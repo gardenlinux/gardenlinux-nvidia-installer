@@ -1,0 +1,35 @@
+version: 1.1.0
+description: system pod for installing nvidia gpu drivers in the host operating system
+
+steps:
+  jenkins:
+    type: jenkinsJob
+    job: aicore/system-services-helm
+    params:
+      ComponentName: nvidia-installer
+  build:
+    type: dockerbuild
+    imageName: '{imageName}'
+    registry: '{docker_registry}'
+
+context:
+  imageName: com.sap.ai/nvidia-installer{image_suffix}
+
+pipelines:
+  local:
+    build: build
+  push-validation:
+    build: jenkins
+  master:
+    build: jenkins
+  release:
+    build: jenkins
+
+patch:
+- file: .xmake.cfg
+  regexp: version=.*
+  replace: version={builtin.version}
+- file: helm/Chart.yaml
+  yaml_path: version
+  replace: '{builtin.version}'
+

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ template "nvidia-device-plugin.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "nvidia-device-plugin.name" . }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ template "nvidia-device-plugin.name" . }}
+  template:
+    metadata:
+      labels:
+        name: {{ template "nvidia-device-plugin.name" . }}
+        k8s-app: {{ template "nvidia-device-plugin.name" . }}
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      {{- if .Values.nvidiaInstaller.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+{{  toYaml .Values.nvidiaInstaller.nodeAffinity | indent 10 }}
+      {{- end}}
+      # priorityClassName: system-node-critical
+      volumes:
+      - name: device-plugin
+        hostPath:
+          path: {{ required "nvidia-device-plugin.hostDevicePluginPath" .Values.nvidiaDevicePlugin.hostDevicePluginPath }}
+      - name: dev
+        hostPath:
+          path: /dev
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecret | default "docker-registry-cdn" }}
+      containers:
+      - image: {{ printf "%s:%s" .Values.nvidiaDevicePlugin.image .Values.nvidiaDevicePlugin.tag }}
+        command:
+        - "/usr/bin/nvidia-gpu-device-plugin"
+        - "-logtostderr"
+        - {{ printf "-host-path=%s/nvidia" .Values.nvidiaInstaller.hostDriverPath }}
+        name: nvidia-gpu-device-plugin
+        resources:
+{{ toYaml .Values.nvidiaDevicePlugin.resources | indent 12 }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: device-plugin
+          mountPath: /device-plugin
+        - name: dev
+          mountPath: /dev
+{{- if .Values.nvidiaDevicePlugin.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nvidiaDevicePlugin.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.nvidiaDevicePlugin.tolerations }}
+      tolerations:
+{{ toYaml .Values.nvidiaDevicePlugin.tolerations | indent 6 }}
+{{- end }}
+  updateStrategy:
+    type: RollingUpdate
