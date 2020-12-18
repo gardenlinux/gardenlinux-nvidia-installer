@@ -12,6 +12,7 @@ GARDENLINUX_VERSION=${GARDENLINUX_VERSION}
 DEBUG=${DEBUG:-false}
 COMPILATION_ALLOWED=${COMPILATION_ALLOWED:-false}
 FORCE_COMPILE=${FORCE_COMPILE:-false}
+AWS_S3=${AWS_S3:-"https://s3.amazonaws.com"}
 
 S3_ALIAS="s3_access"
 
@@ -24,7 +25,7 @@ main() {
 
     driver_cached=$(driver_in_cache "${DRIVER_NAME}" "${DRIVER_VERSION}")
     
-    mc alias set "${S3_ALIAS}" https://s3.amazonaws.com "${AWS_ACCESS_KEY_ID}" "${AWS_SECRET_ACCESS_KEY}"
+    mc alias set "${S3_ALIAS}" "${AWS_S3}" "${AWS_ACCESS_KEY_ID}" "${AWS_SECRET_ACCESS_KEY}"
     
     compiled_new_driver="false"
     if ${FORCE_COMPILE} && ${COMPILATION_ALLOWED}; then

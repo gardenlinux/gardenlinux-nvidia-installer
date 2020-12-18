@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     ca-certificates 
 
 ARG MINIO_CLIENT="mc.RELEASE.2020-11-25T23-04-07Z"
-RUN wget https://dl.min.io/client/mc/release/linux-amd64/$MINIO_CLIENT
+RUN wget https://dl.min.io/client/mc/release/linux-amd64/archive/$MINIO_CLIENT
 RUN mv mc.RELEASE.2020-11-25T23-04-07Z mc
 RUN chmod +x mc
 
