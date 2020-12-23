@@ -1,4 +1,4 @@
-version: 1.1.0
+version: 1.1.1
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 steps:
@@ -7,6 +7,17 @@ steps:
     job: aicore/system-services-helm
     params:
       ComponentName: nvidia-installer
+      BuildContext: '{builtin.encoded_contexts}'
+      RunStaticScans: '{RunStaticScans}'
+      RunUnitTests: '{RunUnitTests}'
+      RunTests: '{RunTests}'
+      RunCheckmarx: '{RunCheckmarx}'
+      RunWhitesource: '{RunWhitesource}'
+      RunSonarQube: '{RunSonarQube}'
+      Release: '{Release}'
+      Build: '{Build}'
+      BuildXmake: '{BuildXmake}'
+      TREEISH: '{builtin.git_commit}'
   build:
     type: dockerbuild
     imageName: '{imageName}'
