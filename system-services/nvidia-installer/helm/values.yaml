@@ -14,7 +14,7 @@ imagePullSecrets:
 
 nvidiaInstaller:
   namespace: kube-system
-  driverVersion: "440.82"
+  driverVersion: "450.80.02"
   hostDriverPath: /opt/drivers
   # We use a combination of nodeAffinity and nodeSelector
   # nodeAffinity is used for all GPU nodes, and may be overridden in mlf-deploy (e.g. to support pools of different GPU types)
