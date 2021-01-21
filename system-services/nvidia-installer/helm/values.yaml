@@ -1,19 +1,17 @@
 dockerRegistry:
   overwrite: false
 
-allowCompilation: true
-forceCompile: true
+allowCompilation: false
+forceCompile: false
 debug: false
-targetProd: false
-
-gardenlinuxVersion: "27.1.0"
+driverBucketSecret: nvidia-driver-bucket-read
+gardenlinuxVersion: 184.0.0
 
 imagePullSecrets:
 # - name: hello
 # - name: bla
 
 nvidiaInstaller:
-  namespace: kube-system
   driverVersion: "450.80.02"
   hostDriverPath: /opt/drivers
   # We use a combination of nodeAffinity and nodeSelector
@@ -28,7 +26,9 @@ nvidiaInstaller:
         - key: gpu
           operator: In
           values:
-          - driver-compile-upload
+          - nvidia-tesla-t4
+          - nvidia-tesla-v100
+          - nvidia-tesla-k80
   tolerations:
    - key: "nvidia.com/gpu"
      operator: "Exists"
@@ -36,16 +36,15 @@ nvidiaInstaller:
 
 gardenlinuxNvidiaInstaller:
   devImage: com.sap.ai/gardenlinux-dev
-  # devTag: 27.1.0
+  # devTag: 184.0.0
   installerImage: com.sap.ai/nvidia-installer
-  # installerTag: 1.1.0
+  # installerTag: 1.1.4
   # nodeSelector: {"os": "gardenlinux"}
   environment:
    - name: IGNORE_MISSING_MODULE_SYMVERS
      value: "1"
 
 nvidiaDevicePlugin:
-  namespace: kube-system
   image: k8s.gcr.io/nvidia-gpu-device-plugin@sha256
   tag: 08509a36233c5096bb273a492251a9a5ca28558ab36d74007ca2a9d3f0b61e1d
   pauseImage: k8s.gcr.io/pause-amd64

@@ -1,4 +1,3 @@
-{{- $bucketSecret := ternary "nvidia-driver-bucket-prod" "nvidia-driver-bucket-dev" .Values.targetProd }}
 {{- $dockerRegistry := ternary (.Values.dockerRegistry.host | default "build-releases.common.repositories.cloud.sap") "build-releases.common.repositories.cloud.sap" .Values.dockerRegistry.overwrite }}
 apiVersion: apps/v1
 kind: DaemonSet
@@ -67,17 +66,17 @@ spec:
         - name: AWS_ACCESS_KEY_ID
           valueFrom: 
             secretKeyRef:
-              name: {{ $bucketSecret }}
+              name: {{ .Values.driverBucketSecret }}
               key: accessKeyId
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom: 
             secretKeyRef: 
-              name: {{ $bucketSecret }}
+              name: {{ .Values.driverBucketSecret }}
               key: secretAccessKey
         - name: BUCKET
           valueFrom: 
             secretKeyRef: 
-              name: {{ $bucketSecret }}
+              name: {{ .Values.driverBucketSecret }}
               key: bucket
 {{- if .Values.gardenlinuxNvidiaInstaller.environment }}
 {{ toYaml .Values.gardenlinuxNvidiaInstaller.environment | indent 8 }}
