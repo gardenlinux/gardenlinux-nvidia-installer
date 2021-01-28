@@ -21,14 +21,18 @@ nvidiaInstaller:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
       - matchExpressions:
-        # - key: gpu
-        #   operator: Exists
         - key: gpu
+          operator: Exists
+        # - key: gpu
+        #   operator: In
+        #   values:
+        #   - nvidia-tesla-t4
+        #   - nvidia-tesla-v100
+        #   - nvidia-tesla-k80
+        - key: os-version
           operator: In
           values:
-          - nvidia-tesla-t4
-          - nvidia-tesla-v100
-          - nvidia-tesla-k80
+          - 184.0.0
   tolerations:
    - key: "nvidia.com/gpu"
      operator: "Exists"
