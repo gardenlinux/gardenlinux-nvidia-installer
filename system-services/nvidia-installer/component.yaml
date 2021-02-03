@@ -22,6 +22,8 @@ steps:
     type: dockerbuild
     imageName: '{imageName}'
     registry: '{docker_registry}'
+  tagRelease:
+    type: tagRelease
 
 context:
   imageName: com.sap.ai/nvidia-installer{image_suffix}
