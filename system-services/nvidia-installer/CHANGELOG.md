@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.2.0-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0...rel/system-services/nvidia-installer/1.2.0-sap1)
+### feature
+* **mono:** add tagRelease step type ([#1946](https://github.wdf.sap.corp/ICN-ML/aicore/pull/1946)) ([`4a29018`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/4a290185d9a6d08ad76bf06d4ab613cc4d377e67))
+* **nvidia-installer:** Update documentation for nvidia installer ([#1929](https://github.wdf.sap.corp/ICN-ML/aicore/pull/1929)) ([`9ec86f5`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/9ec86f5e3963d644e883b80cefa84ad30f3ab1ce))
+
+
 ## [1.2.0](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.1.4...rel/system-services/nvidia-installer/1.2.0)
 ### feature
 * **mono:** add tagRelease step type ([#1946](https://github.wdf.sap.corp/ICN-ML/aicore/pull/1946)) ([`4a29018`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/4a290185d9a6d08ad76bf06d4ab613cc4d377e67))
