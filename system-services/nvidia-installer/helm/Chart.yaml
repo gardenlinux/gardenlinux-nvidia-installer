@@ -2,4 +2,4 @@ apiVersion: v1
 description: A Helm chart to install NVIDIA GPU Support on Garden Linux based Kubernetes
   Cluster
 name: nvidia-installer
-version: 1.2.0-sap1
+version: 1.2.0-sap2

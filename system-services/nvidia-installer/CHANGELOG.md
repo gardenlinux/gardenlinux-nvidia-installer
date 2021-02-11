@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.2.0-sap2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap1...rel/system-services/nvidia-installer/1.2.0-sap2)
+### other
+* Foss image version fix ([#1993](https://github.wdf.sap.corp/ICN-ML/aicore/pull/1993)) ([`ab678c3`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ab678c3c495451c2f43a75256f4ee8b3ea6c9bb7))
+
+
 ## [1.2.0-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0...rel/system-services/nvidia-installer/1.2.0-sap1)
 ### feature
 * **mono:** add tagRelease step type ([#1946](https://github.wdf.sap.corp/ICN-ML/aicore/pull/1946)) ([`4a29018`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/4a290185d9a6d08ad76bf06d4ab613cc4d377e67))
