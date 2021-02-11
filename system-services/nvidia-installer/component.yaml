@@ -31,7 +31,7 @@ pipelines:
     build: build
   push-validation:
     build: jenkins
-  master:
+  main:
     build: jenkins
   release:
     build: jenkins
