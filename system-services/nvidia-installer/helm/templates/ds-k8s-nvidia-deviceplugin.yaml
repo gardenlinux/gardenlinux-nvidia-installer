@@ -1,3 +1,7 @@
+{{- /*
+Note: For GKE clusters in GCP, GKE automatically installs its own device plugin Daemonset
+*/}}
+{{- if .Values.targetInfrastructure.gardener }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -58,3 +62,4 @@ spec:
 {{- end }}
   updateStrategy:
     type: RollingUpdate
+{{- end }}
