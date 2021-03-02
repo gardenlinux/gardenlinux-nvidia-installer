@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.2.0-sap3](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap2...rel/system-services/nvidia-installer/1.2.0-sap3)
+### other
+* Add GCP support to system-services/nvidia-installer ([#2062](https://github.wdf.sap.corp/ICN-ML/aicore/pull/2062)) ([`ff7cef4`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ff7cef4629e51fd87a8d54a4f1897affbd4bb9f5))
+
+
 ## [1.2.0-sap2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap1...rel/system-services/nvidia-installer/1.2.0-sap2)
 ### other
 * Foss image version fix ([#1993](https://github.wdf.sap.corp/ICN-ML/aicore/pull/1993)) ([`ab678c3`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ab678c3c495451c2f43a75256f4ee8b3ea6c9bb7))
