@@ -37,6 +37,13 @@ nvidiaInstaller:
    - key: "nvidia.com/gpu"
      operator: "Exists"
      effect: "NoSchedule"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 10Mi
+    limits:
+      cpu: 50m
+      memory: 10Mi
 
 gardenlinuxNvidiaInstaller:
   devImage: com.sap.ai/gardenlinux-dev
@@ -69,8 +76,8 @@ nvidiaDevicePlugin:
      effect: "NoSchedule"
   resources:
     requests:
-      cpu: 50m
-      memory: 50Mi
+      cpu: 10m
+      memory: 10Mi
     limits:
-      cpu: 100m
-      memory: 100Mi
+      cpu: 50m
+      memory: 10Mi

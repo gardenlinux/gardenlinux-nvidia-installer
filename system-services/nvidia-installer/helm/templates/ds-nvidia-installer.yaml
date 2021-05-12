@@ -68,18 +68,18 @@ spec:
           value: "true"
         {{- end }}
         - name: AWS_ACCESS_KEY_ID
-          valueFrom: 
+          valueFrom:
             secretKeyRef:
               name: {{ .Values.driverBucketSecret }}
               key: accessKeyId
         - name: AWS_SECRET_ACCESS_KEY
-          valueFrom: 
-            secretKeyRef: 
+          valueFrom:
+            secretKeyRef:
               name: {{ .Values.driverBucketSecret }}
               key: secretAccessKey
         - name: BUCKET
-          valueFrom: 
-            secretKeyRef: 
+          valueFrom:
+            secretKeyRef:
               name: {{ .Values.driverBucketSecret }}
               key: bucket
 {{- if .Values.gardenlinuxNvidiaInstaller.environment }}
@@ -116,6 +116,8 @@ spec:
       - image: k8s.gcr.io/pause-amd64:3.1
         name: pause
       {{- end }}
+      resources:
+{{ toYaml .Values.nvidiaInstaller.resources | indent 12 }}
 {{- if .Values.gardenlinuxNvidiaInstaller.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.gardenlinuxNvidiaInstaller.nodeSelector | indent 8 }}

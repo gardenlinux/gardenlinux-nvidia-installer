@@ -110,4 +110,6 @@ spec:
       containers:
       - image: "gcr.io/google-containers/pause:2.0"
         name: pause
+        resources:
+{{ toYaml .Values.nvidiaInstaller.resources | indent 12 }}
 {{- end }}
