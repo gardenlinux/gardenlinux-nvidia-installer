@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.2.0-sap4](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap3...rel/system-services/nvidia-installer/1.2.0-sap4)
+### chore
+* **Nvidia-plugin:** set resources ([#2407](https://github.wdf.sap.corp/ICN-ML/aicore/pull/2407)) ([`760de8c`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/760de8cff67a099c402c5f80ba7d629f7329d0b8))
+
+
 ## [1.2.0-sap3](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap2...rel/system-services/nvidia-installer/1.2.0-sap3)
 ### other
 * Add GCP support to system-services/nvidia-installer ([#2062](https://github.wdf.sap.corp/ICN-ML/aicore/pull/2062)) ([`ff7cef4`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ff7cef4629e51fd87a8d54a4f1897affbd4bb9f5))
