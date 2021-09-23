@@ -128,7 +128,7 @@ pipeline {
         }
 
         stage('Whitesource Container Scan') {
-            when { expression { params.RunWhitesourceDocker == true } }
+            when { expression { false && params.RunWhitesourceDocker == true } } // TODO: revert "false &&"
             steps {
                 script{
                     def vaultAddress = 'https://vault.ml.only.sap'
