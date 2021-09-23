@@ -1,27 +1,40 @@
-version: 1.2.0-sap4
+version: 1.2.0-sap5
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 steps:
   jenkins:
     type: jenkinsJob
-    job: aicore/system-services-helm
+    job: aicore/nvidia-installer
     params:
       ComponentName: nvidia-installer
       BuildContext: '{builtin.encoded_contexts}'
       RunStaticScans: '{RunStaticScans}'
       RunUnitTests: '{RunUnitTests}'
-      RunTests: '{RunTests}'
-      RunCheckmarx: '{RunCheckmarx}'
-      RunWhitesource: '{RunWhitesource}'
-      RunSonarQube: '{RunSonarQube}'
       Release: '{Release}'
       Build: '{Build}'
       BuildXmake: '{BuildXmake}'
       TREEISH: '{builtin.git_commit}'
+      RunTests: '{RunTests}'
+      RunCheckmarx: '{RunCheckmarx}'
+      RunWhitesource: '{RunWhitesource}'
+      RunSonarQube: '{RunSonarQube}'
+      RunWhitesourceDocker: '{RunWhitesourceDocker}'
+      RunPPMSComplianceForImage: '{RunPPMSComplianceForImage}'
   build:
     type: dockerbuild
-    imageName: '{imageName}'
-    registry: '{docker_registry}'
+    artifact: image
+    dockerfile: Dockerfile
+    buildArgs:
+      GIT_COMMIT: '{builtin.git_commit}'
+      GIT_TAG: '{builtin.version}'
+      GIT_TREE_STATE: '{builtin.git_tree_state}'
+  whitesource:
+    type: whitesource
+
+artifacts:
+  image:
+    type: docker
+    imageName: com.sap.ai/nvidia-installer{image_suffix}
 
 context:
   imageName: com.sap.ai/nvidia-installer{image_suffix}

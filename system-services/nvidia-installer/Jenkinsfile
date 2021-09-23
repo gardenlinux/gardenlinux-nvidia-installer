@@ -1,0 +1,235 @@
+@Library(['piper-lib', 'piper-lib-os']) _
+@Library(["AIF_CICD_Toolkit@master"])
+
+def xmake
+def git
+def wsDockerScanConfig
+def wsDockerProductToken
+def wsScanIncludingBaseImageFlag
+def vaultClient
+def vaultAppRoleToken
+pipeline {
+
+    agent any
+
+    options {
+        timeout(time: 90, unit: 'MINUTES')
+        timestamps()
+        buildDiscarder(logRotator(daysToKeepStr: '-1', numToKeepStr: '20', artifactDaysToKeepStr: '-1', artifactNumToKeepStr: '-1'))
+    }
+
+    parameters{
+        booleanParam(name: 'Build', defaultValue: true, description: '\'true\' triggers image builds')
+        booleanParam(name: 'BuildXmake', defaultValue: true, description: '\'true\' triggers image builds via xmake for testing')
+        booleanParam(name: 'Release', defaultValue: false, description: '\'true\' publishes the git tag and the docker image')
+
+        string(name: 'TREEISH', defaultValue: 'main', description: 'the git branch name to deploy from')
+        string(name: 'BuildContext', defaultValue: '', description: 'context to patch versions')
+        booleanParam(name: 'RunWhitesourceDocker', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
+        booleanParam(name: 'RunPPMSComplianceForImage', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
+    }
+    
+    environment {
+        AUDITLOG_VALUES=""
+        KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-central-1_aicore-pr-valid_config"
+        SERVICE_PATH="system-services/nvidia-installer"
+        SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID="sap-artifactory-dmz-api-token"
+        SAP_REMOTE_CACHE_REGISTRY="remote-docker.docker.repositories.sapcdn.io"
+        VAULT_APPROLE_CRED_ID="jenkins-ai-foundation-user-privileged"
+        XMAKE_REGISTRY="docker.wdf.sap.corp:51022"
+    }
+
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    echo "Patching versions"
+                    sh "mono/scripts/run_mono_update.sh ${params.BuildContext}"
+                    sh "mono/scripts/run_mono_export_context.sh ${params.BuildContext} ${env.SERVICE_PATH}"
+
+                    context = readYaml file: 'env.yaml'
+                    env.VERSION=context["builtin"]["version"]
+                    env.PRERELEASE_VERSION = ""
+                    env.DOCKER_REGISTRY=context["docker_registry"]
+                    env.IMAGE_NAME=context["imageName"]
+                    env.BRANCH_NAME=context["branch_name"]
+
+                    xmake = load("scripts/xmake_utils.groovy")
+                    git = load("scripts/git_utils.groovy")
+                    xmake.set_build_config([params.ComponentName])
+
+                    assert env.GIT_COMMIT == git.get_commit():\
+                    "Jenkins GIT_COMMIT \"${namenv.GIT_COMMIT}\" must match \
+                    the actual branch commit \"${git.get_commit()}\". \
+                    If this is not the case Jenkins is probably doing a merge before it builds."
+                }
+            }
+        }
+
+        stage('Piper Setup') {
+            //Setting up for upcoming piper steps (SapCumulusUpload, )
+            steps {
+                script{
+                    setupPipelineEnvironment script: this, configYmlFile: 'system-services/nvidia-installer/.pipeline/config.yml'
+                    //Setting up params for ws scan for docker images
+                    if(params.RunWhitesourceDocker == true){
+                        wsDockerScanConfig = globalPipelineEnvironment.configuration.steps?.whitesourceExecuteScan?.custom_wsDockerScanConfig ?: null
+                        wsDockerProductToken = globalPipelineEnvironment.configuration.steps?.whitesourceExecuteScan?.custom_CTNR_Product_Token ?: null
+                        wsScanIncludingBaseImageFlag = globalPipelineEnvironment.configuration.steps?.whitesourceExecuteScan?.custom_wsDockerScanWithBaseImage ?: false
+                        def doesWSDockerConfigExist = fileExists "${wsDockerScanConfig}"
+                        def checkIfProductNameAndConfigFileExist = {
+                            (wsDockerProductToken == null) ? {
+                                throw new Exception("'custom_CTNR_Product_Token' not defined for whitesource container scan");
+                            }() : doesWSDockerConfigExist ? true: {
+                                throw new Exception("'custom_wsDockerScanConfig' not defined for whitesource container scan");
+                            }();
+                        }
+                        //Calling closure to check if there has been any misconfiguration in ws docker scan params
+                        checkIfProductNameAndConfigFileExist.call()
+                    }
+
+                    def vaultAddress = 'https://vault.ml.only.sap'
+                    if (params.RunSonarQube == true || params.RunWhitesource == true || params.RunWhitesourceDocker == true) {
+                        withCredentials([usernamePassword(credentialsId: 'jenkins-ai-foundation-user-privileged', passwordVariable: 'SECRET_ID', usernameVariable: 'APPROLE_ID')]) {
+                            vaultClient = new aif.VaultClient(this, vaultAddress)
+                            vaultAppRoleToken = vaultClient.getVaultAppRoleToken(APPROLE_ID, SECRET_ID)
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Build images') {
+            parallel {
+                stage("Build docker image") {
+                    when { expression { params.Build == true } }
+                    steps {
+                        sh "mono/scripts/run_mono.sh run ${env.SERVICE_PATH}:build -e ${params.BuildContext}"
+                    }
+                }
+                stage("Build xmake image (for testing)") {
+                    when { expression { params.BuildXmake == true } }
+                    steps {
+                        script {
+                            parallel xmake.make_build_jobs("build", env.GIT_COMMIT, env.PRERELEASE_VERSION)
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Xmake publish') {
+            when { expression { params.Release == true } }
+            steps {
+                script {
+                    parallel xmake.make_build_jobs("build_and_deploy", env.GIT_COMMIT, env.PRERELEASE_VERSION)
+                }
+            }
+        }
+
+        stage('Whitesource Container Scan') {
+            when { expression { params.RunWhitesourceDocker == true } }
+            steps {
+                script{
+                    def vaultAddress = 'https://vault.ml.only.sap'
+                    def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}" 
+                    def imageURI = "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}"
+                    sh "docker pull ${imageURI}"
+                    wsDockerGeneratedProjectName = "nvidia-installer ${version}"
+                    new aif.WhitesourceScan(this).execute("nvidia-installer","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
+                    println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
+                       
+                }
+            }
+        }
+
+        stage('PPMS Compliance Docker Scan'){
+            when {
+                allOf{
+                    expression { params.RunWhitesourceDocker == true }
+                    expression { params.RunPPMSComplianceForImage == true }
+                }
+            }
+            steps{
+                script{
+                    println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
+                    new aif.WhitesourceScan(this).execute("runtime-adapter", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)       
+                }   
+            }
+        }
+
+        stage('Docker publish (will be removed once we consume images from xmake)') {
+            when { expression { params.Release == true } }
+            steps {
+                script {
+                    // iterate over all build config that are stored in the xmake branch
+                    // `https://github.wdf.sap.corp/ICN-ML/aicore/blob/config/services/production-services/build-service/config.yml`
+                    // in the variants map
+                    xmake.build_config.each {
+                    if(it.uri != "") {
+                        sh "docker pull ${XMAKE_REGISTRY}/${it.uri}:${VERSION}"
+                        sh "docker tag \
+                            ${XMAKE_REGISTRY}/${it.uri}:${VERSION} \
+                            mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
+                        sh "docker push \
+                            mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Setup Git Remote') {
+            when { expression { params.Release == true } }
+            steps {
+                sh "git remote set-url origin git@github.wdf.sap.corp:ICN-ML/aicore.git"
+            }
+        }
+
+        stage('Tag Release') {
+            when { expression { params.Release == true } }
+            steps {
+                sh "git tag -a rel/${env.SERVICE_PATH}/${VERSION} -m 'creating release tag for ${env.SERVICE_PATH}/${VERSION}'"
+                sh "git push --tags"
+            }
+        }
+
+        stage('Push helm chart to mlf-gitops repository') {
+            when { expression { params.Release == true } }
+            steps {
+                dir("${WORKSPACE}") {
+                    withCredentials([usernamePassword(credentialsId: 'mlf-gitops-write-serviceuser',
+                        usernameVariable: 'GITHUB_USER',
+                        passwordVariable: 'GITHUB_TOKEN')]) {
+
+                        script {
+                            def repo_folder="tmp/mlf-gitops"
+                            def source_branch="main"
+                            def repo_url="https://github.wdf.sap.corp/ICN-ML/aicore"
+                            def service_name="${params.ComponentName}"
+                            sh """
+                                git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.tools.sap/MLF/mlf-gitops" \
+                                    --branch "${source_branch}" \
+                                    --depth 2 \
+                                    "${repo_folder}"
+                            """
+                            sh """
+                                ./${repo_folder}/tooling/upload_component_resources.sh \
+                                    --source-branch "${source_branch}" \
+                                    --name "${service_name}" \
+                                    --repository "${repo_url}" \
+                                    --version "${VERSION}" \
+                                    --chart-folder ${env.SERVICE_PATH}/manifests/base \
+                                    --target "services/nvidia-installer/source"
+                            """
+                            sh """
+                                rm -rf ${repo_folder}
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}
