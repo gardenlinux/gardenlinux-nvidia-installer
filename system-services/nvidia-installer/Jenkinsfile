@@ -127,37 +127,6 @@ pipeline {
             }
         }
 
-        stage('Whitesource Container Scan') {
-            when { expression { false && params.RunWhitesourceDocker == true } } // TODO: revert "false &&"
-            steps {
-                script{
-                    def vaultAddress = 'https://vault.ml.only.sap'
-                    def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}" 
-                    def imageURI = "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}"
-                    sh "docker pull ${imageURI}"
-                    wsDockerGeneratedProjectName = "nvidia-installer ${version}"
-                    new aif.WhitesourceScan(this).execute("nvidia-installer","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
-                    println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
-                       
-                }
-            }
-        }
-
-        stage('PPMS Compliance Docker Scan'){
-            when {
-                allOf{
-                    expression { params.RunWhitesourceDocker == true }
-                    expression { params.RunPPMSComplianceForImage == true }
-                }
-            }
-            steps{
-                script{
-                    println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
-                    new aif.WhitesourceScan(this).execute("runtime-adapter", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)       
-                }   
-            }
-        }
-
         stage('Docker publish (will be removed once we consume images from xmake)') {
             when { expression { params.Release == true } }
             steps {
@@ -228,6 +197,37 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage('Whitesource Container Scan') {
+            when { expression { false && params.RunWhitesourceDocker == true } } // TODO: revert "false &&"
+            steps {
+                script{
+                    def vaultAddress = 'https://vault.ml.only.sap'
+                    def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}" 
+                    def imageURI = "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}"
+                    sh "docker pull ${imageURI}"
+                    wsDockerGeneratedProjectName = "nvidia-installer ${version}"
+                    new aif.WhitesourceScan(this).execute("nvidia-installer","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
+                    println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
+                       
+                }
+            }
+        }
+
+        stage('PPMS Compliance Docker Scan'){
+            when {
+                allOf{
+                    expression { params.RunWhitesourceDocker == true }
+                    expression { params.RunPPMSComplianceForImage == true }
+                }
+            }
+            steps{
+                script{
+                    println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
+                    new aif.WhitesourceScan(this).execute("runtime-adapter", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)       
+                }   
             }
         }
 
