@@ -1,6 +1,16 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.2.0-sap5](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap4...rel/system-services/nvidia-installer/1.2.0-sap5)
+### chore
+* reordering stages in pipeline ([#3042](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3042)) ([`dfa35c2`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/dfa35c26e1cdadbebff5391535b155f63b0ac508))
+* **ci:** configure whitesource scan for aicore ([#2922](https://github.wdf.sap.corp/ICN-ML/aicore/pull/2922)) ([`d7ef2c7`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/d7ef2c72165cae956c171cf43b0d4de5c6f8dc09))
+
+### other
+* Temp fix for nvidia-installer build ([#3025](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3025)) ([`1379f83`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/1379f833a01b4bc349dfee287bbb7cc853ad0b39))
+* NVIDIA driver & xmake fix ([#3014](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3014)) ([`ef42e14`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ef42e14e07ec09a73fc7a15846277cb327655e4f))
+
+
 ## [1.2.0-sap4](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap3...rel/system-services/nvidia-installer/1.2.0-sap4)
 ### chore
 * **Nvidia-plugin:** set resources ([#2407](https://github.wdf.sap.corp/ICN-ML/aicore/pull/2407)) ([`760de8c`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/760de8cff67a099c402c5f80ba7d629f7329d0b8))
