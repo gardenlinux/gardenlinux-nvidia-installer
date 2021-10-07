@@ -50,8 +50,8 @@ pipeline {
                     context = readYaml file: 'env.yaml'
                     env.VERSION=context["builtin"]["version"]
                     env.PRERELEASE_VERSION = ""
+                    env.IMAGE_SUFFIX=context["image_suffix"]
                     env.DOCKER_REGISTRY=context["docker_registry"]
-                    env.IMAGE_NAME=context["imageName"]
                     env.BRANCH_NAME=context["branch_name"]
 
                     xmake = load("scripts/xmake_utils.groovy")
@@ -201,17 +201,20 @@ pipeline {
         }
 
         stage('Whitesource Container Scan') {
-            when { expression { false && params.RunWhitesourceDocker == true } } // TODO: revert "false &&"
+            when { expression { params.RunWhitesourceDocker == true } }
             steps {
                 script{
                     def vaultAddress = 'https://vault.ml.only.sap'
-                    def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}" 
-                    def imageURI = "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}"
-                    sh "docker pull ${imageURI}"
-                    wsDockerGeneratedProjectName = "nvidia-installer ${version}"
-                    new aif.WhitesourceScan(this).execute("nvidia-installer","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
-                    println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
-                       
+                    xmake.build_config.each {
+                        if(it.uri != "" ){
+                            def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
+                            def imageURI = "${DOCKER_REGISTRY}${it.uri}${IMAGE_SUFFIX}:${VERSION}"
+                            sh "docker pull ${imageURI}"
+                            wsDockerGeneratedProjectName = "nvidia-installer ${version}"
+                            new aif.WhitesourceScan(this).execute("nvidia-installer","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
+                            println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
+                        }
+                    }
                 }
             }
         }

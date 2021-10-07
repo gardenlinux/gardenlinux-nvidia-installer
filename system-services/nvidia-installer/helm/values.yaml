@@ -33,6 +33,7 @@ nvidiaInstaller:
           operator: In
           values:
           - 184.0.0
+          - 318.8.0
   tolerations:
    - key: "nvidia.com/gpu"
      operator: "Exists"
