@@ -80,9 +80,13 @@ systems.
 ### Practical setup
 
 - Setup one specific compiler instance of the `nvidia-installer` in a specific devOps
-  cluster.
+  cluster, `ìnfra-tests`
 - Setup an installer instance of the `nvidia-installer` for all normal gpu nodepools
-  in all clusters.
+  in all clusters, using a new node pool for each new Garden Linux or NVIDIA driver version for production.
+
+For a new Garden Linux or NVIDIA driver version:
+- create a new set of GPU node pools (increment the version number in the node pool name, e.g. `infer-s-v1` becomes
+ `infer-s-v2` for the new pool)
 
 All instances of the nvidia-installer must run in a namespace that is allowed to
 spawn pods with `priorityClassName: system-node-critical` - this is e.g. the case
