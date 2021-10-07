@@ -89,8 +89,8 @@ pipeline {
                     }
 
                     def vaultAddress = 'https://vault.ml.only.sap'
-                    if (params.RunSonarQube == true || params.RunWhitesource == true || params.RunWhitesourceDocker == true) {
-                        withCredentials([usernamePassword(credentialsId: 'jenkins-ai-foundation-user-privileged', passwordVariable: 'SECRET_ID', usernameVariable: 'APPROLE_ID')]) {
+                    if (params.RunSonarQube == params.RunWhitesource == params.RunWhitesourceDocker == true) {
+                        withCredentials([usernamePassword(credentialsId: env.VAULT_APPROLE_CRED_ID, passwordVariable: 'SECRET_ID', usernameVariable: 'APPROLE_ID')]) {
                             vaultClient = new aif.VaultClient(this, vaultAddress)
                             vaultAppRoleToken = vaultClient.getVaultAppRoleToken(APPROLE_ID, SECRET_ID)
                         }
