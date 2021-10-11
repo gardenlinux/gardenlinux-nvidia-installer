@@ -188,8 +188,7 @@ pipeline {
                                     --name "${service_name}" \
                                     --repository "${repo_url}" \
                                     --version "${VERSION}" \
-                                    --chart-folder ${env.SERVICE_PATH}/manifests/base \
-                                    --target "services/nvidia-installer/source"
+                                    --chart-folder system-services/${params.ComponentName}/helm
                             """
                             sh """
                                 rm -rf ${repo_folder}
