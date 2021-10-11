@@ -1,6 +1,13 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.2.0-sap6](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap5...rel/system-services/nvidia-installer/1.2.0-sap6)
+### other
+* Copy nvidia-installer Jenkinsfile logic to gardenlinux-dev ([#3095](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3095)) ([`d083172`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/d08317216be949caa45a2b4d892b508d1490dfc4))
+* Copy nvidia-installer component.yaml ([#3094](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3094)) ([`ce9ecc6`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ce9ecc6c543af52c9a250f5738d0f8aae58c00ec))
+* Fix Garden Linux image build & NVIDIA installer whitesource ([#3026](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3026)) ([`f39da2e`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/f39da2eff0404ee3c8713a127be59456cda68a4a))
+
+
 ## [1.2.0-sap5](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap4...rel/system-services/nvidia-installer/1.2.0-sap5)
 ### chore
 * reordering stages in pipeline ([#3042](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3042)) ([`dfa35c2`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/dfa35c26e1cdadbebff5391535b155f63b0ac508))
