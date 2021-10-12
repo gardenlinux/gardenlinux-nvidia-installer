@@ -176,23 +176,26 @@ pipeline {
                             def source_branch="main"
                             def repo_url="https://github.wdf.sap.corp/ICN-ML/aicore"
                             def service_name="${params.ComponentName}"
-                            sh """
-                                git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.tools.sap/MLF/mlf-gitops" \
-                                    --branch "${source_branch}" \
-                                    --depth 2 \
-                                    "${repo_folder}"
-                            """
-                            sh """
-                                ./${repo_folder}/tooling/upload_component_resources.sh \
-                                    --source-branch "${source_branch}" \
-                                    --name "${service_name}" \
-                                    --repository "${repo_url}" \
-                                    --version "${VERSION}" \
-                                    --chart-folder system-services/${params.ComponentName}/helm
-                            """
-                            sh """
-                                rm -rf ${repo_folder}
-                            """
+                            try {
+                                sh """
+                                    git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.tools.sap/MLF/mlf-gitops" \
+                                        --branch "${source_branch}" \
+                                        --depth 2 \
+                                        "${repo_folder}"
+                                """
+                                sh """
+                                    ./${repo_folder}/tooling/upload_component_resources.sh \
+                                        --source-branch "${source_branch}" \
+                                        --name "${service_name}" \
+                                        --repository "${repo_url}" \
+                                        --version "${VERSION}" \
+                                        --chart-folder ${env.SERVICE_PATH}/helm
+                                """
+                            } finally {
+                                sh """
+                                    rm -rf ${repo_folder}
+                                """
+                            }
                         }
                     }
                 }
