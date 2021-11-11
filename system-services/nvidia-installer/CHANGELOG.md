@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.2.0-sap7](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap6...rel/system-services/nvidia-installer/1.2.0-sap7)
+### other
+* Make sure `${repo_folder}` is always cleaned up ([#3117](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3117)) ([`bb697e4`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bb697e4e1bc8a6c269991c0a4b8cd47782fff3bf))
+
+
 ## [1.2.0-sap6](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.2.0-sap5...rel/system-services/nvidia-installer/1.2.0-sap6)
 ### other
 * Copy nvidia-installer Jenkinsfile logic to gardenlinux-dev ([#3095](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3095)) ([`d083172`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/d08317216be949caa45a2b4d892b508d1490dfc4))
