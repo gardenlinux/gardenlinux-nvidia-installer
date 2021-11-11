@@ -44,7 +44,7 @@ spec:
       {{- else }}
       initContainers:
       {{- end }}
-      - image: {{ printf "%s/%s:%s" $dockerRegistry .Values.gardenlinuxNvidiaInstaller.installerImage (.Values.gardenlinuxNvidiaInstaller.installerTag | default .Chart.Version) }}
+      - image: {{ printf "%s/%s:%s" $dockerRegistry .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
         name: modulus
         imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
         args:
@@ -52,9 +52,6 @@ spec:
         - nvidia
         - "--driver-version"
         - {{ required "nvidiaInstaller.driverVersion" .Values.nvidiaInstaller.driverVersion | quote }}
-        - "--gardenlinux-version"
-        - {{ required "gardenlinuxVersion" .Values.gardenlinuxVersion | quote }}
-        - "--compile-if-needed"
         {{- if .Values.debug }}
         - "--debug"
         {{- end }}
@@ -63,31 +60,10 @@ spec:
         env:
         - name: LD_ROOT
           value: /root
-        {{- if .Values.forceCompile }}
-        - name: FORCE_COMPILE
-          value: "true"
-        {{- end }}
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.driverBucketSecret }}
-              key: accessKeyId
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.driverBucketSecret }}
-              key: secretAccessKey
-        - name: BUCKET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.driverBucketSecret }}
-              key: bucket
-{{- if .Values.gardenlinuxNvidiaInstaller.environment }}
-{{ toYaml .Values.gardenlinuxNvidiaInstaller.environment | indent 8 }}
+{{- if .Values.nvidiaInstaller.environment }}
+{{ toYaml .Values.nvidiaInstaller.environment | indent 8 }}
 {{- end }}
         volumeMounts:
-        - name: command-pipe
-          mountPath: /cmd
         - name: dev
           mountPath: /dev
         - name: ld-root
@@ -96,21 +72,6 @@ spec:
           mountPath: /opt/modulus/cache
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
-      {{- if .Values.allowCompilation }}
-      - image: {{ printf "%s/%s:%s" $dockerRegistry .Values.gardenlinuxNvidiaInstaller.devImage (.Values.gardenlinuxNvidiaInstaller.devTag | default .Values.gardenlinuxVersion) }}
-        name: dev
-        imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
-        securityContext:
-          privileged: true
-        volumeMounts:
-          - name: command-pipe
-            mountPath: /cmd
-          - name: dev
-            mountPath: /dev
-          - name: module-cache
-            mountPath: /out
-            subPath: nvidia/{{ .Values.nvidiaInstaller.driverVersion }}
-      {{- end }}
       {{- if not .Values.debug }}
       containers:
       - image: k8s.gcr.io/pause-amd64:3.1
@@ -118,17 +79,15 @@ spec:
       {{- end }}
       resources:
 {{ toYaml .Values.nvidiaInstaller.resources | indent 12 }}
-{{- if .Values.gardenlinuxNvidiaInstaller.nodeSelector }}
+{{- if .Values.nvidiaInstaller.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.gardenlinuxNvidiaInstaller.nodeSelector | indent 8 }}
+{{ toYaml .Values.nvidiaInstaller.nodeSelector | indent 8 }}
 {{- end }}
 {{- if .Values.nvidiaInstaller.tolerations }}
       tolerations:
 {{ toYaml .Values.nvidiaInstaller.tolerations | indent 6 }}
 {{- end }}
       volumes:
-      - name: command-pipe
-        emptyDir: {}
       - name: dev
         hostPath:
           path: /dev

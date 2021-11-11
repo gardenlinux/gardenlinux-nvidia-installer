@@ -35,10 +35,13 @@ steps:
 artifacts:
   image:
     type: docker
-    imageName: com.sap.ai/nvidia-installer{image_suffix}
+    imageName: com.sap.ai/nvidia-installer-{kernelVersion}-{driverVersion}{image_suffix}
 
 context:
   imageName: com.sap.ai/nvidia-installer{image_suffix}
+  driverVersion: "450.80.02"
+  # Do not edit kernelVersion - master value is in gardenlinux-dev/component.yaml context section.
+  kernelVersion: 5.4.0-5-cloud-amd64
 
 pipelines:
   local:
@@ -57,4 +60,28 @@ patch:
 - file: helm/Chart.yaml
   yaml_path: version
   replace: '{builtin.version}'
+- file: helm/values.yaml
+  regexp: 'driverVersion: .*'
+  replace: 'driverVersion: "{driverVersion}"'
+- file: helm/values.yaml
+  regexp: 'installerImage: .*'
+  replace: 'installerImage: com.sap.ai/nvidia-installer-{kernelVersion}-{driverVersion}'
 
+dependencies:
+- component: system-services/gardenlinux-dev
+  patch:
+  - file: Dockerfile
+    regexp: FROM \S* AS builder
+    replace: FROM {docker_registry}{imageName}:{builtin.version} AS builder
+  - file: Dockerfile
+    regexp: ARG KERNEL_VERSION=.*
+    replace: 'ARG KERNEL_VERSION={kernelVersion}'
+  - file: helm/values.yaml
+    regexp: 'gardenlinuxVersion: .*'
+    replace: 'gardenlinuxVersion: {gardenlinuxVersion}'
+  - file: helm/values.yaml
+    regexp: 'values: \[\".*\"\]'
+    replace: 'values: ["{gardenlinuxVersion}"]'
+  - file: helm/values.yaml
+    regexp: 'kernelVersion: .*'
+    replace: 'kernelVersion: "{kernelVersion}"'

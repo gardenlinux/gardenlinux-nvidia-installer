@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "Installing NVIDIA modules for driver version $DRIVER_VERSION"
 set -e
+set -x
 depmod -b "$LD_ROOT"
 # This is an NVIDIA dep that is not specified in the module.dep file.
 #modprobe -d "$LD_ROOT" ipmi_devintf

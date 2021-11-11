@@ -1,10 +1,8 @@
 dockerRegistry:
   overwrite: false
 
-allowCompilation: false
-forceCompile: false
 debug: false
-driverBucketSecret: nvidia-driver-bucket-read
+# Do not edit gardenlinuxVersion - master value is in gardenlinux-dev/component.yaml context section.
 gardenlinuxVersion: 184.0.0
 
 imagePullSecrets:
@@ -12,7 +10,15 @@ imagePullSecrets:
 # - name: bla
 
 nvidiaInstaller:
+  # Do not edit installerImage - this is generated from a patch in component.yaml
+  installerImage: com.sap.ai/nvidia-installer-5.4.0-5-cloud-amd64-450.80.02
+  # installerTag: 1.1.4
+  # nodeSelector: {"os": "gardenlinux"}
+
+  # Do not edit driverVersion - master value is in component.yaml context section.
   driverVersion: "450.80.02"
+  # Do not edit kernelVersion - master value is in gardenlinux-dev/component.yaml context section.
+  kernelVersion: "5.4.0-5-cloud-amd64"
   hostDriverPath: /opt/drivers
   # We use a combination of nodeAffinity and nodeSelector
   # nodeAffinity is used for all GPU nodes, and may be overridden in mlf-deploy (e.g. to support pools of different GPU types)
@@ -23,17 +29,10 @@ nvidiaInstaller:
       - matchExpressions:
         - key: gpu
           operator: Exists
-        # - key: gpu
-        #   operator: In
-        #   values:
-        #   - nvidia-tesla-t4
-        #   - nvidia-tesla-v100
-        #   - nvidia-tesla-k80
         - key: os-version
           operator: In
-          values:
-          - 184.0.0
-          - 318.8.0
+          values: ["184.0.0"]
+          # Do not edit gardenlinuxVersion above - master value is in gardenlinux-dev/component.yaml context section.
   tolerations:
    - key: "nvidia.com/gpu"
      operator: "Exists"
@@ -45,13 +44,6 @@ nvidiaInstaller:
     limits:
       cpu: 50m
       memory: 10Mi
-
-gardenlinuxNvidiaInstaller:
-  devImage: com.sap.ai/gardenlinux-dev
-  # devTag: 184.0.0
-  installerImage: com.sap.ai/nvidia-installer
-  # installerTag: 1.1.4
-  # nodeSelector: {"os": "gardenlinux"}
   environment:
    - name: IGNORE_MISSING_MODULE_SYMVERS
      value: "1"

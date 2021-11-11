@@ -1,17 +1,18 @@
+# Do not edit FROM line - it is created from a component.yaml patch rule
+FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev-5.4.0-5-cloud-amd64:184.0.0-sap1 AS builder
 
-FROM docker.wdf.sap.corp:50003/debian:10.6-slim as builder
+COPY resources/compile.sh /tmp/compile
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    wget \
-    ca-certificates 
+# Do not edit DRIVER_VERSION - master value is in component.yaml context section.
+ARG DRIVER_VERSION="450.80.02"
 
-ARG MINIO_CLIENT="mc.RELEASE.2020-11-25T23-04-07Z"
-RUN wget https://dl.min.io/client/mc/release/linux-amd64/archive/$MINIO_CLIENT
-RUN mv mc.RELEASE.2020-11-25T23-04-07Z mc
-RUN chmod +x mc
+# Do not edit KERNEL_VERSION - master value is in gardenlinux-dev/component.yaml context section.
+ARG KERNEL_VERSION=5.4.0-5-cloud-amd64
+
+RUN /tmp/compile
 
 
-FROM docker.wdf.sap.corp:50000/debian:10.6-slim
+FROM docker.wdf.sap.corp:50000/debian:11.1-slim
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     kmod \
@@ -19,9 +20,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /mc /usr/local/bin/mc
+COPY --from=builder /out /out
 
 COPY resources/load_install_gpu_driver.sh /opt/modulus/load_install_gpu_driver
-COPY resources/compile.sh /opt/modulus/nvidia/compile
 COPY resources/install.sh /opt/modulus/nvidia/install
 ENTRYPOINT ["/opt/modulus/load_install_gpu_driver"]

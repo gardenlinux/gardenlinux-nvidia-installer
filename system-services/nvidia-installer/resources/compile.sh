@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION"
+echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_VERSION"
 set -e
 set -x
 mkdir -p /tmp/nvidia
@@ -17,17 +17,10 @@ export IGNORE_MISSING_MODULE_SYMVERS=1
     --no-opengl-files \
     --no-libglx-indirect \
     --no-install-libglvnd \
+    --kernel-name=$KERNEL_VERSION \
     --log-file-name="$PWD"/nvidia-installer.log
 
-./nvidia-smi
-
-if [[ "$?" != "0" ]]; then
-echo "[ERROR] Failed to verify NVIDIA modules: nvidia-smi execution failed." \
-  && cat "$PWD"/nvidia-installer.log \
-  && exit 1 ; 
-fi
-
-if [ -e kernel/nvidia.ko ] ; then 
+if [ -e kernel/nvidia.ko ] ; then
   echo "Successfully compiled NVIDIA modules" ; 
 else 
   echo "[ERROR] Failed to compile NVIDIA modules" \
@@ -36,10 +29,10 @@ else
 fi
 
 echo "Archiving assets"
-KERNEL_VERSION=$(uname -r)
-mkdir -p /out/lib/modules/"$KERNEL_VERSION" /out/bin
-cp ./*.so* /out/lib
-cp kernel/*.ko /lib/modules/"$KERNEL_VERSION"/modules.* /out/lib/modules/"$KERNEL_VERSION"
+OUTDIR="/out/nvidia/$DRIVER_VERSION"
+mkdir -p $OUTDIR/lib/modules/"$KERNEL_VERSION" $OUTDIR/bin
+cp ./*.so* $OUTDIR/lib
+cp kernel/*.ko /lib/modules/"$KERNEL_VERSION"/modules.* $OUTDIR/lib/modules/"$KERNEL_VERSION"
 
 files=(\
   nvidia-debugdump \
@@ -52,5 +45,5 @@ files=(\
   nvidia-settings 
 )
 for f in "${files[@]}"; do \
-    cp "$f" /out/bin/;
+    cp "$f" $OUTDIR/bin/;
 done
