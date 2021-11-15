@@ -3,7 +3,7 @@ dockerRegistry:
 
 debug: false
 # Do not edit gardenlinuxVersion - master value is in gardenlinux-dev/component.yaml context section.
-gardenlinuxVersion: 184.0.0
+gardenlinuxVersion: 318.8.0
 
 imagePullSecrets:
 # - name: hello
@@ -11,14 +11,14 @@ imagePullSecrets:
 
 nvidiaInstaller:
   # Do not edit installerImage - this is generated from a patch in component.yaml
-  installerImage: com.sap.ai/nvidia-installer-5.4.0-5-cloud-amd64-450.80.02
+  installerImage: com.sap.ai/nvidia-installer-5.4.0-6-cloud-amd64-450.80.02
   # installerTag: 1.1.4
   # nodeSelector: {"os": "gardenlinux"}
 
   # Do not edit driverVersion - master value is in component.yaml context section.
   driverVersion: "450.80.02"
   # Do not edit kernelVersion - master value is in gardenlinux-dev/component.yaml context section.
-  kernelVersion: "5.4.0-5-cloud-amd64"
+  kernelVersion: "5.4.0-6-cloud-amd64"
   hostDriverPath: /opt/drivers
   # We use a combination of nodeAffinity and nodeSelector
   # nodeAffinity is used for all GPU nodes, and may be overridden in mlf-deploy (e.g. to support pools of different GPU types)
@@ -31,7 +31,7 @@ nvidiaInstaller:
           operator: Exists
         - key: os-version
           operator: In
-          values: ["184.0.0"]
+          values: ["318.8.0"]
           # Do not edit gardenlinuxVersion above - master value is in gardenlinux-dev/component.yaml context section.
   tolerations:
    - key: "nvidia.com/gpu"

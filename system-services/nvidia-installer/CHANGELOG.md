@@ -1,6 +1,8 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.4.0-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.3.0-sap2...rel/system-services/nvidia-installer/1.4.0-sap1)
+
 ## [1.3.0-sap2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.3.0-sap1...rel/system-services/nvidia-installer/1.3.0-sap2)
 ### other
 * Compile NVIDIA drivers in Dockerfile ([#3263](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3263)) ([`28fa259`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/28fa259e15692d3b97a7233dbabb57429eda6ef6))
