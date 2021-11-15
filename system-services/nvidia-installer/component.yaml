@@ -1,4 +1,4 @@
-version: 1.2.0-sap7
+version: 1.3.0-sap1
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 steps:
@@ -39,7 +39,7 @@ artifacts:
 
 context:
   imageName: com.sap.ai/nvidia-installer{image_suffix}
-  driverVersion: "450.80.02"
+  driverVersion: 450.80.02
   # Do not edit kernelVersion - master value is in gardenlinux-dev/component.yaml context section.
   kernelVersion: 5.4.0-5-cloud-amd64
 
@@ -75,7 +75,7 @@ dependencies:
     replace: FROM {docker_registry}{imageName}:{builtin.version} AS builder
   - file: Dockerfile
     regexp: ARG KERNEL_VERSION=.*
-    replace: 'ARG KERNEL_VERSION={kernelVersion}'
+    replace: ARG KERNEL_VERSION={kernelVersion}
   - file: helm/values.yaml
     regexp: 'gardenlinuxVersion: .*'
     replace: 'gardenlinuxVersion: {gardenlinuxVersion}'
