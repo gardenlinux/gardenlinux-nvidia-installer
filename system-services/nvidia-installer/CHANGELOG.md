@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [318.8.0-450.80.02-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.4.0-sap1...rel/system-services/nvidia-installer/318.8.0-450.80.02-sap1)
+### other
+* Add static tests for nvidia-installer ([#3302](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3302)) ([`410cca3`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/410cca392f26e07931df51c76a13e4cd15d17888))
+
+
 ## [1.4.0-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.3.0-sap2...rel/system-services/nvidia-installer/1.4.0-sap1)
 
 ## [1.3.0-sap2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.3.0-sap1...rel/system-services/nvidia-installer/1.3.0-sap2)

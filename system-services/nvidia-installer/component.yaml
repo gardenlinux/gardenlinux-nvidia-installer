@@ -1,4 +1,4 @@
-version: 1.4.0-sap1
+version: 318.8.0-450.80.02-sap1
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 steps:
@@ -54,13 +54,15 @@ steps:
     env:
       ARTIFACTS: /repo
     commands:
-    - helm template nvidia-installer helm --set targetInfrastructure.gardener=true > "${{ARTIFACTS}}"/nvidia-installer.yaml
+    - helm template nvidia-installer helm --set targetInfrastructure.gardener=true
+      > "${{ARTIFACTS}}"/nvidia-installer.yaml
     - template_exit_code=$?
     - cat "${{ARTIFACTS}}"/nvidia-installer.yaml
     - echo \"helm template exit code was ${{template_exit_code}}\"
     - if [[ ${{template_exit_code}} != 0 ]]; then exit ${{template_exit_code}}; fi
 
-    - kubeconform --kubernetes-version 1.21.0 --strict --summary --verbose "${{ARTIFACTS}}"/nvidia-installer.yaml > "${{ARTIFACTS}}"/kubeconform.out
+    - kubeconform --kubernetes-version 1.21.0 --strict --summary --verbose "${{ARTIFACTS}}"/nvidia-installer.yaml
+      > "${{ARTIFACTS}}"/kubeconform.out
     - kubeconform_exit_code=$?
     - cat "${{ARTIFACTS}}"/kubeconform.out
     - echo \"kubeconform exit code was ${{kubeconform_exit_code}}\"
