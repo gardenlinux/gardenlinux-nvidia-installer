@@ -77,7 +77,7 @@ spec:
       - image: k8s.gcr.io/pause-amd64:3.1
         name: pause
       {{- end }}
-      resources:
+        resources:
 {{ toYaml .Values.nvidiaInstaller.resources | indent 12 }}
 {{- if .Values.nvidiaInstaller.nodeSelector }}
       nodeSelector:

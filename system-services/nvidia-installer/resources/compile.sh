@@ -17,7 +17,7 @@ export IGNORE_MISSING_MODULE_SYMVERS=1
     --no-opengl-files \
     --no-libglx-indirect \
     --no-install-libglvnd \
-    --kernel-name=$KERNEL_VERSION \
+    --kernel-name="$KERNEL_VERSION" \
     --log-file-name="$PWD"/nvidia-installer.log
 
 if [ -e kernel/nvidia.ko ] ; then
@@ -30,9 +30,9 @@ fi
 
 echo "Archiving assets"
 OUTDIR="/out/nvidia/$DRIVER_VERSION"
-mkdir -p $OUTDIR/lib/modules/"$KERNEL_VERSION" $OUTDIR/bin
-cp ./*.so* $OUTDIR/lib
-cp kernel/*.ko /lib/modules/"$KERNEL_VERSION"/modules.* $OUTDIR/lib/modules/"$KERNEL_VERSION"
+mkdir -p "$OUTDIR"/lib/modules/"$KERNEL_VERSION" "$OUTDIR"/bin
+cp ./*.so* "$OUTDIR"/lib
+cp kernel/*.ko /lib/modules/"$KERNEL_VERSION"/modules.* "$OUTDIR"/lib/modules/"$KERNEL_VERSION"
 
 files=(\
   nvidia-debugdump \
@@ -45,5 +45,5 @@ files=(\
   nvidia-settings 
 )
 for f in "${files[@]}"; do \
-    cp "$f" $OUTDIR/bin/;
+    cp "$f" "$OUTDIR"/bin/;
 done

@@ -8,7 +8,7 @@ depmod -b "$LD_ROOT"
 
 error_out=$(depmod -b "$INSTALL_DIR/$DRIVER_NAME" 2>&1)
 # "grep -v ..." removes warnings that do not cause a problem for the gpu driver installation
-echo $error_out | grep -v 'depmod: WARNING:' || true
+echo "$error_out" | grep -v 'depmod: WARNING:' || true
 
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm

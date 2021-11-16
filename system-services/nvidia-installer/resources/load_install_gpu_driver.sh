@@ -24,8 +24,8 @@ main() {
     driver_cached=$(driver_in_cache "${DRIVER_NAME}" "${DRIVER_VERSION}")
 
     if ! ${driver_cached}; then
-      mkdir -p ${CACHE_DIR}
-      cp -ar /out/* ${CACHE_DIR}
+      mkdir -p "${CACHE_DIR}"
+      cp -ar /out/* "${CACHE_DIR}"
     fi
 
     install "$DRIVER_NAME" "$DRIVER_VERSION"
@@ -115,8 +115,6 @@ print_menu() {
 }
 
 parse_parameters() {
-
-  input_params="${@}"
 
   while [ "$#" -gt 0 ]
   do

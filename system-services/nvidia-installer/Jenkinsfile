@@ -25,6 +25,8 @@ pipeline {
 
         string(name: 'TREEISH', defaultValue: 'main', description: 'the git branch name to deploy from')
         string(name: 'BuildContext', defaultValue: '', description: 'context to patch versions')
+        booleanParam(name: 'RunUnitTests', defaultValue: true, description: '\'true\' runs unit tests')
+        booleanParam(name: 'RunStaticScans', defaultValue: true, description: '\'true\' runs linters')
         booleanParam(name: 'RunWhitesourceDocker', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
         booleanParam(name: 'RunPPMSComplianceForImage', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
     }
@@ -98,7 +100,37 @@ pipeline {
                 }
             }
         }
-        
+
+       stage('Lint') {
+            when { expression { params.RunStaticScans == true } }
+            steps {
+                sh "rm -rf helm-lint.out"
+                sh "rm -rf shellcheck.out"
+                sh "mono/scripts/run_mono.sh run ${env.SERVICE_PATH}:lint -e ${params.BuildContext}"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: "helm-lint.out", fingerprint: true
+                    archiveArtifacts artifacts: "shellcheck.out", fingerprint: true
+                }
+            }
+        }
+
+       stage('Unit test') {
+            when { expression { params.RunUnitTests == true } }
+            steps {
+                sh "rm -rf nvidia-installer.yaml"
+                sh "rm -rf kubeconform.out"
+                sh "mono/scripts/run_mono.sh run ${env.SERVICE_PATH}:unit -e ${params.BuildContext}"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: "nvidia-installer.yaml", fingerprint: true
+                    archiveArtifacts artifacts: "kubeconform.out", fingerprint: true
+                }
+            }
+        }
+
         stage('Build images') {
             parallel {
                 stage("Build docker image") {
