@@ -18,7 +18,6 @@ steps:
       RunCheckmarx: '{RunCheckmarx}'
       RunWhitesource: '{RunWhitesource}'
       RunSonarQube: '{RunSonarQube}'
-      RunWhitesourceDocker: '{RunWhitesourceDocker}'
       RunPPMSComplianceForImage: '{RunPPMSComplianceForImage}'
       RunProtecode: '{RunProtecode}'
   build:
@@ -103,7 +102,13 @@ patch:
   replace: 'driverVersion: "{driverVersion}"'
 - file: helm/values.yaml
   regexp: 'installerImage: .*'
-  replace: 'installerImage: com.sap.ai/nvidia-installer-{kernelVersion}-{driverVersion}'
+  replace: 'installerImage: {imageName}'
+- file: helm/values.yaml
+  regexp: 'installerTag: .*'
+  replace: 'installerTag: {builtin.version}'
+- file: wss-unified-agent.config
+  regexp: projectVersion=.*
+  replace: projectVersion={builtin.component_version}
 
 dependencies:
 - component: system-services/gardenlinux-dev
