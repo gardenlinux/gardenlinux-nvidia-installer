@@ -8,6 +8,7 @@ def wsDockerProductToken
 def wsScanIncludingBaseImageFlag
 def vaultClient
 def vaultAppRoleToken
+
 pipeline {
 
     agent any
@@ -18,11 +19,10 @@ pipeline {
         buildDiscarder(logRotator(daysToKeepStr: '-1', numToKeepStr: '20', artifactDaysToKeepStr: '-1', artifactNumToKeepStr: '-1'))
     }
 
-    parameters{
+    parameters {
         booleanParam(name: 'Build', defaultValue: true, description: '\'true\' triggers image builds')
         booleanParam(name: 'BuildXmake', defaultValue: true, description: '\'true\' triggers image builds via xmake for testing')
         booleanParam(name: 'Release', defaultValue: false, description: '\'true\' publishes the git tag and the docker image')
-
         string(name: 'TREEISH', defaultValue: 'main', description: 'the git branch name to deploy from')
         string(name: 'BuildContext', defaultValue: '', description: 'context to patch versions')
         booleanParam(name: 'RunUnitTests', defaultValue: true, description: '\'true\' runs unit tests')

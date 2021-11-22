@@ -3,7 +3,8 @@
 
 ## [184.0.0-450.80.02-sap2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/184.0.0-450.80.02-sap1...rel/system-services/nvidia-installer/184.0.0-450.80.02-sap2)
 ### chore
-* nvidia-installer release for Garden Linux 184.0 (fix) ([`0dfbc78`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/0dfbc78991c823ece2fa8183b29d6690aa66c437))
+* nvidia-installer release for Garden Linux 184.0 (3rd time lucky) ([#3341](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3341)) ([`a762eaf`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a762eaf843585ffa0061394bf5f1f578c620f1bf))
+* nvidia-installer release for Garden Linux 184.0 (fix) ([#3339](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3339)) ([`c45dd0a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c45dd0a38d1e850f0eb75006eb5004763b7132ba))
 * nvidia-installer release for Garden Linux 184.0 ([#3336](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3336)) ([`daad7a9`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/daad7a92e8c3789ccb9adebda5f463912b04887e))
 
 ### other
