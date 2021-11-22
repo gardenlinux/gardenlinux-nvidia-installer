@@ -13,7 +13,7 @@ nvidiaInstaller:
   # Do not edit installerImage - this is generated from a patch in component.yaml
   installerImage: com.sap.ai/nvidia-installer
   # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 184.0.0-450.80.02-sap1
+  installerTag: 184.0.0-450.80.02-sap2
   # nodeSelector: {"os": "gardenlinux"}
 
   # Do not edit driverVersion - master value is in component.yaml context section.

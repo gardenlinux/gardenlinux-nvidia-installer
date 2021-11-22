@@ -1,5 +1,5 @@
 # Do not edit FROM line - it is created from a component.yaml patch rule
-FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:184.0.0-sap5 AS builder
+FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:184.0.0-sap6 AS builder
 
 COPY resources/compile.sh /tmp/compile
 
