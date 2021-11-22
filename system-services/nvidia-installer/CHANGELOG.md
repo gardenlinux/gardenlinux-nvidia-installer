@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [184.0.0-450.80.02-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/318.8.0-450.80.02-sap1...rel/system-services/nvidia-installer/184.0.0-450.80.02-sap1)
+### other
+* Fix nvidia-installer image name to fix whitesource ([#3310](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3310)) ([`2c2971a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/2c2971aba1d60277524377619a4b5fb0918b1f5b))
+* Generate the correct image name & tag in nvidia-installer chart ([#3306](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3306)) ([`2a6a00a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/2a6a00ad52d48a470d26cb2a7ebb73ba0c4577ca))
+
+
 ## [318.8.0-450.80.02-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.4.0-sap1...rel/system-services/nvidia-installer/318.8.0-450.80.02-sap1)
 ### other
 * Add static tests for nvidia-installer ([#3302](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3302)) ([`410cca3`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/410cca392f26e07931df51c76a13e4cd15d17888))

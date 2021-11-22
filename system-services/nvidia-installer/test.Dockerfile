@@ -1,4 +1,4 @@
-FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:318.8.0-sap2
+FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:184.0.0-sap5
 
 ARG HELM_VERSION=3.5.2
 
