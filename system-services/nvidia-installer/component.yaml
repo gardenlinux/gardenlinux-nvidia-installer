@@ -1,4 +1,4 @@
-version: 184.0.0-450.80.02-sap2
+version: 184.0.0-450.80.02-sap3
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 steps:
@@ -20,6 +20,7 @@ steps:
       RunSonarQube: '{RunSonarQube}'
       RunPPMSComplianceForImage: '{RunPPMSComplianceForImage}'
       RunProtecode: '{RunProtecode}'
+      RunWhitesourceDocker: '{RunWhitesourceDocker}'
   build:
     type: dockerbuild
     artifact: image

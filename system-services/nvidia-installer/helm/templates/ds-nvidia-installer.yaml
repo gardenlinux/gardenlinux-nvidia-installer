@@ -57,6 +57,8 @@ spec:
         {{- end }}
         securityContext:
           privileged: true
+        resources:
+{{ toYaml .Values.nvidiaInstaller.installerResources | indent 12 }}
         env:
         - name: LD_ROOT
           value: /root
@@ -78,7 +80,7 @@ spec:
         name: pause
       {{- end }}
         resources:
-{{ toYaml .Values.nvidiaInstaller.resources | indent 12 }}
+{{ toYaml .Values.nvidiaInstaller.pauseResources | indent 12 }}
 {{- if .Values.nvidiaInstaller.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nvidiaInstaller.nodeSelector | indent 8 }}
