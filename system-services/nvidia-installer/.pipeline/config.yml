@@ -7,6 +7,12 @@ steps:
   sapCumulusUpload:
     cumulusFileCredentialsId: 'CumulusToken'
     pipelineId: '2484658e-a82d-4162-81d4-601443e7234d'
+  protecodeExecuteScan:
+    protecodeCredentialsId: 'b9513ce4-c466-4d2b-b679-f6084432f0b5'
+    group: '1169'
+    failOnSevereVulnerabilities: false
+    timeoutMinutes: 300
+    verbose: true
   whitesourceExecuteScan:
     custom_enableContainerScan: true
     custom_CTNR_Product_Token: 'eaf8db06829343f6a42c8c15607329416c15a4ff0e0a451a9ab13c68f2ca6609'

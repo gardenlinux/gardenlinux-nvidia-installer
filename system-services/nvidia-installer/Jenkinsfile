@@ -29,6 +29,7 @@ pipeline {
         booleanParam(name: 'RunStaticScans', defaultValue: true, description: '\'true\' runs linters')
         booleanParam(name: 'RunWhitesource', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
         booleanParam(name: 'RunPPMSComplianceForImage', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
+        booleanParam(name: 'RunProtecode', defaultValue: true, description: '\'true\' triggers Protecode scan, any other value will not')
     }
     
     environment {
@@ -237,6 +238,23 @@ pipeline {
             }
         }
 
+        stage('Protecode Scan') {
+            when { expression { params.RunProtecode == true } }
+            steps {
+                script {
+                    dir("${WORKSPACE}/system-services/nvidia-installer"){
+                        println("Path for scan is ${DOCKER_REGISTRY}${it.uri}:${VERSION}")
+                        protecodeExecuteScan script: this, scanImage: "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}" , serverUrl: "https://protecode.c.eu-de-2.cloud.sap", reportFileName: "protecode_report.pdf"
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'protecode_report.pdf', fingerprint: true, allowEmptyArchive: true
+                }
+            }
+        }
+        
         stage('WhiteSource') {
             when { expression { params.RunWhitesource == true } }
             steps {
