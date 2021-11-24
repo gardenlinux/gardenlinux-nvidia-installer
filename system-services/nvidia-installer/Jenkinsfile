@@ -243,7 +243,6 @@ pipeline {
             steps {
                 script {
                     dir("${WORKSPACE}/system-services/nvidia-installer"){
-                        println("Path for scan is ${DOCKER_REGISTRY}${it.uri}:${VERSION}")
                         protecodeExecuteScan script: this, scanImage: "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}" , serverUrl: "https://protecode.c.eu-de-2.cloud.sap", reportFileName: "protecode_report.pdf"
                     }
                 }
