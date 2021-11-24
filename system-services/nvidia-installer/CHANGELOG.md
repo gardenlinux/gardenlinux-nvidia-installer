@@ -1,6 +1,18 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [318.8.0-440.82-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/184.0.0-450.80.02-sap3...rel/system-services/nvidia-installer/318.8.0-440.82-sap1)
+### other
+* add protecode scan for nvidia installer ([#3240](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3240)) ([`7b328c1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/7b328c1261901be669ab7aa26aaff5b7ad6d3d65))
+* Fix nvidia-installer image name to fix whitesource ([#3310](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3310)) ([`2c2971a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/2c2971aba1d60277524377619a4b5fb0918b1f5b))
+* Generate the correct image name & tag in nvidia-installer chart ([#3306](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3306)) ([`2a6a00a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/2a6a00ad52d48a470d26cb2a7ebb73ba0c4577ca))
+
+### chore
+* nvidia-installer release for Garden Linux 184.0 (3rd time lucky) ([#3341](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3341)) ([`a762eaf`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a762eaf843585ffa0061394bf5f1f578c620f1bf))
+* nvidia-installer release for Garden Linux 184.0 (fix) ([#3339](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3339)) ([`c45dd0a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c45dd0a38d1e850f0eb75006eb5004763b7132ba))
+* nvidia-installer release for Garden Linux 184.0 ([#3336](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3336)) ([`daad7a9`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/daad7a92e8c3789ccb9adebda5f463912b04887e))
+
+
 ## [184.0.0-450.80.02-sap3](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/184.0.0-450.80.02-sap2...rel/system-services/nvidia-installer/184.0.0-450.80.02-sap3)
 ### other
 * add protecode scan for nvidia installer ([#3240](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3240)) ([`7b328c1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/7b328c1261901be669ab7aa26aaff5b7ad6d3d65))
