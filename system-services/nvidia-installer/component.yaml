@@ -1,4 +1,4 @@
-version: 318.8.0-440.82-sap1
+version: 318.8.0-470.82.01-sap1
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 steps:
@@ -77,9 +77,7 @@ artifacts:
 
 context:
   imageName: com.sap.ai/nvidia-installer{image_suffix}
-  driverVersion: "440.82"
-  # Do not edit kernelVersion - master value is in gardenlinux-dev/component.yaml context section.
-  kernelVersion: 5.4.0-6-cloud-amd64
+  driverVersion: "470.82.01"
 
 pipelines:
   local:
@@ -127,11 +125,5 @@ dependencies:
     regexp: ARG KERNEL_VERSION=.*
     replace: ARG KERNEL_VERSION={kernelVersion}
   - file: helm/values.yaml
-    regexp: 'gardenlinuxVersion: .*'
-    replace: 'gardenlinuxVersion: {gardenlinuxVersion}'
-  - file: helm/values.yaml
     regexp: 'values: \[\".*\"\]'
     replace: 'values: ["{gardenlinuxVersion}"]'
-  - file: helm/values.yaml
-    regexp: 'kernelVersion: .*'
-    replace: 'kernelVersion: "{kernelVersion}"'

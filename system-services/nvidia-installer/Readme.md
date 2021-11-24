@@ -1,6 +1,6 @@
 # nvidia-installer
 
-Compile NVIDIA kernel modules for Gardenlinux in a Docker image. Running the image in a cluster installs the GPU driver.
+Compile NVIDIA kernel modules for Garden Linux in a Docker image. Running the image in a cluster installs the GPU driver.
 
 ## TL;DR - How to create a new version?
 
@@ -10,13 +10,25 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 
 * Make sure the required Garden Linux DEB files are copied to the Swift container `gardenlinux-packages` in Converged Cloud
   project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home).
-* Update the values in the `context` section of `gardenlinux-dev/component.yaml`, then release a new version of 
-`nvidia-installer`.
+* Update the values in the `context` section of `gardenlinux-dev/component.yaml`, then [release a new version of 
+`nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### New NVIDIA driver (CUDA) version
 
-Update the `driverVersion` value in the `context` section of `component.yaml`, then release a new version of 
-`nvidia-installer`.
+Update the `driverVersion` value in the `context` section of `component.yaml`, then [release a new version of 
+`nvidia-installer`](#release-a-new-version-of-nvidia-installer).
+
+### Release a new version of nvidia-installer
+
+* Commit any changes for this release & push to GitHub, check that PR validation runs OK
+* From `system-services/nvidia-installer` run `mono release`
+* Commit changes and then squash them with the previous commit (`git rebase -i` etc.), making sure the commit
+  message contains the string `[release]`
+* Force push the commit to GitHub
+* In order not to release unnecessary components, stop the PR build and restart it with "Release" checked, and the
+  components list set to `system-services/nvidia-installer`
+* Once everything is green & approved, merge the commit and then restart the `main` build the same way as in the 
+  previous step 
 
 ### For both of the above
 

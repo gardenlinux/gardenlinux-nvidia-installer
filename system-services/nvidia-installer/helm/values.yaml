@@ -2,28 +2,18 @@ dockerRegistry:
   overwrite: false
 
 debug: false
-# Do not edit gardenlinuxVersion - master value is in gardenlinux-dev/component.yaml context section.
-gardenlinuxVersion: 318.8.0
 
 imagePullSecrets:
-# - name: hello
-# - name: bla
 
 nvidiaInstaller:
   # Do not edit installerImage - this is generated from a patch in component.yaml
   installerImage: com.sap.ai/nvidia-installer
   # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 318.8.0-440.82-sap1
-  # nodeSelector: {"os": "gardenlinux"}
+  installerTag: 318.8.0-470.82.01-sap1
 
   # Do not edit driverVersion - master value is in component.yaml context section.
-  driverVersion: "440.82"
-  # Do not edit kernelVersion - master value is in gardenlinux-dev/component.yaml context section.
-  kernelVersion: "5.4.0-6-cloud-amd64"
+  driverVersion: "470.82.01"
   hostDriverPath: /opt/drivers
-  # We use a combination of nodeAffinity and nodeSelector
-  # nodeAffinity is used for all GPU nodes, and may be overridden in mlf-deploy (e.g. to support pools of different GPU types)
-  # nodeSelector is used per-OS to select which OS-specific installation method is used
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:

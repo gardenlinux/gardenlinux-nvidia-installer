@@ -3,4 +3,4 @@ description: >
   A Helm chart to install NVIDIA GPU Support on Garden Linux based Kubernetes Gardener
   clusters and on GKE clusters
 name: nvidia-installer
-version: 318.8.0-440.82-sap1
+version: 318.8.0-470.82.01-sap1
