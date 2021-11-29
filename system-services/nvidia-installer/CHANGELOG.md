@@ -1,6 +1,14 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [318.8.0-sap2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/318.8.0-470.82.01-sap1...rel/system-services/nvidia-installer/318.8.0-sap2)
+### feature
+* **mono:** automatic releases ([#3377](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3377)) ([`5ea517a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/5ea517ae9a987811e08664b2a3d20abe1efb138f))
+
+### other
+* remove unwanted line ([#3381](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3381)) ([`0a9b2d3`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/0a9b2d3f5aa8f9c165339a105d709dc51549806f))
+
+
 ## [318.8.0-470.82.01-sap1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/318.8.0-440.82-sap1...rel/system-services/nvidia-installer/318.8.0-470.82.01-sap1)
 ### other
 * add protecode scan for nvidia installer ([#3240](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3240)) ([`7b328c1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/7b328c1261901be669ab7aa26aaff5b7ad6d3d65))

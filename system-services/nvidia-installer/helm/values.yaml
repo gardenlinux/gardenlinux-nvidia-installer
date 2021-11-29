@@ -9,7 +9,7 @@ nvidiaInstaller:
   # Do not edit installerImage - this is generated from a patch in component.yaml
   installerImage: com.sap.ai/nvidia-installer
   # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 318.8.0-470.82.01-sap1
+  installerTag: 318.8.0-sap2
 
   # Do not edit driverVersion - master value is in component.yaml context section.
   driverVersion: "470.82.01"

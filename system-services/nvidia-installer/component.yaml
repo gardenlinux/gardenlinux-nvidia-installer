@@ -1,4 +1,4 @@
-version: 318.8.0-470.82.01-sap1
+version: 318.8.0-sap2
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 versioningStrategy: foss
@@ -9,6 +9,20 @@ steps:
     job: aicore/nvidia-installer
     params:
       ComponentName: nvidia-installer
+      BuildContext: '{builtin.encoded_contexts}'
+      RunStaticScans: '{RunStaticScans}'
+      RunUnitTests: '{RunUnitTests}'
+      RunTests: '{RunTests}'
+      RunCheckmarx: '{RunCheckmarx}'
+      RunWhitesource: '{RunWhitesource}'
+      RunSonarQube: '{RunSonarQube}'
+      Release: '{Release}'
+      Build: '{Build}'
+      BuildXmake: '{BuildXmake}'
+      TREEISH: '{builtin.git_commit}'
+      RunWhitesourceDocker: '{RunWhitesourceDocker}'
+      RunPPMSComplianceForImage: '{RunPPMSComplianceForImage}'
+      RunProtecode: '{RunProtecode}'
   build:
     type: dockerbuild
     artifact: image
@@ -65,7 +79,7 @@ artifacts:
 
 context:
   imageName: com.sap.ai/nvidia-installer{image_suffix}
-  driverVersion: "470.82.01"
+  driverVersion: 470.82.01
 
 pipelines:
   local:
@@ -82,8 +96,8 @@ patch:
   regexp: version=.*
   replace: version={builtin.version}
 - file: Dockerfile
-  regexp: 'ARG DRIVER_VERSION=.*'
-  replace: 'ARG DRIVER_VERSION={driverVersion}'
+  regexp: ARG DRIVER_VERSION=.*
+  replace: ARG DRIVER_VERSION={driverVersion}
 - file: helm/Chart.yaml
   yaml_path: version
   replace: '{builtin.version}'
