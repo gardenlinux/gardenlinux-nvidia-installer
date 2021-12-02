@@ -9,7 +9,7 @@ nvidiaInstaller:
   # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
   installerImage: com.sap.ai/nvidia-installer-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 318.8.0-sap2
+  installerTag: 318.8.0-sap3
 
   hostDriverPath: /opt/drivers
   nodeAffinity:
