@@ -10,23 +10,26 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 
 * Make sure the required Garden Linux DEB files are copied to the Swift container `gardenlinux-packages` in Converged Cloud
   project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home).
-* Update the values in the `context` section of `gardenlinux-dev/component.yaml`, then [release a new version of 
+* Update the values in the `context` section of `gardenlinux-dev/component.yaml`, then [release the new version of 
 `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### New NVIDIA driver (CUDA) version
 
+Copy the latest `nvidia-installer-<version>` folder and paste with the new version number. 
 Update the `driverVersion` value in the `context` section of `component.yaml`, then [release a new version of 
 `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### Release a new version of nvidia-installer
 
 * Commit any changes for this release & push to GitHub, check that PR validation runs OK
-* From `system-services/nvidia-installer` run `mono release`
-* Commit changes and then squash them with the previous commit (`git rebase -i` etc.), making sure the commit
-  message contains the string `[release]`
-* Force push the commit to GitHub
+* Merge the PR to `main` & pull/fetch to update your local copy
+* Checkout a new branch `release-nvidia-installer-<version>`
+* From the `nvidia-installer-<version>` folder run `mono release` (if this is for a new Garden Linux version, do this once 
+  per `nvidia-installer` folder) and **set the release version to `<GardenLinux version>-<SAP number>`**, e.g. `318.8.0-sap2`.
+  Ideally the SAP number is aligned between all the `nvidia-installer-*` components.
+* Commit the changes with message "\[release\] updating nvidia-installer to version X" and push the commit to GitHub
 * In order not to release unnecessary components, stop the PR build and restart it with "Release" checked, and the
-  components list set to `system-services/nvidia-installer`
+  components list set to `system-services/nvidia-installer-<version>` (for all versions if this is for a new Garden Linux)
 * Once everything is green & approved, merge the commit and then restart the `main` build the same way as in the 
   previous step 
 

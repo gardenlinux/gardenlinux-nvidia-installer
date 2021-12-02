@@ -48,17 +48,15 @@ spec:
         name: modulus
         imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
         args:
-        - "--driver-name"
-        - nvidia
-        - "--driver-version"
-        - {{ required "nvidiaInstaller.driverVersion" .Values.nvidiaInstaller.driverVersion | quote }}
         {{- if .Values.debug }}
         - "--debug"
         {{- end }}
         securityContext:
           privileged: true
+{{- if .Values.nvidiaInstaller.installerResources }}
         resources:
 {{ toYaml .Values.nvidiaInstaller.installerResources | indent 12 }}
+{{- end }}
         env:
         - name: LD_ROOT
           value: /root

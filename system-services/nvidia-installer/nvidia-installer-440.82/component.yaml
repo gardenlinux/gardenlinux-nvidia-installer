@@ -1,0 +1,126 @@
+version: 318.8.0-sap2
+description: system pod for installing nvidia gpu drivers in the host operating system
+
+context:
+  driverVersion: 440.82
+  imageName: com.sap.ai/{builtin.component_folder_basename}{image_suffix}
+
+versioningStrategy: foss
+
+steps:
+  jenkins:
+    type: jenkinsJob
+    job: aicore/nvidia-installer
+    params:
+      ComponentName: '{builtin.component_folder_basename}'
+      BuildContext: '{builtin.encoded_contexts}'
+      RunStaticScans: '{RunStaticScans}'
+      RunUnitTests: '{RunUnitTests}'
+      RunTests: '{RunTests}'
+      RunCheckmarx: '{RunCheckmarx}'
+      RunWhitesource: '{RunWhitesource}'
+      RunSonarQube: '{RunSonarQube}'
+      Release: '{Release}'
+      Build: '{Build}'
+      BuildXmake: '{BuildXmake}'
+      TREEISH: '{builtin.git_commit}'
+      RunWhitesourceDocker: '{RunWhitesourceDocker}'
+      RunPPMSComplianceForImage: '{RunPPMSComplianceForImage}'
+      RunProtecode: '{RunProtecode}'
+  build:
+    type: dockerbuild
+    artifact: image
+    dockerfile: Dockerfile
+    buildContext: ..
+    buildArgs:
+      DRIVER_VERSION: '{driverVersion}'
+      GIT_COMMIT: '{builtin.git_commit}'
+      GIT_TAG: '{builtin.version}'
+      GIT_TREE_STATE: '{builtin.git_tree_state}'
+  lint:
+    type: dockerRun
+    dockerfile: test.Dockerfile
+    buildContext: ..
+    shell: /bin/bash
+    env:
+      ARTIFACTS: /repo
+    commands:
+    - helm lint helm --set targetInfrastructure.gardener=true > "${{ARTIFACTS}}"/helm-lint.out
+    - lint_exit_code=$?
+    - cat "${{ARTIFACTS}}"/helm-lint.out
+    - echo \"helm lint exit code was ${{lint_exit_code}}\"
+    - if [[ ${{lint_exit_code}} != 0 ]]; then exit ${{lint_exit_code}}; fi
+
+    - shellcheck resources/* > "${{ARTIFACTS}}"/shellcheck.out
+    - shellcheck_exit_code=$?
+    - cat "${{ARTIFACTS}}"/shellcheck.out
+    - echo \"shellcheck exit code was ${{shellcheck_exit_code}}\"
+    - exit ${{shellcheck_exit_code}}
+  unit:
+    type: dockerRun
+    dockerfile: test.Dockerfile
+    buildContext: ..
+    shell: /bin/bash
+    env:
+      ARTIFACTS: /repo
+    commands:
+    - helm template nvidia-installer helm --set targetInfrastructure.gardener=true
+      > "${{ARTIFACTS}}"/nvidia-installer.yaml
+    - template_exit_code=$?
+    - cat "${{ARTIFACTS}}"/nvidia-installer.yaml
+    - echo \"helm template exit code was ${{template_exit_code}}\"
+    - if [[ ${{template_exit_code}} != 0 ]]; then exit ${{template_exit_code}}; fi
+
+    - kubeconform --kubernetes-version 1.21.0 --strict --summary --verbose "${{ARTIFACTS}}"/nvidia-installer.yaml
+      > "${{ARTIFACTS}}"/kubeconform.out
+    - kubeconform_exit_code=$?
+    - cat "${{ARTIFACTS}}"/kubeconform.out
+    - echo \"kubeconform exit code was ${{kubeconform_exit_code}}\"
+    - exit ${{kubeconform_exit_code}}
+  whitesource:
+    type: whitesource
+
+artifacts:
+  image:
+    type: docker
+    imageName: com.sap.ai/{builtin.component_folder_basename}{image_suffix}
+
+pipelines:
+  local:
+    build: build
+  push-validation:
+    build: jenkins
+  main:
+    build: jenkins
+  release:
+    build: jenkins
+
+patch:
+- file: .xmake.cfg
+  regexp: version=.*
+  replace: version={builtin.version}
+- file: ../helm/Chart.yaml
+  yaml_path: version
+  replace: '{builtin.version}'
+- file: ../helm/values.yaml
+  regexp: 'installerTag: .*'
+  replace: 'installerTag: {builtin.version}'
+- file: ../wss-unified-agent.config
+  regexp: projectVersion=.*
+  replace: projectVersion={builtin.component_version}
+
+dependencies:
+- component: system-services/gardenlinux-dev
+  patch:
+  - file: ../Dockerfile
+    regexp: FROM \S* AS builder
+    replace: FROM {docker_registry}{imageName}:{builtin.version} AS builder
+  - file: ../test.Dockerfile
+    regexp: FROM \S*
+    replace: FROM {docker_registry}{imageName}:{builtin.version}
+  - file: ../Dockerfile
+    regexp: ARG KERNEL_VERSION=.*
+    replace: ARG KERNEL_VERSION={kernelVersion}
+  - file: ../helm/values.yaml
+    regexp: 'values: \[\".*\"\]'
+    replace: 'values: ["{gardenlinuxVersion}"]'

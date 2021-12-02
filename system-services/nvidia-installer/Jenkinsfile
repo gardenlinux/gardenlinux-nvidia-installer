@@ -25,6 +25,7 @@ pipeline {
         booleanParam(name: 'Release', defaultValue: false, description: '\'true\' publishes the git tag and the docker image')
         string(name: 'TREEISH', defaultValue: 'main', description: 'the git branch name to deploy from')
         string(name: 'BuildContext', defaultValue: '', description: 'context to patch versions')
+        string(name: 'ComponentName', defaultValue: '', description: 'same as the image folder name')
         booleanParam(name: 'RunUnitTests', defaultValue: true, description: '\'true\' runs unit tests')
         booleanParam(name: 'RunStaticScans', defaultValue: true, description: '\'true\' runs linters')
         booleanParam(name: 'RunWhitesource', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
@@ -35,7 +36,7 @@ pipeline {
     environment {
         AUDITLOG_VALUES=""
         KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-central-1_aicore-pr-valid_config"
-        SERVICE_PATH="system-services/nvidia-installer"
+        SERVICE_PATH="system-services/nvidia-installer/${params.ComponentName}"
         SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID="sap-artifactory-dmz-api-token"
         SAP_REMOTE_CACHE_REGISTRY="remote-docker.docker.repositories.sapcdn.io"
         VAULT_APPROLE_CRED_ID="jenkins-ai-foundation-user-privileged"
@@ -52,6 +53,8 @@ pipeline {
 
                     context = readYaml file: 'env.yaml'
                     env.VERSION=context["builtin"]["version"]
+                    env.GARDENLINUX_VERSION=""
+                    env.DRIVER_VERSION=""
                     env.PRERELEASE_VERSION = ""
                     env.IMAGE_SUFFIX=context["image_suffix"]
                     env.DOCKER_REGISTRY=context["docker_registry"]
@@ -66,6 +69,9 @@ pipeline {
                     "Jenkins GIT_COMMIT \"${namenv.GIT_COMMIT}\" must match \
                     the actual branch commit \"${git.get_commit()}\". \
                     If this is not the case Jenkins is probably doing a merge before it builds."
+
+                    assert env.version.contains(env.GARDENLINUX_VERSION)
+                    assert env.version.contains(env.DRIVER_VERSION)
                 }
             }
         }
@@ -102,6 +108,7 @@ pipeline {
 
         stage('Piper Setup') {
             //Setting up for upcoming piper steps (SapCumulusUpload, )
+            // Update the configs in 'system-services/nvidia-installer/.pipeline/config.yml'
             steps {
                 script{
                     dir("${WORKSPACE}/system-services/nvidia-installer"){

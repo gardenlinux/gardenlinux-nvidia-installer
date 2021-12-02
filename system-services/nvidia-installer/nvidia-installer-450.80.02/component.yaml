@@ -1,6 +1,10 @@
 version: 318.8.0-sap2
 description: system pod for installing nvidia gpu drivers in the host operating system
 
+context:
+  driverVersion: 450.80.02
+  imageName: com.sap.ai/{builtin.component_folder_basename}{image_suffix}
+
 versioningStrategy: foss
 
 steps:
@@ -8,7 +12,7 @@ steps:
     type: jenkinsJob
     job: aicore/nvidia-installer
     params:
-      ComponentName: nvidia-installer
+      ComponentName: '{builtin.component_folder_basename}'
       BuildContext: '{builtin.encoded_contexts}'
       RunStaticScans: '{RunStaticScans}'
       RunUnitTests: '{RunUnitTests}'
@@ -27,13 +31,16 @@ steps:
     type: dockerbuild
     artifact: image
     dockerfile: Dockerfile
+    buildContext: ..
     buildArgs:
+      DRIVER_VERSION: '{driverVersion}'
       GIT_COMMIT: '{builtin.git_commit}'
       GIT_TAG: '{builtin.version}'
       GIT_TREE_STATE: '{builtin.git_tree_state}'
   lint:
     type: dockerRun
     dockerfile: test.Dockerfile
+    buildContext: ..
     shell: /bin/bash
     env:
       ARTIFACTS: /repo
@@ -52,6 +59,7 @@ steps:
   unit:
     type: dockerRun
     dockerfile: test.Dockerfile
+    buildContext: ..
     shell: /bin/bash
     env:
       ARTIFACTS: /repo
@@ -75,11 +83,7 @@ steps:
 artifacts:
   image:
     type: docker
-    imageName: com.sap.ai/nvidia-installer{image_suffix}
-
-context:
-  imageName: com.sap.ai/nvidia-installer{image_suffix}
-  driverVersion: 470.82.01
+    imageName: com.sap.ai/{builtin.component_folder_basename}{image_suffix}
 
 pipelines:
   local:
@@ -95,37 +99,28 @@ patch:
 - file: .xmake.cfg
   regexp: version=.*
   replace: version={builtin.version}
-- file: Dockerfile
-  regexp: ARG DRIVER_VERSION=.*
-  replace: ARG DRIVER_VERSION={driverVersion}
-- file: helm/Chart.yaml
+- file: ../helm/Chart.yaml
   yaml_path: version
   replace: '{builtin.version}'
-- file: helm/values.yaml
-  regexp: 'driverVersion: .*'
-  replace: 'driverVersion: "{driverVersion}"'
-- file: helm/values.yaml
-  regexp: 'installerImage: .*'
-  replace: 'installerImage: {imageName}'
-- file: helm/values.yaml
+- file: ../helm/values.yaml
   regexp: 'installerTag: .*'
   replace: 'installerTag: {builtin.version}'
-- file: wss-unified-agent.config
+- file: ../wss-unified-agent.config
   regexp: projectVersion=.*
   replace: projectVersion={builtin.component_version}
 
 dependencies:
 - component: system-services/gardenlinux-dev
   patch:
-  - file: Dockerfile
+  - file: ../Dockerfile
     regexp: FROM \S* AS builder
     replace: FROM {docker_registry}{imageName}:{builtin.version} AS builder
-  - file: test.Dockerfile
+  - file: ../test.Dockerfile
     regexp: FROM \S*
     replace: FROM {docker_registry}{imageName}:{builtin.version}
-  - file: Dockerfile
+  - file: ../Dockerfile
     regexp: ARG KERNEL_VERSION=.*
     replace: ARG KERNEL_VERSION={kernelVersion}
-  - file: helm/values.yaml
+  - file: ../helm/values.yaml
     regexp: 'values: \[\".*\"\]'
     replace: 'values: ["{gardenlinuxVersion}"]'

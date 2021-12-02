@@ -1,31 +1,36 @@
 #!/bin/bash
 echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_VERSION"
-set -e
 set -x
 mkdir -p /tmp/nvidia
 # shellcheck disable=SC2164
 pushd /tmp/nvidia
-curl -Ls "https://download.nvidia.com/XFree86/Linux-x86_64/$DRIVER_VERSION/NVIDIA-Linux-x86_64-$DRIVER_VERSION.run" -o nvidia.run
+DRIVER_URL="https://download.nvidia.com/XFree86/Linux-x86_64/$DRIVER_VERSION/NVIDIA-Linux-x86_64-$DRIVER_VERSION.run"
+if ! curl -Ls "${DRIVER_URL}" -o nvidia.run ; then
+  echo "Failed to download ${DRIVER_URL}"
+  exit 1
+fi
 chmod +x nvidia.run
 ./nvidia.run -x -s || cat nvidia.run
 # shellcheck disable=SC2164
 pushd "./NVIDIA-Linux-x86_64-$DRIVER_VERSION"
 export IGNORE_MISSING_MODULE_SYMVERS=1
-./nvidia-installer --silent \
-    --no-questions \
-    --ui=none \
+if ./nvidia-installer --silent \
     --no-opengl-files \
     --no-libglx-indirect \
     --no-install-libglvnd \
     --kernel-name="$KERNEL_VERSION" \
-    --log-file-name="$PWD"/nvidia-installer.log
-
-if [ -e kernel/nvidia.ko ] ; then
-  echo "Successfully compiled NVIDIA modules" ; 
+    --no-drm \
+    --no-install-compat32-libs \
+    --no-opengl-files \
+    --no-kernel-module-source \
+    --log-file-name="$PWD"/nvidia-installer.log \
+  && test -e kernel/nvidia.ko
+then
+  echo "Successfully compiled NVIDIA modules"
 else 
-  echo "[ERROR] Failed to compile NVIDIA modules" \
-  && cat "$PWD"/nvidia-installer.log \
-  && exit 1 ; 
+  echo "[ERROR] Failed to compile NVIDIA modules"
+  cat "$PWD"/nvidia-installer.log
+  exit 1
 fi
 
 echo "Archiving assets"
@@ -47,3 +52,6 @@ files=(\
 for f in "${files[@]}"; do \
     cp "$f" "$OUTDIR"/bin/;
 done
+
+# shellcheck disable=SC2046
+tar czf "$OUTDIR".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"

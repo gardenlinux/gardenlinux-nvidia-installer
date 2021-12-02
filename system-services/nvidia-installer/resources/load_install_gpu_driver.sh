@@ -9,6 +9,10 @@ CACHE_DIR=${CACHE_DIR:-$BIN_DIR/cache}
 INSTALL_DIR=${INSTALL_DIR:-/opt/drivers}
 LD_ROOT=${LD_ROOT:-/}
 DEBUG=${DEBUG:-false}
+DRIVER_NAME=nvidia
+# Look for a file <driver version>.tar.gz and remove the .tar.gz to get the driver version
+# shellcheck disable=SC2012
+DRIVER_VERSION=$(ls /out/nvidia | sed 's/.tar.gz//')
 
 main() {
     parse_parameters "${@}"
@@ -24,8 +28,8 @@ main() {
     driver_cached=$(driver_in_cache "${DRIVER_NAME}" "${DRIVER_VERSION}")
 
     if ! ${driver_cached}; then
-      mkdir -p "${CACHE_DIR}"
-      cp -ar /out/* "${CACHE_DIR}"
+      mkdir -p "${CACHE_DIR}"/"${DRIVER_NAME}"
+      tar xzf /out/"${DRIVER_NAME}"/"${DRIVER_VERSION}".tar.gz -C "${CACHE_DIR}"/"${DRIVER_NAME}"
     fi
 
     install "$DRIVER_NAME" "$DRIVER_VERSION"
@@ -99,7 +103,7 @@ install() {
         ldconfig -r "${LD_ROOT}" 2> /dev/null
     fi
     # shellcheck disable=SC1090
-    source "${BIN_DIR}/${DRIVER_NAME}/install"
+    source "${BIN_DIR}/${DRIVER_NAME}/install.sh"
 }
 
 print_menu() {
@@ -107,8 +111,6 @@ print_menu() {
     printf 'Usage:\n\n \t %s [options]\n\n' "$(basename "$0")"
     printf 'The options are:\n\n'
 
-    echo "  -d   | --driver-name            GPU driver name, e.g. \"nvidia\"."
-    echo "  -v   | --driver-version         GPU driver version."
     echo "       | --debug                  Debug flag for more noisy logging."
     echo "  -h   | --help                   Prints the help"
     echo ""
@@ -126,14 +128,6 @@ parse_parameters() {
     --debug)
       export DEBUG="true"
       ;;
-    -d|--driver-name)
-      export DRIVER_NAME="$2"
-      shift
-      ;;
-    -v|--driver-version)
-      export DRIVER_VERSION="$2"
-      shift
-      ;;
     --)
       break
       ;;
@@ -147,9 +141,6 @@ parse_parameters() {
     esac
     shift
   done
-
-  check_required "parameter" DRIVER_NAME
-  check_required "parameter" DRIVER_VERSION
 }
 
 check_required() {

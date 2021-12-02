@@ -6,13 +6,11 @@ debug: false
 imagePullSecrets:
 
 nvidiaInstaller:
-  # Do not edit installerImage - this is generated from a patch in component.yaml
-  installerImage: com.sap.ai/nvidia-installer
+  # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
+  installerImage: com.sap.ai/nvidia-installer-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
   installerTag: 318.8.0-sap2
 
-  # Do not edit driverVersion - master value is in component.yaml context section.
-  driverVersion: "470.82.01"
   hostDriverPath: /opt/drivers
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -28,13 +26,6 @@ nvidiaInstaller:
    - key: "nvidia.com/gpu"
      operator: "Exists"
      effect: "NoSchedule"
-  installerResources:
-    requests:
-      cpu: 1000m
-      memory: 500Mi
-    limits:
-      cpu: 1000m
-      memory: 500Mi
   pauseResources:
     requests:
       cpu: 10m

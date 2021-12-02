@@ -3,8 +3,7 @@ FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:318.8.0-sap5 AS builde
 
 COPY resources/compile.sh /tmp/compile
 
-# Do not edit DRIVER_VERSION - master value is in component.yaml context section.
-ARG DRIVER_VERSION=470.82.01
+ARG DRIVER_VERSION
 
 # Do not edit KERNEL_VERSION - master value is in gardenlinux-dev/component.yaml context section.
 ARG KERNEL_VERSION=5.4.0-6-cloud-amd64
@@ -23,5 +22,5 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 COPY --from=builder /out /out
 
 COPY resources/load_install_gpu_driver.sh /opt/modulus/load_install_gpu_driver
-COPY resources/install.sh /opt/modulus/nvidia/install
+COPY resources/install.sh /opt/modulus/nvidia/install.sh
 ENTRYPOINT ["/opt/modulus/load_install_gpu_driver"]
