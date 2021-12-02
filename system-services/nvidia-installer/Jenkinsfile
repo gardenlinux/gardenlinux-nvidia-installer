@@ -37,6 +37,8 @@ pipeline {
         AUDITLOG_VALUES=""
         KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-central-1_aicore-pr-valid_config"
         SERVICE_PATH="system-services/nvidia-installer/${params.ComponentName}"
+        HELM_PATH="system-services/nvidia-installer/helm"
+        CHART_NAME="nvidia-installer"
         SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID="sap-artifactory-dmz-api-token"
         SAP_REMOTE_CACHE_REGISTRY="remote-docker.docker.repositories.sapcdn.io"
         VAULT_APPROLE_CRED_ID="jenkins-ai-foundation-user-privileged"
@@ -229,10 +231,10 @@ pipeline {
                                 sh """
                                     ./${repo_folder}/tooling/upload_component_resources.sh \
                                         --source-branch "${source_branch}" \
-                                        --name "${service_name}" \
+                                        --name "${env.CHART_NAME}" \
                                         --repository "${repo_url}" \
                                         --version "${VERSION}" \
-                                        --chart-folder ${env.SERVICE_PATH}/helm
+                                        --chart-folder ${env.HELM_PATH}
                                 """
                             } finally {
                                 sh """
