@@ -1,6 +1,6 @@
 # Do not edit FROM line - it is created from a component.yaml patch rule
 FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:318.8.0-sap5 AS builder
-
+# TODO: update Gardenlinux version & fold into main build
 COPY resources/compile.sh /tmp/compile
 
 ARG DRIVER_VERSION

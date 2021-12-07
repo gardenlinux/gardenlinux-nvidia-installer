@@ -36,7 +36,7 @@ pipeline {
     environment {
         AUDITLOG_VALUES=""
         KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-central-1_aicore-pr-valid_config"
-        SERVICE_PATH="system-services/nvidia-installer/${params.ComponentName}"
+        SERVICE_PATH="system-services/nvidia-installer"
         HELM_PATH="system-services/nvidia-installer/helm"
         CHART_NAME="nvidia-installer"
         SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID="sap-artifactory-dmz-api-token"
@@ -65,7 +65,11 @@ pipeline {
 
                     xmake = load("scripts/xmake_utils.groovy")
                     git = load("scripts/git_utils.groovy")
-                    xmake.set_build_config([params.ComponentName])
+                    xmake.set_build_config([
+                                            "nvidia-installer-318.8.0-440.82",
+                                            "nvidia-installer-318.8.0-450.80.02",
+                                            "nvidia-installer-318.8.0-470.82.01"
+                                            ])
 
                     assert env.GIT_COMMIT == git.get_commit():\
                     "Jenkins GIT_COMMIT \"${namenv.GIT_COMMIT}\" must match \

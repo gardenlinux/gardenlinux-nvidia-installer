@@ -15,8 +15,9 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 
 ### New NVIDIA driver (CUDA) version
 
-Copy the latest `nvidia-installer-<version>` folder and paste with the new version number. 
-Update the `driverVersion` value in the `context` section of `component.yaml`, then [release a new version of 
+* Copy the latest `nvidia-installer-<version>` folder and paste with the new version number. 
+* In the `config/services` branch, add a variant for `nvidia-installer-<version>` 
+* Update the `driverVersion` value in the `context` section of `component.yaml`, then [release a new version of 
 `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### Release a new version of nvidia-installer
