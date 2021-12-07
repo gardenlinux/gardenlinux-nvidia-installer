@@ -10,15 +10,17 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 
 * Make sure the required Garden Linux DEB files are copied to the Swift container `gardenlinux-packages` in Converged Cloud
   project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home).
-* Update the values in the `context` section of `gardenlinux-dev/component.yaml`, then [release the new version of 
-`nvidia-installer`](#release-a-new-version-of-nvidia-installer).
+* Update the values in the `image_versions` file, and in the `context` section of `component.yaml`
+* Add required xmake entries in the `config/services` branch 
+* [Release the new versions of `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### New NVIDIA driver (CUDA) version
 
-* Copy the latest `nvidia-installer-<version>` folder and paste with the new version number. 
-* In the `config/services` branch, add a variant for `nvidia-installer-<version>` 
-* Update the `driverVersion` value in the `context` section of `component.yaml`, then [release a new version of 
-`nvidia-installer`](#release-a-new-version-of-nvidia-installer).
+* In the `config/services` branch, in `config/services/production-services/build-service/config.yml` add a variant 
+  for `nvidia-installer-<gardenlinux version>-<driver version>` for each Garden Linux version for which you want 
+  the new driver to be available.
+* Add the driver version value to the `driverVersion` list in the `context` section of `component.yaml`
+* [Release the new version of `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### Release a new version of nvidia-installer
 
@@ -26,11 +28,10 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 * Merge the PR to `main` & pull/fetch to update your local copy
 * Checkout a new branch `release-nvidia-installer-<version>`
 * From the `nvidia-installer-<version>` folder run `mono release` (if this is for a new Garden Linux version, do this once 
-  per `nvidia-installer` folder) and **set the release version to `<GardenLinux version>-<SAP number>`**, e.g. `318.8.0-sap2`.
-  Ideally the SAP number is aligned between all the `nvidia-installer-*` components.
-* Commit the changes with message "\[release\] updating nvidia-installer to version X" and push the commit to GitHub
+  per `nvidia-installer` folder) and **increment the release version** (for example, from `1.5.0` to `1.5.1`.
+* Commit the changes with message `"[release] updating nvidia-installer to version X"` and push the commit to GitHub
 * In order not to release unnecessary components, stop the PR build and restart it with "Release" checked, and the
-  components list set to `system-services/nvidia-installer-<version>` (for all versions if this is for a new Garden Linux)
+  components list set to `system-services/nvidia-installer`
 * Once everything is green & approved, merge the commit and then restart the `main` build the same way as in the 
   previous step 
 
@@ -40,14 +41,13 @@ Make sure to update `mlf-gitops` according to the new release version.
 
 ## High level structure of the Dockerfile
 
-The first stage uses the gardenlinux-dev image (which contains the needed compilers & kernel headers) to download
-the NVIDIA driver files and compile the kernel modules.
+The first stage installs the needed compilers & kernel headers, then calls 
+a script to download the NVIDIA driver files and compile the kernel modules, and finally creates a
+compressed tar archive of the required files.
 
-The second (main) stage copies the kernel modules into the image and contains the runtime script to install
+The second (main) stage copies the tarball into the image along with the runtime scripts to
+extract the tarball and install
 the modules into the running kernel as part of a Daemonset.
-
-For new versions of Garden Linux, update the required values in gardenlinux-dev.
-For new versions of the NVIDIA driver, update the required `driverVersion` value in `component.yaml`.
 
 ### Background
 
@@ -60,14 +60,6 @@ which contains the kernel headers and compiler.
 
 Modulus makes it easy to automatically compile kernel modules for NVIDIA GPUs. See the [NVIDIA README](nvidia/README.md) for detailed instructions.
 
-## Build and releases
-
-The normal build and release is triggered via the normal mono repo pipeline.
-
-[nvidia-installer](README.md)
-
-[gardenlinux-dev](./../gardenlinux-dev/README.md)
-
 ### Local Build and release the installer image
 
 To locally build the nvidia-installer image run the following
@@ -75,11 +67,6 @@ To locally build the nvidia-installer image run the following
 ```bash
 mono run build
 ```
-
-## Productive setup
-
-The nvidia-installer conceptually fullfils 2 distinct roles: it compiles a gpu-driver during image building
-and it installs said driver into the host gardenlinux operating system.
 
 ### Practical setup
 
@@ -92,7 +79,4 @@ spawn pods with `priorityClassName: system-node-critical` - this is e.g. the cas
 for the `kube-system` namespace.
 
 In addition, the gpu nodepools must have appropriate node labels so that the
-compiler and the installer instances can target the correct nodes.
-
-In general, the compiler nodepool can be scaled to zero once the desired drivers
-have been compiled.
+the nvidia-installer instances can target the correct nodes.

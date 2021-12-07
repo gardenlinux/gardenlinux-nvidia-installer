@@ -11,14 +11,19 @@ ignoreVersion:
 - 318.8.0-sap3
 
 context:
-  driverVersion:
+  nvidiaDriverVersion:
     - '440.82'
     - '450.80.02'
     - '470.82.01'
-  gardenLinuxVersion:
-    # - '184.0.0' - TODO revert when the GL dev image is rolled into this build
-    - '318.8.0'
-  imageName: com.sap.ai/nvidia-installer-{gardenLinuxVersion}-{driverVersion}{image_suffix}
+
+  gardenLinux:
+    - version: '184.0.0'
+      debianBaseImageTag: 'bullseye-20200224-slim'
+      dummy: entry
+    - version: '318.8.0'
+      debianBaseImageTag: 'bullseye-20200224-slim'
+      dummy: entry
+  imageName: com.sap.ai/nvidia-installer-{gardenLinux.version}-{nvidiaDriverVersion}{image_suffix}
 
 steps:
   jenkins:
@@ -27,15 +32,16 @@ steps:
   build:
     type: parameterized
     parameters:
-      - driverVersion: '{driverVersion}'
-      - gardenLinuxVersion: '{gardenLinuxVersion}'
+      - nvidiaDriverVersion: '{nvidiaDriverVersion}'
+      - gardenLinux: '{gardenLinux}'
     step:
       type: dockerbuild
-      imageName: '{imageName}'
+      imageName: 'com.sap.ai/nvidia-installer-{gardenLinux.version}-{nvidiaDriverVersion}{image_suffix}'
       dockerfile: Dockerfile
       buildArgs:
-        DRIVER_VERSION: '{driverVersion}'
-        GARDENLINUX_VERSION: '{gardenLinuxVersion}'
+        DRIVER_VERSION: '{nvidiaDriverVersion}'
+        GARDENLINUX_VERSION: '{gardenLinux.version}'
+        DEBIAN_BASE_IMAGE_TAG: '{gardenLinux.debianBaseImageTag}'
         GIT_COMMIT: '{builtin.git_commit}'
         GIT_TAG: '{builtin.version}'
         GIT_TREE_STATE: '{builtin.git_tree_state}'
@@ -103,19 +109,3 @@ patch:
 - file: wss-unified-agent.config
   regexp: projectVersion=.*
   replace: projectVersion={builtin.component_version}
-
-dependencies:
-- component: system-services/gardenlinux-dev
-  patch:
-  - file: Dockerfile
-    regexp: FROM \S* AS builder
-    replace: FROM {docker_registry}{imageName}:{builtin.version} AS builder
-  - file: test.Dockerfile
-    regexp: FROM \S*
-    replace: FROM {docker_registry}{imageName}:{builtin.version}
-  - file: Dockerfile
-    regexp: ARG KERNEL_VERSION=.*
-    replace: ARG KERNEL_VERSION={kernelVersion}
-  - file: helm/values.yaml
-    regexp: 'values: \[\".*\"\]'
-    replace: 'values: ["{gardenlinuxVersion}"]'

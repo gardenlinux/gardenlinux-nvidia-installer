@@ -1,4 +1,15 @@
-FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:318.8.0-sap5
+ARG DEBIAN_BASE_IMAGE_TAG=bullseye-20200224-slim
+FROM debian:$DEBIAN_BASE_IMAGE_TAG
+
+RUN apt-get -o Acquire::Check-Valid-Until=false update
+
+RUN apt-get install -y --allow-downgrades --no-install-recommends \
+      build-essential \
+      ca-certificates \
+      curl \
+      binutils \
+      wget && \
+    apt autoremove -y
 
 ARG HELM_VERSION=3.5.2
 

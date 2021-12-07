@@ -1,0 +1,31 @@
+# Most values can be got from the host (or a container running on the host) as follows:
+#
+# KERNEL_VERSION:
+# The output of `uname -r` gives the kernel version string, e.g. "5.4.0-4-cloud-amd64"
+#
+# GCC_VERSION:
+# `cat /proc/version` gives output of the form:
+#   Linux version 5.4.0-4-cloud-amd64 (debian-kernel@lists.debian.org) (gcc version 9.2.1 20200203 (Debian 9.2.1-28)) #1 SMP Debian 5.4.19-1 (2020-02-13)
+# From this output we want the string "9.2.1-28"
+#
+# LINUX_VERSION & LINUX_DATE
+# `uname -v` gives output of the form:
+#   #1 SMP Debian 5.4.19-1 (2020-02-13)
+# From this output we want the strings "5.4.19-1" and "2020-02-13"
+#
+# The value for DEBIAN_BASE_IMAGE_TAG needs to be found by trial and error - the right value
+# is whatever allows the image to build. Most likely to succeed is bullseye-X-slim where
+# X is the first release following the kernel date. The available tags are listed at
+# https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20
+#
+# The various needed files should be sourced from the Garden Linux team (e.g. this thread:
+# https://sap-ml.slack.com/archives/CV1SWRHR6/p1629759358011800?thread_ts=1629753024.011500&cid=CV1SWRHR6)
+# and then put into the S3 bucket gardenlinux-packages-public, so the files will have URLs like:
+# https://gardenlinux-packages-public.s3.eu-central-1.amazonaws.com/kernel_5.4.0-6_linux_5.4.93-1/linux-compiler-gcc-10-x86_5.4.93-1_amd64.deb
+
+GARDENLINUX_VERSION  | KERNEL_VERSION      | DEBIAN_BASE_IMAGE_TAG  | GCC_VERSION | LINUX_VERSION | LINUX_DATE
+#--------------------+---------------------+------------------------+-------------+---------------------------
+# Garden Linux 27.1.0: To rebuild the gardenlinux_dev image for this version please use commit 2beac582a8a08eff6e7b4c7a0ac0693e91c35a70
+# 27.1.0               | 5.4.0-4-cloud-amd64 | bullseye-20200224-slim | 9.2.1-28    | 5.4.19-1      | 2020-02-13
+184.0.0              | 5.4.0-5-cloud-amd64 | bullseye-20200224-slim | 10.2.0-9    | 5.4.68-1      | 2020-09-28
+318.8.0              | 5.4.0-6-cloud-amd64 | bullseye-20200224-slim | 10.2.1-6    | 5.4.93-1      | 2021-02-09

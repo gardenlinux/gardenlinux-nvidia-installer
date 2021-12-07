@@ -1,14 +1,28 @@
-# Do not edit FROM line - it is created from a component.yaml patch rule
-FROM docker.wdf.sap.corp:51022/com.sap.ai/gardenlinux-dev:318.8.0-sap5 AS builder
-# TODO: update Gardenlinux version & fold into main build
+# Do not edit DEBIAN_BASE_IMAGE_TAG - master value is in component.yaml context section.
+ARG DEBIAN_BASE_IMAGE_TAG=bullseye-20200224-slim
+FROM debian:$DEBIAN_BASE_IMAGE_TAG as builder
+
+RUN dpkg --add-architecture i386
+
+ARG PACKAGE_FOLDER=tmp/pkg
+
+# This URL is a link to the publicly-readable OpenStack Swift container "gardenlinux-packages" in the
+# Converged Cloud project https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home
+# This container is NOT an official gardenlinux one but a mirror maintained by aicore.
+# The content can be updated following the documentation in ./README.md
+ARG GARDENLINUX_PACKAGES_URL="https://objectstore-3.eu-de-1.cloud.sap:443/v1/AUTH_535c582484f44532aa5e21b2bb5cb471/gardenlinux-packages"
+
+ARG GARDENLINUX_VERSION
+
+COPY gardenlinux-dev .
+
+RUN ./install_packages.sh $GARDENLINUX_VERSION
+
 COPY resources/compile.sh /tmp/compile
 
 ARG DRIVER_VERSION
 
-# Do not edit KERNEL_VERSION - master value is in gardenlinux-dev/component.yaml context section.
-ARG KERNEL_VERSION=5.4.0-6-cloud-amd64
-
-RUN /tmp/compile
+RUN export $(./read_image_versions.sh | xargs) && /tmp/compile
 
 
 FROM docker.wdf.sap.corp:50000/debian:11.1-slim

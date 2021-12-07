@@ -1,0 +1,39 @@
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-debug
+  namespace: default
+spec:
+  containers:
+    - name: gpu-debug-pod
+      image: debian
+      # resources:
+      #   limits:
+      #     nvidia.com/gpu: 1 # requesting 1 GPUs
+      command: ["/bin/sleep"]
+      args: ['2h']
+      volumeMounts:
+        - name: ld-root
+          mountPath: /host/root
+        - name: dev
+          mountPath: /host/dev
+        - name: usr
+          mountPath: /host/usr
+  nodeSelector:
+    kubernetes.io/hostname: ip-10-250-86-43.eu-central-1.compute.internal
+  tolerations:
+   - key: "nvidia.com/gpu"
+     operator: "Exists"
+     effect: "NoSchedule"
+
+  volumes:
+  - name: dev
+    hostPath:
+      path: /dev
+  - name: ld-root
+    hostPath:
+      path: /
+  - name: usr
+    hostPath:
+      path: /usr
