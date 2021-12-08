@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.1...rel/system-services/nvidia-installer/1.5.2)
+### other
+* Another attempt to fix the nvidia image scans ([#3474](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3474)) ([`4ac0697`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/4ac0697d6a1fb986c41ded02f9f05e9b31ef3d7f))
+
+
 ## [1.5.1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.0...rel/system-services/nvidia-installer/1.5.1)
 ### other
 * Fix image scans for nvidia-installer ([#3468](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3468)) ([`c5032fe`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c5032fe6a9a913c696173a11307f0c1da4092505))
