@@ -60,16 +60,11 @@ pipeline {
                     env.PRERELEASE_VERSION = ""
                     env.IMAGE_SUFFIX=context["image_suffix"]
                     env.DOCKER_REGISTRY=context["docker_registry"]
-                    env.IMAGE_NAME=context["imageName"]
                     env.BRANCH_NAME=context["branch_name"]
 
                     xmake = load("scripts/xmake_utils.groovy")
                     git = load("scripts/git_utils.groovy")
-                    xmake.set_build_config([
-                                            "nvidia-installer-318.8.0-440.82",
-                                            "nvidia-installer-318.8.0-450.80.02",
-                                            "nvidia-installer-318.8.0-470.82.01"
-                                            ])
+                    xmake.set_build_config(~"nvidia-installer.*")
 
                     assert env.GIT_COMMIT == git.get_commit():\
                     "Jenkins GIT_COMMIT \"${namenv.GIT_COMMIT}\" must match \
@@ -82,7 +77,7 @@ pipeline {
             }
         }
 
-       stage('Lint') {
+        stage('Lint') {
             when { expression { params.RunStaticScans == true } }
             steps {
                 sh "rm -rf helm-lint.out"
@@ -97,7 +92,7 @@ pipeline {
             }
         }
 
-       stage('Unit test') {
+        stage('Unit test') {
             when { expression { params.RunUnitTests == true } }
             steps {
                 sh "rm -rf nvidia-installer.yaml"
@@ -180,17 +175,15 @@ pipeline {
             when { expression { params.Release == true } }
             steps {
                 script {
-                    // iterate over all build config that are stored in the xmake branch
-                    // `https://github.wdf.sap.corp/ICN-ML/aicore/blob/config/services/production-services/build-service/config.yml`
-                    // in the variants map
+                    // iterate over all build config that are stored in the xmake config/services branch
                     xmake.build_config.each {
-                    if(it.uri != "") {
-                        sh "docker pull ${XMAKE_REGISTRY}/${it.uri}:${VERSION}"
-                        sh "docker tag \
-                            ${XMAKE_REGISTRY}/${it.uri}:${VERSION} \
-                            mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
-                        sh "docker push \
-                            mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
+                        if(it.uri != "") {
+                            sh "docker pull ${XMAKE_REGISTRY}/${it.uri}:${VERSION}"
+                            sh "docker tag \
+                                ${XMAKE_REGISTRY}/${it.uri}:${VERSION} \
+                                mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
+                            sh "docker push \
+                                mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
                         }
                     }
                 }
@@ -256,13 +249,17 @@ pipeline {
             steps {
                 script {
                     dir("${WORKSPACE}/system-services/nvidia-installer"){
-                        protecodeExecuteScan script: this, scanImage: "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}" , serverUrl: "https://protecode.c.eu-de-2.cloud.sap", reportFileName: "protecode_report.pdf"
+                        // iterate over all build configs that are stored in the xmake config/services branch
+                        xmake.build_config.each {
+                            if(it.uri != "") {
+                                try {
+                                    protecodeExecuteScan script: this, scanImage: "${DOCKER_REGISTRY}${it.uri}${IMAGE_SUFFIX}:${VERSION}" , serverUrl: "https://protecode.c.eu-de-2.cloud.sap", reportFileName: "protecode_report_${it.name}.pdf"
+                                } finally {
+                                    archiveArtifacts artifacts: 'protecode_report_${it.name}.pdf', fingerprint: true, allowEmptyArchive: true
+                                }
+                            }
+                        }
                     }
-                }
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'protecode_report.pdf', fingerprint: true, allowEmptyArchive: true
                 }
             }
         }
@@ -273,12 +270,17 @@ pipeline {
                 script{
                     def vaultAddress = 'https://vault.ml.only.sap'
                     def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
-                    def imageURI = "${DOCKER_REGISTRY}${IMAGE_NAME}:${VERSION}"
-                    sh "docker pull ${imageURI}"
-                    wsDockerGeneratedProjectName = "nvidia-installer ${version}"
                     dir("${WORKSPACE}/system-services/nvidia-installer"){
-                        new aif.WhitesourceScan(this).execute("nvidia-installer","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
-                        println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
+                        // iterate over all build configs that are stored in the xmake config/services branch
+                        xmake.build_config.each {
+                            if(it.uri != "") {
+                                def imageURI = "${DOCKER_REGISTRY}${it.uri}${IMAGE_SUFFIX}:${VERSION}"
+                                sh "docker pull ${imageURI}"
+                                wsDockerGeneratedProjectName = "${it.name} ${version}"
+                                new aif.WhitesourceScan(this).execute("${it.name}","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
+                                println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
+                            }
+                        }
                     }
                 }
             }
@@ -286,15 +288,20 @@ pipeline {
 
         stage('PPMS Compliance Docker Scan'){
             when {
-                allOf{
+                allOf {
                     expression { params.RunWhitesource == true }
                     expression { params.RunPPMSComplianceForImage == true }
                 }
             }
             steps{
-                script{
-                    println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
-                    new aif.WhitesourceScan(this).execute("nvidia-installer", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)
+                script {
+                    // iterate over all build configs that are stored in the xmake config/services branch
+                    xmake.build_config.each {
+                        if(it.uri != "") {
+                            println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
+                            new aif.WhitesourceScan(this).execute("${it.name}", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)
+                        }
+                    }
                 }   
             }
         }

@@ -13,17 +13,16 @@ ignoreVersion:
 context:
   nvidiaDriverVersion:
   - '440.82'
-  - 450.80.02
-  - 470.82.01
+  - '450.80.02'
+  - '470.82.01'
 
   gardenLinux:
-  - version: 184.0.0
-    debianBaseImageTag: bullseye-20200224-slim
-    dummy: entry
-  - version: 318.8.0
-    debianBaseImageTag: bullseye-20200224-slim
-    dummy: entry
-  imageName: com.sap.ai/nvidia-installer-{gardenLinux.version}-{nvidiaDriverVersion}{image_suffix}
+    '184':
+      version: '184.0.0'
+      debianBaseImageTag: 'bullseye-20200224-slim'
+    '318':
+      version: '318.8.0'
+      debianBaseImageTag: 'bullseye-20200224-slim'
 
 steps:
   jenkins:

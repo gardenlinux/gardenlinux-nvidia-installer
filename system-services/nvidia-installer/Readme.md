@@ -19,6 +19,16 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 * In the `config/services` branch, in `config/services/production-services/build-service/config.yml` add a variant 
   for `nvidia-installer-<gardenlinux version>-<driver version>` for each Garden Linux version for which you want 
   the new driver to be available.
+
+  A typical build variant is defined thus:
+
+  ```yaml
+  - Variant: nvidia-installer-184.0.0-470.82.01
+    runtime: docker_rhel
+    args: ['--buildplugin-option', 'aid=nvidia-installer-184.0.0-470.82.01', '--buildplugin-option', 'options="--build-arg GARDENLINUX_VERSION=184.0.0 --build-arg DRIVER_VERSION=470.82.01"', '--buildplugin-option', 'gid=com.sap.ai', '--project-root-dir=./system-services/nvidia-installer']   
+  ```
+  Note that both the Garden Linux version and NVIDIA driver version are defined **three times each** in the variant definition.
+
 * Add the driver version value to the `driverVersion` list in the `context` section of `component.yaml`
 * [Release the new version of `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
