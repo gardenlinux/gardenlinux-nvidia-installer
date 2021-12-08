@@ -1,4 +1,4 @@
-version: 1.5.0
+version: 1.5.1
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 ignoreVersion:
@@ -13,16 +13,16 @@ ignoreVersion:
 context:
   nvidiaDriverVersion:
   - '440.82'
-  - '450.80.02'
-  - '470.82.01'
+  - 450.80.02
+  - 470.82.01
 
   gardenLinux:
     '184':
-      version: '184.0.0'
-      debianBaseImageTag: 'bullseye-20200224-slim'
+      version: 184.0.0
+      debianBaseImageTag: bullseye-20200224-slim
     '318':
-      version: '318.8.0'
-      debianBaseImageTag: 'bullseye-20200224-slim'
+      version: 318.8.0
+      debianBaseImageTag: bullseye-20200224-slim
 
 steps:
   jenkins:

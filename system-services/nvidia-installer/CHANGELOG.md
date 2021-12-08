@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.1](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.0...rel/system-services/nvidia-installer/1.5.1)
+### other
+* Fix image scans for nvidia-installer ([#3468](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3468)) ([`c5032fe`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c5032fe6a9a913c696173a11307f0c1da4092505))
+
+
 ## 1.5.0
 ### chore
 * **all:** docker.wdf.sap.corp:50000 to public.int.repositories.cloud.sap ([#3465](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3465)) ([`2f8554d`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/2f8554d82ae24522f35758d47e7046c21e4ff013))
