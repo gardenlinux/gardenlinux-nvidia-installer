@@ -25,7 +25,7 @@ ARG DRIVER_VERSION
 RUN export $(./read_image_versions.sh | xargs) && /tmp/compile
 
 
-FROM docker.wdf.sap.corp:50000/debian:11.1-slim
+FROM public.int.repositories.cloud.sap/debian:11.1-slim
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     kmod \
