@@ -12,17 +12,17 @@ ignoreVersion:
 
 context:
   nvidiaDriverVersion:
-    - '440.82'
-    - '450.80.02'
-    - '470.82.01'
+  - '440.82'
+  - 450.80.02
+  - 470.82.01
 
   gardenLinux:
-    - version: '184.0.0'
-      debianBaseImageTag: 'bullseye-20200224-slim'
-      dummy: entry
-    - version: '318.8.0'
-      debianBaseImageTag: 'bullseye-20200224-slim'
-      dummy: entry
+  - version: 184.0.0
+    debianBaseImageTag: bullseye-20200224-slim
+    dummy: entry
+  - version: 318.8.0
+    debianBaseImageTag: bullseye-20200224-slim
+    dummy: entry
   imageName: com.sap.ai/nvidia-installer-{gardenLinux.version}-{nvidiaDriverVersion}{image_suffix}
 
 steps:
@@ -32,11 +32,11 @@ steps:
   build:
     type: parameterized
     parameters:
-      - nvidiaDriverVersion: '{nvidiaDriverVersion}'
-      - gardenLinux: '{gardenLinux}'
+    - nvidiaDriverVersion: '{nvidiaDriverVersion}'
+    - gardenLinux: '{gardenLinux}'
     step:
       type: dockerbuild
-      imageName: 'com.sap.ai/nvidia-installer-{gardenLinux.version}-{nvidiaDriverVersion}{image_suffix}'
+      imageName: com.sap.ai/nvidia-installer-{gardenLinux.version}-{nvidiaDriverVersion}{image_suffix}
       dockerfile: Dockerfile
       buildArgs:
         DRIVER_VERSION: '{nvidiaDriverVersion}'
