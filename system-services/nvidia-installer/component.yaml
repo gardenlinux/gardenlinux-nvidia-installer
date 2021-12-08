@@ -36,6 +36,7 @@ steps:
     step:
       type: dockerbuild
       imageName: com.sap.ai/nvidia-installer-{gardenLinux.version}-{nvidiaDriverVersion}{image_suffix}
+      registry: '{docker_registry}'
       dockerfile: Dockerfile
       buildArgs:
         DRIVER_VERSION: '{nvidiaDriverVersion}'
