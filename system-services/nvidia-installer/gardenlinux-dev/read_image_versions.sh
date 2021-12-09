@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# For a specified Garden Linux version, return the keys & values from the relevant row in image_versions
 set -o errexit
 set -o nounset
 set -o pipefail

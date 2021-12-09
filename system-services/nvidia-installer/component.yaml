@@ -11,10 +11,11 @@ ignoreVersion:
 - 318.8.0-sap3
 
 context:
+  gid: "com.sap.ai"
   nvidiaDriverVersion:
   - '440.82'
-  - 450.80.02
-  - 470.82.01
+  - '450.80.02'
+  - '470.82.01'
 
   gardenLinux:
     '184':

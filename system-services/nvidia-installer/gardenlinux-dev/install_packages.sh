@@ -4,15 +4,15 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-export $(./read_image_versions.sh | xargs)
+# Given GARDENLINUX_VERSION is set, export variables for each entry in the relevant row of image_versions
+export $(GARDENLINUX_VERSION=$1 ./read_image_versions.sh | xargs)
 
-printf "\n-------------\ninputs:\nPACKAGE_FOLDER=%s\nLINUX_VERSION=%s\nLINUX_DATE=%s\nKERNEL_VERSION=%s\nGCC_VERSION=%s\nGARDENLINUX_PACKAGES_URL=%s\n-------------" \
-  "${PACKAGE_FOLDER}" \
+printf "\n-------------\ninputs:\n\nLINUX_VERSION=%s\nLINUX_DATE=%s\nKERNEL_VERSION=%s\nGCC_VERSION=%s\nGARDENLINUX_PACKAGES_URL=%s\n-------------" \
   "${LINUX_VERSION}" \
   "${LINUX_DATE}" \
   "${KERNEL_VERSION}" \
   "${GCC_VERSION}" \
-  "${GARDENLINUX_PACKAGES_URL}"
+  "${GARDENLINUX_PACKAGES_URL}" # This last one is a build arg, and is the location of the Swift container with the package files
 
 DATESTAMP=$(echo ${LINUX_DATE} | sed 's/-//g') && rm -f /etc/apt/sources.list && \
   echo "deb http://snapshot.debian.org/archive/debian/${DATESTAMP}T000000Z testing main" >> /etc/apt/sources.list

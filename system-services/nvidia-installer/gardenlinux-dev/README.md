@@ -53,27 +53,11 @@ Minimally the following steps must be fulfilled:
     to get the new valid tag that works for the new gardenlinux version.
 
 
-3. Update the `context.gardenLinux` values in `component.yaml`, adding a dictionary to the array:
+3. Update the `context.gardenLinux` values in `component.yaml`, adding a dictionary to the array similar to this:
     ```
     '184':                                         # Short version name - not actually used, but needs to be present
       version: '184.0.0'                           # Change to the new Garden Linux version
       debianBaseImageTag: 'bullseye-20200224-slim' # Change if needed - see warning above
     ```
 
-4. In the branch `config/services` add entries to
-  `config/services/production-services/build-service/config.yml` for the required xmake builds.
-    Currently the build arg `DEBIAN_BASE_IMAGE_TAG` is left as default, but if the new Garden Linux
-    version requires a new base image then each variant will need the extra args:
-    `'--buildplugin-option', 'options="--build-arg DEBIAN_BASE_IMAGE_TAG=<new image tag>"', `
-
-    A typical build variant is defined thus:
-
-    ```yaml
-    - Variant: nvidia-installer-184.0.0-470.82.01
-      runtime: docker_rhel
-      args: ['--buildplugin-option', 'aid=nvidia-installer-184.0.0-470.82.01', '--buildplugin-option', 'options="--build-arg GARDENLINUX_VERSION=184.0.0 --build-arg DRIVER_VERSION=470.82.01"', '--buildplugin-option', 'gid=com.sap.ai', '--project-root-dir=./system-services/nvidia-installer']   
-    ```
-    Note that both the Garden Linux version and NVIDIA driver version are defined **three times each** in the variant definition.
- 
-
-5. Run `mono run build` to check if the build goes through.
+4. Run `mono run build` to check if the build goes through.

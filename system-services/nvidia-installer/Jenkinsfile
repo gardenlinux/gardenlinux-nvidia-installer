@@ -64,7 +64,37 @@ pipeline {
 
                     xmake = load("scripts/xmake_utils.groovy")
                     git = load("scripts/git_utils.groovy")
-                    xmake.set_build_config(~"nvidia-installer.*")
+
+                    xmake.set_build_config("nvidia-installer") // Load one xmake config, which we will replicate & edit
+                    def base_build = xmake.build_config[0]
+                    // Iterate through garden linux & driver versions to create an xmake build config for each
+                    def nvidiaDriverVersions = readYaml text: context["nvidiaDriverVersion"]
+                    def gardenLinuxMap = readYaml text: context["gardenLinux"]
+                    def gardenLinuxVersions = gardenLinuxMap.collect{entry -> entry.value}
+                    def builds = []
+                    gardenLinuxVersions.each {
+                        def gardenLinux = it
+                        nvidiaDriverVersions.each {
+                            def nvidiaDriverVersion = it
+                            def name = base_build['name'] + "-${gardenLinux.version}-${nvidiaDriverVersion}"
+                            def entry = [
+                                name: name,
+                                jobname: base_build['jobname'],
+                                gid: context["gid"],
+                                aid: name,
+                                uri: context["gid"] + "/" + name,
+                                dockerfile_path: base_build['dockerfile_path'],
+                                docker_build_args: [
+                                    DRIVER_VERSION: nvidiaDriverVersion,
+                                    GARDENLINUX_VERSION: gardenLinux.version,
+                                    DEBIAN_BASE_IMAGE_TAG: gardenLinux.debianBaseImageTag
+                                ]
+                            ]
+                            builds.add(entry)
+                        }
+                    }
+                    // Replace the template build from config/service with our new list of builds
+                    xmake.build_config = builds
 
                     assert env.GIT_COMMIT == git.get_commit():\
                     "Jenkins GIT_COMMIT \"${namenv.GIT_COMMIT}\" must match \
@@ -175,7 +205,7 @@ pipeline {
             when { expression { params.Release == true } }
             steps {
                 script {
-                    // iterate over all build config that are stored in the xmake config/services branch
+                    // iterate over all build configs (1 per Garden Linux/NVIDIA driver combination)
                     xmake.build_config.each {
                         if(it.uri != "") {
                             sh "docker pull ${XMAKE_REGISTRY}/${it.uri}:${VERSION}"
@@ -217,7 +247,6 @@ pipeline {
                             def repo_folder="tmp/mlf-gitops"
                             def source_branch="main"
                             def repo_url="https://github.wdf.sap.corp/ICN-ML/aicore"
-                            def service_name="${params.ComponentName}"
                             try {
                                 sh """
                                     git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.tools.sap/MLF/mlf-gitops" \
@@ -249,14 +278,14 @@ pipeline {
             steps {
                 script {
                     dir("${WORKSPACE}/system-services/nvidia-installer"){
-                        // iterate over all build configs that are stored in the xmake config/services branch
-                        xmake.build_config.each {
-                            if(it.uri != "") {
-                                try {
-                                    protecodeExecuteScan script: this, scanImage: "${DOCKER_REGISTRY}${it.uri}${IMAGE_SUFFIX}:${VERSION}" , serverUrl: "https://protecode.c.eu-de-2.cloud.sap", reportFileName: "protecode_report_${it.name}.pdf"
-                                } finally {
-                                    archiveArtifacts artifacts: 'protecode_report_${it.name}.pdf', fingerprint: true, allowEmptyArchive: true
-                                }
+                        // Scan only the first config, as all are using the same base image and just copy in the
+                        // compiled kernel modules
+                        def config = xmake.build_config[0]
+                        if(config.uri != "") {
+                            try {
+                                protecodeExecuteScan script: this, scanImage: "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}" , serverUrl: "https://protecode.c.eu-de-2.cloud.sap", reportFileName: "protecode_report_${config.name}.pdf"
+                            } finally {
+                                archiveArtifacts artifacts: 'protecode_report_${config.name}.pdf', fingerprint: true, allowEmptyArchive: true
                             }
                         }
                     }
@@ -271,15 +300,15 @@ pipeline {
                     def vaultAddress = 'https://vault.ml.only.sap'
                     def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
                     dir("${WORKSPACE}/system-services/nvidia-installer"){
-                        // iterate over all build configs that are stored in the xmake config/services branch
-                        xmake.build_config.each {
-                            if(it.uri != "") {
-                                def imageURI = "${DOCKER_REGISTRY}${it.uri}${IMAGE_SUFFIX}:${VERSION}"
-                                sh "docker pull ${imageURI}"
-                                wsDockerGeneratedProjectName = "${it.name} ${version}"
-                                new aif.WhitesourceScan(this).execute("${it.name}","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
-                                println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
-                            }
+                        // Scan only the first config, as all are using the same base image and just copy in the
+                        // compiled kernel modules
+                        def config = xmake.build_config[0]
+                        if(config.uri != "") {
+                            def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
+                            sh "docker pull ${imageURI}"
+                            wsDockerGeneratedProjectName = "${config.name} ${version}"
+                            new aif.WhitesourceScan(this).execute("${config.name}","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
+                            println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
                         }
                     }
                 }
@@ -295,14 +324,14 @@ pipeline {
             }
             steps{
                 script {
-                    // iterate over all build configs that are stored in the xmake config/services branch
-                    xmake.build_config.each {
-                        if(it.uri != "") {
-                            println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
-                            new aif.WhitesourceScan(this).execute("${it.name}", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)
-                        }
+                    // Scan only the first config, as all are using the same base image and just copy in the
+                    // compiled kernel modules
+                    def config = xmake.build_config[0]
+                    if(config.uri != "") {
+                        println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
+                        new aif.WhitesourceScan(this).execute("${config.name}", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)
                     }
-                }   
+                }
             }
         }
 

@@ -2,6 +2,12 @@
 
 Compile NVIDIA kernel modules for Garden Linux in a Docker image. Running the image in a cluster installs the GPU driver.
 
+Normally 2 to 3 versions should be maintained of Garden Linux and NVIDIA drivers: 
+always previous & current versions, and a future/canary version when 
+the related Garden Linux or NVIDIA driver version is released. 
+Older versions should be commented out accordingly in order to avoid
+combinatorial explosion when building images. as we build an image for each combination of Garden Linux & NVIDIA driver.
+
 ## TL;DR - How to create a new version?
 
 ### New Garden Linux version
@@ -11,23 +17,9 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 * Make sure the required Garden Linux DEB files are copied to the Swift container `gardenlinux-packages` in Converged Cloud
   project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home).
 * Update the values in the `image_versions` file, and in the `context` section of `component.yaml`
-* Add required xmake entries in the `config/services` branch 
 * [Release the new versions of `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### New NVIDIA driver (CUDA) version
-
-* In the `config/services` branch, in `config/services/production-services/build-service/config.yml` add a variant 
-  for `nvidia-installer-<gardenlinux version>-<driver version>` for each Garden Linux version for which you want 
-  the new driver to be available.
-
-  A typical build variant is defined thus:
-
-  ```yaml
-  - Variant: nvidia-installer-184.0.0-470.82.01
-    runtime: docker_rhel
-    args: ['--buildplugin-option', 'aid=nvidia-installer-184.0.0-470.82.01', '--buildplugin-option', 'options="--build-arg GARDENLINUX_VERSION=184.0.0 --build-arg DRIVER_VERSION=470.82.01"', '--buildplugin-option', 'gid=com.sap.ai', '--project-root-dir=./system-services/nvidia-installer']   
-  ```
-  Note that both the Garden Linux version and NVIDIA driver version are defined **three times each** in the variant definition.
 
 * Add the driver version value to the `driverVersion` list in the `context` section of `component.yaml`
 * [Release the new version of `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
@@ -37,17 +29,15 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 * Commit any changes for this release & push to GitHub, check that PR validation runs OK
 * Merge the PR to `main` & pull/fetch to update your local copy
 * Checkout a new branch `release-nvidia-installer-<version>`
-* From the `nvidia-installer-<version>` folder run `mono release` (if this is for a new Garden Linux version, do this once 
-  per `nvidia-installer` folder) and **increment the release version** (for example, from `1.5.0` to `1.5.1`.
-* Commit the changes with message `"[release] updating nvidia-installer to version X"` and push the commit to GitHub
-* In order not to release unnecessary components, stop the PR build and restart it with "Release" checked, and the
-  components list set to `system-services/nvidia-installer`
-* Once everything is green & approved, merge the commit and then restart the `main` build the same way as in the 
-  previous step 
+* From the `nvidia-installer` folder run `mono release` and **increment the release version**.
+* Commit the changes with message `"[release] updating nvidia-installer to version X"` and push the commit to GitHub.
+* Wait for the PR build to go green - note that **no components are actually built in the release PR build**.
+* Once the PR build for the release is green & approved, merge the commit and then monitor the `main` build, where the
+  `nvidia-installer` component should get built & published.
 
 ### For both of the above
 
-Make sure to update `mlf-gitops` according to the new release version.
+Once released & published, make sure to update `mlf-gitops` values according to the new release version.
 
 ## High level structure of the Dockerfile
 
