@@ -11,7 +11,13 @@ def vaultAppRoleToken
 
 pipeline {
 
-    agent any
+    agent {
+        label 'k8s-berlin'
+    }
+
+    tools {
+        go 'go1.15.7'
+    }
 
     options {
         timeout(time: 90, unit: 'MINUTES')
@@ -103,6 +109,10 @@ pipeline {
 
                     assert env.version.contains(env.GARDENLINUX_VERSION)
                     assert env.version.contains(env.DRIVER_VERSION)
+
+                    withCredentials([usernamePassword(credentialsId: 'mlf.docker.repositories.sap.ondemand.com', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                        sh "docker login mlf.docker.repositories.sap.ondemand.com -u ${DOCKER_USER} -p ${DOCKER_PASS}"
+                    }
                 }
             }
         }

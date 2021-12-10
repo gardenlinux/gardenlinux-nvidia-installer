@@ -28,7 +28,23 @@ context:
 steps:
   jenkins:
     type: jenkinsJob
-    job: aicore/nvidia-installer
+    job: AI-Foundation/berlin-jenkins/AI-Core/nvidia-installer
+    params:
+      ComponentName: '{builtin.component_folder_basename}'
+      BuildContext: '{builtin.encoded_contexts}'
+      RunStaticScans: '{RunStaticScans}'
+      RunUnitTests: '{RunUnitTests}'
+      RunTests: '{RunTests}'
+      RunCheckmarx: '{RunCheckmarx}'
+      RunWhitesource: '{RunWhitesource}'
+      RunSonarQube: '{RunSonarQube}'
+      Release: '{Release}'
+      Build: '{Build}'
+      BuildXmake: '{BuildXmake}'
+      TREEISH: '{builtin.git_commit}'
+      RunWhitesourceDocker: '{RunWhitesourceDocker}'
+      RunPPMSComplianceForImage: '{RunPPMSComplianceForImage}'
+      RunProtecode: '{RunProtecode}'
   build:
     type: parameterized
     parameters:
