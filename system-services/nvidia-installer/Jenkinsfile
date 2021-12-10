@@ -1,4 +1,4 @@
-@Library(['piper-lib', 'piper-lib-os']) _
+@Library(['piper-lib@1.118.1', 'piper-lib-os@v1.151.0']) _
 @Library(["AIF_CICD_Toolkit@master"])
 
 def xmake
