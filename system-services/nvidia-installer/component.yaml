@@ -1,4 +1,4 @@
-version: 1.5.2
+version: 1.5.3
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 ignoreVersion:
@@ -11,11 +11,11 @@ ignoreVersion:
 - 318.8.0-sap3
 
 context:
-  gid: "com.sap.ai"
+  gid: com.sap.ai
   nvidiaDriverVersion:
   - '440.82'
-  - '450.80.02'
-  - '470.82.01'
+  - 450.80.02
+  - 470.82.01
 
   gardenLinux:
     '184':
