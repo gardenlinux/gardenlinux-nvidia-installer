@@ -4,7 +4,7 @@ set -x
 mkdir -p /tmp/nvidia
 # shellcheck disable=SC2164
 pushd /tmp/nvidia
-DRIVER_URL="https://download.nvidia.com/XFree86/Linux-x86_64/$DRIVER_VERSION/NVIDIA-Linux-x86_64-$DRIVER_VERSION.run"
+DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-x86_64-$DRIVER_VERSION.run"
 if ! curl -Ls "${DRIVER_URL}" -o nvidia.run ; then
   echo "Failed to download ${DRIVER_URL}"
   exit 1

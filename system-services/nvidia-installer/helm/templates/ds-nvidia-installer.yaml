@@ -2,7 +2,6 @@
 See ds-gcp-nvidia-installer.yaml for the GCP/GKE version (GKE does not use Garden Linux)
 */}}
 {{- if .Values.targetInfrastructure.gardener }}
-{{- $dockerRegistry := ternary (.Values.dockerRegistry.host | default "build-releases.common.repositories.cloud.sap") "build-releases.common.repositories.cloud.sap" .Values.dockerRegistry.overwrite }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -35,16 +34,13 @@ spec:
       {{- end}}
       hostPID: true
       imagePullSecrets:
-      - name: sap-dmz-docker-registry
-    {{- with .Values.imagePullSecrets }}
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
+      - name: nvidia-installer-docker-registry-secret
       {{- if .Values.debug }}
       containers:
       {{- else }}
       initContainers:
       {{- end }}
-      - image: {{ printf "%s/%s:%s" $dockerRegistry .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+      - image: {{ printf "%s/%s:%s" .Values.global.imageRepository .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
         name: modulus
         imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
         args:
@@ -72,6 +68,20 @@ spec:
           mountPath: /opt/modulus/cache
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
+      # Once the driver is installed, remove the `nvidia-driver` taint so that GPU-requesting pods can run
+      - name: untaint
+        image: 'bitnami/kubectl:latest'
+        command:
+          - /bin/bash
+        args:
+          - '-c'
+          - 'kubectl taint node "${NODE}" nvidia-driver:NoSchedule-'
+        env:
+          - name: NODE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
       {{- if not .Values.debug }}
       containers:
       - image: k8s.gcr.io/pause-amd64:3.1

@@ -42,18 +42,24 @@ main() {
 #  gcc_version="10.2.0-9"
 
   # Garden Linux 318
+#  gardenlinux_build_server="http://45.86.152.1"
+#  gardenlinux_package_root="gardenlinux/pool/main/l/linux"
+#  kernel_version="5.4.0-6"
+#  linux_version="5.4.93-1"
+#  gcc_version="10.2.1-6"
+
+  # Garden Linux 576
   gardenlinux_build_server="http://45.86.152.1"
   gardenlinux_package_root="gardenlinux/pool/main/l/linux"
-  kernel_version="5.4.0-6"
-  linux_version="5.4.93-1"
-  gcc_version="10.2.1-6"
+  kernel_version="5.10.0-9"
+  linux_version="5.10.83-1gardenlinux1"
+  gcc_version="10.3.0-12"
 
   # OpenStack Swift
   container="gardenlinux-packages"
   export OS_PROJECT_DOMAIN_NAME=hcp03
   export OS_USER_DOMAIN_NAME=hcp03
   export OS_PROJECT_NAME=sapclea
-  export OS_PASSWORD=userpassword
   export OS_AUTH_URL=https://identity-3.eu-de-1.cloud.sap:443/v3
   export OS_IDENTITY_API_VERSION=3
 
@@ -86,7 +92,7 @@ main() {
     "linux-kbuild-${kernel_version_major_minor}_${linux_version}_amd64.deb" \
     )
 
-  for file in debs; do
+  for file in "${debs[@]}"; do
     download $file
     upload $container $folder $file
   done
@@ -101,6 +107,7 @@ main() {
 
 download() {
   local -r name=$1
+  echo "Downloading ${name}"
   if [ ! -f "${tmp_dir}/${name}" ]; then
       wget -O "${tmp_dir}/${name}" "${gardenlinux_build_server}/${gardenlinux_package_root}/${name}"
   fi
@@ -108,7 +115,7 @@ download() {
 
 # $1=container $2=folder $3=file
 upload() {
-  openstack object create --name $2/$3 $1 $3
+  openstack object create --name $2/$3 $1 ${tmp_dir}/$3
 }
 
 main "${@}"

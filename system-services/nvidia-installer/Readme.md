@@ -12,7 +12,7 @@ combinatorial explosion when building images. as we build an image for each comb
 
 ### New Garden Linux version
 
-See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) for details, but in short:
+See [gardenlinux-dev/README.md](gardenlinux-dev/README.md) for details, but in short:
 
 * Make sure the required Garden Linux DEB files are copied to the Swift container `gardenlinux-packages` in Converged Cloud
   project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home).
@@ -27,10 +27,11 @@ See [system-services/gardenlinux-dev/README.md](../gardenlinux-dev/README.md) fo
 ### Release a new version of nvidia-installer
 
 * Commit any changes for this release & push to GitHub, check that PR validation runs OK
-* Merge the PR to `main` & pull/fetch to update your local copy
-* Checkout a new branch `release-nvidia-installer-<version>`
-* From the `nvidia-installer` folder run `mono release` and **increment the release version**.
-* Commit the changes with message `"[release] updating nvidia-installer to version X"` and push the commit to GitHub.
+* Merge the PR to `main` & check the main build runs OK
+* Build with Parameters the [AI Core Release job](https://jenkins-mlf.only.sap/job/aicore/job/Release/job/main/)
+  in Jenkins, specifying the component `system-services/nvidia-installer`
+
+TODO - check the below steps are still valid
 * Wait for the PR build to go green - note that **no components are actually built in the release PR build**.
 * Once the PR build for the release is green & approved, merge the commit and then monitor the `main` build, where the
   `nvidia-installer` component should get built & published.

@@ -1,5 +1,7 @@
-dockerRegistry:
-  overwrite: false
+global:
+  imageRepository: "build-releases.common.repositories.cloud.sap"
+  imagePullSecret:
+    location: cluster-secrets/docker-registry-gcr-eu
 
 debug: false
 

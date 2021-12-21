@@ -13,16 +13,19 @@ ignoreVersion:
 context:
   gid: com.sap.ai
   nvidiaDriverVersion:
-  - '440.82'
-  - 450.80.02
+#  - '440.82'
+#  - 450.80.02
   - 470.82.01
 
   gardenLinux:
-    '184':
-      version: 184.0.0
-      debianBaseImageTag: bullseye-20200224-slim
-    '318':
-      version: 318.8.0
+#    '184':
+#      version: 184.0.0
+#      debianBaseImageTag: bullseye-20200224-slim
+#    '318':
+#      version: 318.8.0
+#      debianBaseImageTag: bullseye-20200224-slim
+    '576':
+      version: 576.1.0
       debianBaseImageTag: bullseye-20200224-slim
 
 steps:

@@ -50,7 +50,7 @@ GCC_MAJOR=$(echo $GCC_VERSION | cut -d '.' -f1) && \
       linux-kbuild-${KERNEL_VERSION_MAJOR_MINOR}_${LINUX_VERSION}_amd64.deb \
       linux-headers-${KERNEL_VERSION}_${LINUX_VERSION}_amd64.deb \
     ) && \
-    for debfile in ${files[@]}; do \
+    for debfile in "${files[@]}"; do \
       wget -O "/tmp/pkg/${debfile}" "${DEBS_URL}/${debfile}" ; \
       apt install "/tmp/pkg/${debfile}" ; \
     done
