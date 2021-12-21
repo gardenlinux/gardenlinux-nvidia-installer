@@ -12,7 +12,8 @@ nvidiaInstaller:
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
   installerTag: 1.5.3
-
+  # Uncomment the line below when Gardener supports --ignore-taints on the cluster autoscaler
+#  removeTaintWhenReady: nvidia-driver
   hostDriverPath: /opt/drivers
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -28,6 +29,13 @@ nvidiaInstaller:
    - key: "nvidia.com/gpu"
      operator: "Exists"
      effect: "NoSchedule"
+  installerResources:
+    requests:
+      cpu: 10m
+      memory: 10Mi
+    limits:
+      cpu: 8
+      memory: 1Gi
   pauseResources:
     requests:
       cpu: 10m

@@ -28,17 +28,29 @@ See [gardenlinux-dev/README.md](gardenlinux-dev/README.md) for details, but in s
 
 * Commit any changes for this release & push to GitHub, check that PR validation runs OK
 * Merge the PR to `main` & check the main build runs OK
-* Build with Parameters the [AI Core Release job](https://jenkins-mlf.only.sap/job/aicore/job/Release/job/main/)
-  in Jenkins, specifying the component `system-services/nvidia-installer`
+* Build with Parameters the [AI Core Release job](https://jenkins.ml.only.sap/job/AI-Foundation/job/berlin-jenkins/job/AI-Core/job/Release/job/main/)
+  in Jenkins, specifying the component `system-services/nvidia-installer`. 
 
-TODO - check the below steps are still valid
-* Wait for the PR build to go green - note that **no components are actually built in the release PR build**.
-* Once the PR build for the release is green & approved, merge the commit and then monitor the `main` build, where the
-  `nvidia-installer` component should get built & published.
+  This job will take care of incrementing the 
+  version number in `component.yaml`, adding a message to `CHANGELOG.md`, building the images and pushing it to a Docker
+  registry.
+* When this job is complete, Xmake will have published the images using the form:
+
+  `deploy-releases.common.repositories.cloud.sap/com.sap.ai/nvidia-installer-<GardenLinux-version>-<NVIDIA-version>:<component-version>` 
+
+  For example,
+
+  `deploy-releases.common.repositories.cloud.sap/com.sap.ai/nvidia-installer-576.1.0-470.82.01:1.5.3`
+
+* Within a few minutes (max 1 hour), the images will be synced to GCR and will be available via image URIs of the form
+
+  `eu.gcr.io/sap-ml-mlf-dev/com.sap.ai/nvidia-installer-<GardenLinux-version>-<NVIDIA-version>:<component-version>`
+
 
 ### For both of the above
 
 Once released & published, make sure to update `mlf-gitops` values according to the new release version.
+See for example `mlf-gitops/cluster-service-list/templates/nvidia-installer-GL184.yaml`
 
 ## High level structure of the Dockerfile
 

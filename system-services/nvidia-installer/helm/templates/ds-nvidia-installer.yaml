@@ -34,7 +34,7 @@ spec:
       {{- end}}
       hostPID: true
       imagePullSecrets:
-      - name: nvidia-installer-docker-registry-secret
+      - name: {{ template "garden-nvidia-installer.fullname" . }}
       {{- if .Values.debug }}
       containers:
       {{- else }}
@@ -68,20 +68,22 @@ spec:
           mountPath: /opt/modulus/cache
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
-      # Once the driver is installed, remove the `nvidia-driver` taint so that GPU-requesting pods can run
+{{- if .Values.nvidiaInstaller.removeTaintWhenReady }}
+      # Once the driver is installed, remove the specified taint so that GPU-requesting pods can run
       - name: untaint
         image: 'bitnami/kubectl:latest'
         command:
           - /bin/bash
         args:
           - '-c'
-          - 'kubectl taint node "${NODE}" nvidia-driver:NoSchedule-'
+          - 'kubectl taint node "${NODE}" {{.Values.nvidiaInstaller.removeTaintWhenReady}}:NoSchedule-'
         env:
           - name: NODE
             valueFrom:
               fieldRef:
                 apiVersion: v1
                 fieldPath: spec.nodeName
+{{- end }}
       {{- if not .Values.debug }}
       containers:
       - image: k8s.gcr.io/pause-amd64:3.1
