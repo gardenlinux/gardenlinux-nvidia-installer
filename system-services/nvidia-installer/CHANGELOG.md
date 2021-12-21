@@ -2,12 +2,13 @@
 
 
 ## [1.5.3](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.2...rel/system-services/nvidia-installer/1.5.3)
+### other
+* nvidia-installer feature: add Garden Linux 576.1 support ([#3533](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3533)) ([`b6420eb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/b6420eb56d71022b9b8094120423b15a292aef4f))
+* Dynamically create multiple Xmake builds from a single variant ([#3481](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3481)) ([`bb67a54`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bb67a54feee79d0c1712e5524114800a77829bb4))
+
 ### chore
 * **ci:** change piper version to allow deprecated xmake trigger ([#3497](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3497)) ([`ed0005f`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ed0005f260bac2bc4ae959d910e34f06244660df))
 * **ci:** migrate to ops-jenkins ([#3427](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3427)) ([`a6a0ca0`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a6a0ca0917c985e50c81de72a44f0f22d5d2ebf1))
-
-### other
-* Dynamically create multiple Xmake builds from a single variant ([#3481](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3481)) ([`bb67a54`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bb67a54feee79d0c1712e5524114800a77829bb4))
 
 
 ## [1.5.2](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.1...rel/system-services/nvidia-installer/1.5.2)
