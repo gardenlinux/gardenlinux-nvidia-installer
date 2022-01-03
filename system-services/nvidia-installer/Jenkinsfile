@@ -41,7 +41,7 @@ pipeline {
     
     environment {
         AUDITLOG_VALUES=""
-        KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-central-1_aicore-pr-valid_config"
+        KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-west-1_aicore-pr-valid_config"
         SERVICE_PATH="system-services/nvidia-installer"
         HELM_PATH="system-services/nvidia-installer/helm"
         CHART_NAME="nvidia-installer"
