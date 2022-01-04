@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.4](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.3...rel/system-services/nvidia-installer/1.5.4)
+### other
+* Fix the cluster still having eu-central-1 to the new eu-west-1 ([#3579](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3579)) ([`dbfe90d`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/dbfe90d3b93c3fb62a5a3ae446d05af516eb059f))
+* nvidia-installer fix: update Helm chart to avoid docker secret name conflict ([#3551](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3551)) ([`69e5e99`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/69e5e997bd00cfa040bf31b06563529ef18e49bc))
+
+
 ## [1.5.3](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.2...rel/system-services/nvidia-installer/1.5.3)
 ### other
 * nvidia-installer feature: add Garden Linux 576.1 support ([#3533](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3533)) ([`b6420eb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/b6420eb56d71022b9b8094120423b15a292aef4f))
