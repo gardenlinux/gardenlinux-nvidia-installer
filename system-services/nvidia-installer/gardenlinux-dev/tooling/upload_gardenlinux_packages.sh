@@ -3,37 +3,8 @@
 set -o errexit
 set -o pipefail
 
-
-# wget 18.185.215.86/packages/{linux-headers-5.4.0-5-amd64_5.4.68-1_amd64.deb,linux-headers-5.4.0-5-cloud-amd64_5.4.68-1_amd64.deb,linux-headers-5.4.0-5-common_5.4.68-1_all.deb,linux-compiler-gcc-10-x86_5.4.68-1_amd64.deb}
-
-# packages available on the gardenlinux build server:
-# bpftool-dbgsym_5.4.68-1_amd64.deb                     linux-headers-5.4.0-5-common_5.4.68-1_all.deb
-# bpftool_5.4.68-1_amd64.deb                            linux-headers-5.4.0-5-rt-amd64_5.4.68-1_amd64.deb
-# hyperv-daemons-dbgsym_5.4.68-1_amd64.deb              linux-image-5.4.0-5-amd64-unsigned_5.4.68-1_amd64.deb
-# hyperv-daemons_5.4.68-1_amd64.deb                     linux-image-5.4.0-5-cloud-amd64-unsigned_5.4.68-1_amd64.deb
-# libcpupower-dev_5.4.68-1_amd64.deb                    linux-image-5.4.0-5-rt-amd64-unsigned_5.4.68-1_amd64.deb
-# libcpupower1-dbgsym_5.4.68-1_amd64.deb                linux-image-amd64-dbg_5.4.68-1_amd64.deb
-# libcpupower1_5.4.68-1_amd64.deb                       linux-image-amd64-signed-template_5.4.68-1_amd64.deb
-# libtraceevent-dev_5.4.68-1_amd64.deb                  linux-image-cloud-amd64-dbg_5.4.68-1_amd64.deb
-# libtraceevent1-dbgsym_5.4.68-1_amd64.deb              linux-image-rt-amd64-dbg_5.4.68-1_amd64.deb
-# libtraceevent1-plugin-dbgsym_5.4.68-1_amd64.deb       linux-kbuild-5.4-dbgsym_5.4.68-1_amd64.deb
-# libtraceevent1-plugin_5.4.68-1_amd64.deb              linux-kbuild-5.4_5.4.68-1_amd64.deb
-# libtraceevent1_5.4.68-1_amd64.deb                     linux-libc-dev_5.4.68-1_amd64.deb
-# linux-build-deps_5.4.68-1_amd64.buildinfo             linux-perf-5.4-dbgsym_5.4.68-1_amd64.deb
-# linux-build-deps_5.4.68-1_amd64.changes               linux-perf-5.4_5.4.68-1_amd64.deb
-# linux-build-deps_5.4.68-1_amd64.deb                   linux-perf_5.4.68-1_amd64.deb
-# linux-compiler-gcc-10-x86_5.4.68-1_amd64.deb          linux-source_5.4.68-1_all.deb
-# linux-config-5.4_5.4.68-1_amd64.deb                   linux-support-5.4.0-5_5.4.68-1_all.deb
-# linux-cpupower-dbgsym_5.4.68-1_amd64.deb              linux_5.4.68-1.debian.tar.xz
-# linux-cpupower_5.4.68-1_amd64.deb                     linux_5.4.68-1.dsc
-# linux-doc-5.4_5.4.68-1_all.deb                        linux_5.4.68-1_amd64.buildinfo
-# linux-doc_5.4.68-1_all.deb                            linux_5.4.68-1_amd64.changes
-# linux-headers-5.4.0-5-amd64_5.4.68-1_amd64.deb        usbip-dbgsym_2.0+5.4.68-1_amd64.deb
-# linux-headers-5.4.0-5-cloud-amd64_5.4.68-1_amd64.deb  usbip_2.0+5.4.68-1_amd64.deb
-# linux-headers-5.4.0-5-common-rt_5.4.68-1_all.deb
-
-
 main() {
+
   # Garden Linux 184
 #  gardenlinux_build_server="http://18.185.215.86"
 #  gardenlinux_package_root="packages"
@@ -41,19 +12,36 @@ main() {
 #  linux_version="5.4.68-1"
 #  gcc_version="10.2.0-9"
 
+  gardenlinux_build_server="http://45.86.152.1"
+  gardenlinux_package_root="gardenlinux/pool/main/l/linux"
+
   # Garden Linux 318
-#  gardenlinux_build_server="http://45.86.152.1"
-#  gardenlinux_package_root="gardenlinux/pool/main/l/linux"
 #  kernel_version="5.4.0-6"
 #  linux_version="5.4.93-1"
 #  gcc_version="10.2.1-6"
 
-  # Garden Linux 576
-  gardenlinux_build_server="http://45.86.152.1"
-  gardenlinux_package_root="gardenlinux/pool/main/l/linux"
-  kernel_version="5.10.0-9"
-  linux_version="5.10.83-1gardenlinux1"
-  gcc_version="10.3.0-12"
+  # Garden Linux 576.1 & 576.2
+#  kernel_version="5.10.0-9"
+#  linux_version="5.10.83-1gardenlinux1"
+#  gcc_version="10.3.0-12"
+
+  if [ -z $KERNEL_VERSION ]; then
+    echo "Please set KERNEL_VERSION - see image_versions"
+    badargs=1
+  fi
+  kernel_version="${KERNEL_VERSION/-cloud-amd64/}"
+  
+  if [ -z $LINUX_VERSION ]; then
+    echo "Please set LINUX_VERSION - see image_versions"
+    badargs=1
+  fi
+  linux_version=${LINUX_VERSION}
+
+  if [ -z $GCC_VERSION ]; then
+    echo "Please set GCC_VERSION - see image_versions"
+    badargs=1
+  fi
+  gcc_version=${GCC_VERSION}
 
   # OpenStack Swift
   container="gardenlinux-packages"
@@ -84,7 +72,6 @@ main() {
 
   folder=kernel_${kernel_version}_linux_${linux_version}
 
-  # download "linux-headers-${kernel_version}-amd64_${linux_version}_amd64.deb"
   debs=( \
     "linux-headers-${kernel_version}-common_${linux_version}_all.deb" \
     "linux-headers-${kernel_version}-cloud-amd64_${linux_version}_amd64.deb" \
@@ -119,4 +106,3 @@ upload() {
 }
 
 main "${@}"
-

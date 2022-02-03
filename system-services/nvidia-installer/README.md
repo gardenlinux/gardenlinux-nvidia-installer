@@ -1,6 +1,7 @@
 # nvidia-installer
 
-Compile NVIDIA kernel modules for Garden Linux in a Docker image. Running the image in a cluster installs the GPU driver.
+This component compiles NVIDIA kernel modules for Garden Linux in a Docker image at build time.
+Running the image in a cluster as part of a DaemonSet installs the GPU driver on the required nodes.
 
 Normally 2 to 3 versions should be maintained of Garden Linux and NVIDIA drivers: 
 always previous & current versions, and a future/canary version when 
@@ -14,21 +15,23 @@ combinatorial explosion when building images. as we build an image for each comb
 
 See [gardenlinux-dev/README.md](gardenlinux-dev/README.md) for details, but in short:
 
+* Update the values in the `image_versions` file, and in the `context.gardenLinux` section of `component.yaml`
 * Make sure the required Garden Linux DEB files are copied to the Swift container `gardenlinux-packages` in Converged Cloud
   project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home).
-* Update the values in the `image_versions` file, and in the `context` section of `component.yaml`
 * [Release the new versions of `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### New NVIDIA driver (CUDA) version
 
-* Add the driver version value to the `driverVersion` list in the `context` section of `component.yaml`
+* Add the driver version value to the `driverVersion` list in the `context.nvidiaDriverVersion` section of `component.yaml`
 * [Release the new version of `nvidia-installer`](#release-a-new-version-of-nvidia-installer).
 
 ### Release a new version of nvidia-installer
 
 * Commit any changes for this release & push to GitHub, check that PR validation runs OK
 * Merge the PR to `main` & check the main build runs OK
-* Build with Parameters the [AI Core Release job](https://jenkins.ml.only.sap/job/AI-Foundation/job/berlin-jenkins/job/AI-Core/job/Release/job/main/)
+* This should be done automatically, but in case it has not worked: 
+
+  Build "with Parameters" the [AI Core Release job](https://jenkins.ml.only.sap/job/AI-Foundation/job/berlin-jenkins/job/AI-Core/job/Release/job/main/)
   in Jenkins, specifying the component `system-services/nvidia-installer`. 
 
   This job will take care of incrementing the 
