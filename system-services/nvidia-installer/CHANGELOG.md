@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.5](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.4...rel/system-services/nvidia-installer/1.5.5)
+### chore
+* **nvidia-installer:** Update documentation to be a bit clearer ([#3696](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3696)) ([`a1dcf03`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a1dcf03781c887f940997a0489cf2bfde98f4a5d))
+
+
 ## [1.5.4](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.3...rel/system-services/nvidia-installer/1.5.4)
 ### other
 * Fix the cluster still having eu-central-1 to the new eu-west-1 ([#3579](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3579)) ([`dbfe90d`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/dbfe90d3b93c3fb62a5a3ae446d05af516eb059f))
