@@ -129,3 +129,10 @@ patch:
 - file: wss-unified-agent.config
   regexp: projectVersion=.*
   replace: projectVersion={builtin.component_version}
+
+dependencies:
+- component: foss_images/kubectl
+  patch:
+  - file: helm/values.yaml
+    regexp: '  kubectlImage: .*'
+    replace: '  kubectlImage: {imageName}:{builtin.version}'

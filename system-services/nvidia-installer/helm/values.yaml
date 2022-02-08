@@ -14,6 +14,7 @@ nvidiaInstaller:
   installerTag: 1.5.5
   # Uncomment the line below when Gardener supports --ignore-taints on the cluster autoscaler
 #  removeTaintWhenReady: nvidia-driver
+  kubectlImage: com.sap.ai/kubectl:1.22.6-sap1
   hostDriverPath: /opt/drivers
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
