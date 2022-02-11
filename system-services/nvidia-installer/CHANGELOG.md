@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.6](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.5...rel/system-services/nvidia-installer/1.5.6)
+### fix
+* **nvidia-installer:** Node readiness taint can be removed even if it doesn't exist ([#3702](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3702)) ([`0f3a9e1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/0f3a9e1f5aa3a71e2bcee6ec75613d5e980be089))
+
+
 ## [1.5.5](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.4...rel/system-services/nvidia-installer/1.5.5)
 ### chore
 * **nvidia-installer:** Update documentation to be a bit clearer ([#3696](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3696)) ([`a1dcf03`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a1dcf03781c887f940997a0489cf2bfde98f4a5d))
