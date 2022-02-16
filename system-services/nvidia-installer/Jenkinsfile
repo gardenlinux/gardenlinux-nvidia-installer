@@ -8,6 +8,7 @@ def wsDockerProductToken
 def wsScanIncludingBaseImageFlag
 def vaultClient
 def vaultAppRoleToken
+def utils
 
 pipeline {
 
@@ -70,7 +71,7 @@ pipeline {
 
                     xmake = load("scripts/xmake_utils.groovy")
                     git = load("scripts/git_utils.groovy")
-
+                    utils = load("scripts/general_utils.groovy")
                     xmake.set_build_config("nvidia-installer") // Load one xmake config, which we will replicate & edit
                     def base_build = xmake.build_config[0]
                     // Iterate through garden linux & driver versions to create an xmake build config for each
@@ -292,11 +293,10 @@ pipeline {
                         // compiled kernel modules
                         def config = xmake.build_config[0]
                         if(config.uri != "") {
-                            try {
-                                protecodeExecuteScan script: this, scanImage: "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}" , serverUrl: "https://protecode.c.eu-de-2.cloud.sap", reportFileName: "protecode_report_${config.name}.pdf"
-                            } finally {
-                                archiveArtifacts artifacts: 'protecode_report_${config.name}.pdf', fingerprint: true, allowEmptyArchive: true
-                            }
+                            def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
+                            def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
+                            utils.runProtecodeScan("nvidia-installer", version, imageURI, params.Release)
+
                         }
                     }
                 }
