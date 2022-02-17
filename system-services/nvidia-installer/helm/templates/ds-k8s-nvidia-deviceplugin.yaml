@@ -35,7 +35,7 @@ spec:
         hostPath:
           path: /dev
       imagePullSecrets:
-      - name: {{ .Values.imagePullSecret | default "docker-registry-cdn" }}
+      - name: {{ template "garden-nvidia-installer.fullname" . }}
       containers:
       - image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaDevicePlugin.devicePluginImage }}
         command:
