@@ -71,7 +71,7 @@ spec:
 {{- if .Values.nvidiaInstaller.removeTaintWhenReady }}
       # Once the driver is installed, remove the specified taint so that GPU-requesting pods can run
       - name: untaint
-      - image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.kubectlImage }}
+        image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.kubectlImage }}
         command:
           - /bin/bash
         args:

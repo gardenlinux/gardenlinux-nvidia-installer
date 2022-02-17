@@ -12,8 +12,7 @@ nvidiaInstaller:
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
   installerTag: 1.5.7
-  # Uncomment the line below when Gardener supports --ignore-taints on the cluster autoscaler
-#  removeTaintWhenReady: nvidia-driver
+  removeTaintWhenReady: ai.sap.com/gpu-not-ready
   # Do not edit kubectlImage - this is generated from a patch in component.yaml
   kubectlImage: com.sap.ai/kubectl:1.22.6-sap1
   # Do not edit pauseImage - this is generated from a patch in component.yaml
