@@ -1,6 +1,15 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.7](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.6...rel/system-services/nvidia-installer/1.5.7)
+### other
+* nvidia-installer: use foss_images nvidia-gpu-device-plugin and pause images ([#3792](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3792)) ([`60bdaeb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/60bdaeb245c2ce45749ab7f464dd90b23978bdb5))
+
+### chore
+* **ci:** sending jobs to devops dashboard ([#3781](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3781)) ([`77bf0e7`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/77bf0e75be1ef45430e8a0be626349b3ec9884c2))
+* **ci:** move to toolkit protecode scan ([#3732](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3732)) ([`bb4dbb0`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bb4dbb039c18c1d227cbc7e4b7d56cc3f05c37f6))
+
+
 ## [1.5.6](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.5...rel/system-services/nvidia-installer/1.5.6)
 ### fix
 * **nvidia-installer:** Node readiness taint can be removed even if it doesn't exist ([#3702](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3702)) ([`0f3a9e1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/0f3a9e1f5aa3a71e2bcee6ec75613d5e980be089))
