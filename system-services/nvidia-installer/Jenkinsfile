@@ -346,4 +346,11 @@ pipeline {
         }
 
     }
+     post{
+        always {
+            script {
+                utils.send_job_to_devops_dashboard(env, this)
+            }
+        }
+    }
 }
