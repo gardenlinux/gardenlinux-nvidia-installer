@@ -71,7 +71,7 @@ spec:
 {{- if .Values.nvidiaInstaller.removeTaintWhenReady }}
       # Once the driver is installed, remove the specified taint so that GPU-requesting pods can run
       - name: untaint
-      - image: {{ printf "%s/%s:%s" .Values.global.imageRepository .Values.nvidiaInstaller.kubectlImage }}
+      - image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.kubectlImage }}
         command:
           - /bin/bash
         args:
@@ -86,7 +86,7 @@ spec:
 {{- end }}
       {{- if not .Values.debug }}
       containers:
-      - image: k8s.gcr.io/pause-amd64:3.1
+      - image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.pauseImage }}
         name: pause
       {{- end }}
         resources:

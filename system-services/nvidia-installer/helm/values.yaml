@@ -14,7 +14,10 @@ nvidiaInstaller:
   installerTag: 1.5.6
   # Uncomment the line below when Gardener supports --ignore-taints on the cluster autoscaler
 #  removeTaintWhenReady: nvidia-driver
+  # Do not edit kubectlImage - this is generated from a patch in component.yaml
   kubectlImage: com.sap.ai/kubectl:1.22.6-sap1
+  # Do not edit pauseImage - this is generated from a patch in component.yaml
+  pauseImage: com.sap.ai/pause:3.1.0-sap1
   hostDriverPath: /opt/drivers
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -27,6 +30,8 @@ nvidiaInstaller:
           values: ["318.8.0"]
           # Do not edit gardenlinuxVersion above - master value is in gardenlinux-dev/component.yaml context section.
   tolerations:
+   - key: CriticalAddonsOnly
+     operator: Exists
    - key: "nvidia.com/gpu"
      operator: "Exists"
      effect: "NoSchedule"
@@ -49,10 +54,8 @@ nvidiaInstaller:
      value: "1"
 
 nvidiaDevicePlugin:
-  image: k8s.gcr.io/nvidia-gpu-device-plugin@sha256
-  tag: 08509a36233c5096bb273a492251a9a5ca28558ab36d74007ca2a9d3f0b61e1d
-  pauseImage: k8s.gcr.io/pause-amd64
-  pauseTag: 3.1
+  # Do not edit devicePluginImage - this is generated from a patch in component.yaml
+  devicePluginImage: com.sap.ai/nvidia-gpu-device-plugin:0.0.1
   hostDevicePluginPath: /var/lib/kubelet/device-plugins
   nodeSelector: {}
   nodeAffinity:

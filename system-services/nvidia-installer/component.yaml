@@ -136,3 +136,13 @@ dependencies:
   - file: helm/values.yaml
     regexp: '  kubectlImage: .*'
     replace: '  kubectlImage: {imageName}:{builtin.version}'
+- component: foss_images/pause
+  patch:
+  - file: helm/values.yaml
+    regexp: '  pauseImage: .*'
+    replace: '  pauseImage: {imageName}:{builtin.version}'
+- component: foss_images/nvidia-gpu-device-plugin
+  patch:
+  - file: helm/values.yaml
+    regexp: '  devicePluginImage: .*'
+    replace: '  devicePluginImage: {imageName}:{builtin.version}'
