@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.8](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.7...rel/system-services/nvidia-installer/1.5.8)
+### other
+* Enable GPU node-readiness taint/untaint ([#3797](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3797)) ([`95369f1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/95369f16ec934bf98c3ebf82a0651beded42f76a))
+* Update imagePullSecrets for NVIDIA device plugin ([#3794](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3794)) ([`f91d7f9`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/f91d7f9a96f21264a5fc5bc1c6329db5711969b2))
+
+
 ## [1.5.7](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.6...rel/system-services/nvidia-installer/1.5.7)
 ### other
 * nvidia-installer: use foss_images nvidia-gpu-device-plugin and pause images ([#3792](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3792)) ([`60bdaeb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/60bdaeb245c2ce45749ab7f464dd90b23978bdb5))
