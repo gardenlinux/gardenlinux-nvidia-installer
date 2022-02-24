@@ -288,15 +288,17 @@ pipeline {
             when { expression { params.RunProtecode == true } }
             steps {
                 script {
-                    dir("${WORKSPACE}/system-services/nvidia-installer"){
-                        // Scan only the first config, as all are using the same base image and just copy in the
-                        // compiled kernel modules
-                        def config = xmake.build_config[0]
-                        if(config.uri != "") {
-                            def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
-                            def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
-                            utils.runProtecodeScan("nvidia-installer", version, imageURI, params.Release)
+                    node('k8s-berlin'){
+                        dir("${WORKSPACE}/system-services/nvidia-installer"){
+                            // Scan only the first config, as all are using the same base image and just copy in the
+                            // compiled kernel modules
+                            def config = xmake.build_config[0]
+                            if(config.uri != "") {
+                                def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
+                                def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
+                                utils.runProtecodeScan("nvidia-installer", version, imageURI, params.Release)
 
+                            }
                         }
                     }
                 }
