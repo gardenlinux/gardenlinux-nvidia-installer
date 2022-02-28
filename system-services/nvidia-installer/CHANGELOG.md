@@ -1,6 +1,17 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.9](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.8...rel/system-services/nvidia-installer/1.5.9)
+### other
+* update nvidia version ([#3832](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3832)) ([`bfcc214`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bfcc21491fdb9e7faf732d331eb134b1e182b2e0))
+
+### fix
+* **protecode:** add failErrorLevel=all ([#3816](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3816)) ([`942326a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/942326a9081878091ac2caad902460c4044100a8))
+
+### chore
+* **ci:** fix for protecode and checkmarx stages ([#3788](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3788)) ([`a7b7eb8`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a7b7eb80df30a279eca9ac8ba1ffe515dbcca848))
+
+
 ## [1.5.8](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.7...rel/system-services/nvidia-installer/1.5.8)
 ### other
 * Enable GPU node-readiness taint/untaint ([#3797](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3797)) ([`95369f1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/95369f16ec934bf98c3ebf82a0651beded42f76a))
