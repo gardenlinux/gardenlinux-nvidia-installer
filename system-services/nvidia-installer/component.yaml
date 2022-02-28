@@ -24,9 +24,13 @@ context:
 #    '318':
 #      version: 318.8.0
 #      debianBaseImageTag: bullseye-20200224-slim
-    '576.1':
-      version: 576.1.0
+#    '576.1':
+#      version: 576.1.0
+#      debianBaseImageTag: bullseye-20200224-slim
+    '576.3':
+      version: 576.3.0
       debianBaseImageTag: bullseye-20200224-slim
+
 
 steps:
   jenkins:
