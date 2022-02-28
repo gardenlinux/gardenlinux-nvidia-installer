@@ -272,6 +272,7 @@ pipeline {
                                         --repository "${repo_url}" \
                                         --version "${VERSION}" \
                                         --chart-folder ${env.HELM_PATH}
+                                        --target "services/nvidia-installer/source/service/chart"
                                 """
                             } finally {
                                 sh """
