@@ -258,6 +258,8 @@ pipeline {
                             def repo_folder="tmp/mlf-gitops"
                             def source_branch="main"
                             def repo_url="https://github.wdf.sap.corp/ICN-ML/aicore"
+                            def service_name="nvidia-installer"
+                            def service_path="services/nvidia-installer/source"
                             try {
                                 sh """
                                     git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.tools.sap/MLF/mlf-gitops" \
@@ -266,13 +268,12 @@ pipeline {
                                         "${repo_folder}"
                                 """
                                 sh """
-                                    ./${repo_folder}/tooling/upload_component_resources.sh \
-                                        --source-branch "${source_branch}" \
-                                        --name "${env.CHART_NAME}" \
-                                        --repository "${repo_url}" \
-                                        --version "${VERSION}" \
-                                        --chart-folder ${env.HELM_PATH}
-                                        --target "services/nvidia-installer/source/service/chart"
+                                    ./${repo_folder}/tooling/upload_component_resources_v2.sh \
+                                      --source-branch "${source_branch}" \
+                                      --name "${service_name}" \
+                                      --copy-from-to "helm:${service_path}/service/chart" \
+                                      --repository "${repo_url}" \
+                                      --version "${VERSION}"
                                 """
                             } finally {
                                 sh """
