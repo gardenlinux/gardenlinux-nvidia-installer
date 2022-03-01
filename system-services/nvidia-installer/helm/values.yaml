@@ -14,7 +14,7 @@ nvidiaInstaller:
   installerTag: 1.5.10
   removeTaintWhenReady: ai.sap.com/gpu-not-ready
   # Do not edit kubectlImage - this is generated from a patch in component.yaml
-  kubectlImage: com.sap.ai/kubectl:1.22.6-sap1
+  kubectlImage: com.sap.ai/kubectl:1.22.6-sap2
   # Do not edit pauseImage - this is generated from a patch in component.yaml
   pauseImage: com.sap.ai/pause:3.1.0-sap1
   hostDriverPath: /opt/drivers
