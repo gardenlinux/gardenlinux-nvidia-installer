@@ -73,7 +73,7 @@ spec:
       - name: untaint
         image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.kubectlImage }}
         command:
-          - /bin/bash
+          - /bin/sh
         args:
           - '-c'
           - 'kubectl taint node "${NODE}" {{.Values.nvidiaInstaller.removeTaintWhenReady}}:NoSchedule- || true'
