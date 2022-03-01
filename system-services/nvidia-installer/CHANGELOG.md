@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.10](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.9...rel/system-services/nvidia-installer/1.5.10)
+### other
+* adapt nvidiaPR to use upload_resources_v2 ([#3838](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3838)) ([`4e67a59`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/4e67a596cb48e532be3ed5bd75fba8385911d754))
+* correct nvidia-installer gitops location ([#3835](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3835)) ([`9b9f560`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/9b9f560085ad21a222fdb4bc744d5dd23f252c28))
+
+
 ## [1.5.9](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.8...rel/system-services/nvidia-installer/1.5.9)
 ### other
 * update nvidia version ([#3832](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3832)) ([`bfcc214`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bfcc21491fdb9e7faf732d331eb134b1e182b2e0))
