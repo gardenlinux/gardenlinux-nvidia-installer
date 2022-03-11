@@ -1,6 +1,13 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.11](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.10...rel/system-services/nvidia-installer/1.5.11)
+### other
+* Update kubectl to remove libdb ([#3843](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3843)) ([`7c3106e`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/7c3106ef7c3978b514abd2765579f53c5210a0b5))
+* new kubectl release ([#3842](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3842)) ([`e6fed99`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/e6fed9902466de3d8415e958abc34d77359099ea))
+* nvidia fix source to repo ([#3840](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3840)) ([`c446c3b`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c446c3b48f315cade9482e5d5825afa2881b60a3))
+
+
 ## [1.5.10](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.9...rel/system-services/nvidia-installer/1.5.10)
 ### other
 * adapt nvidiaPR to use upload_resources_v2 ([#3838](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3838)) ([`4e67a59`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/4e67a596cb48e532be3ed5bd75fba8385911d754))
