@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.12](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.11...rel/system-services/nvidia-installer/1.5.12)
+### other
+* add current gardenlinux version back to build ([#3928](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3928)) ([`5a05cc3`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/5a05cc378c532c62ce2537ec3d1312292b31f8bd))
+* nvidia daemonset: Tolerate ai.sap.com/gpu-not-ready taint ([#3927](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3927)) ([`717a687`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/717a68775b079d938d8017ff5235836c73b15b45))
+
+
 ## [1.5.11](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.10...rel/system-services/nvidia-installer/1.5.11)
 ### other
 * Update kubectl to remove libdb ([#3843](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3843)) ([`7c3106e`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/7c3106ef7c3978b514abd2765579f53c5210a0b5))
