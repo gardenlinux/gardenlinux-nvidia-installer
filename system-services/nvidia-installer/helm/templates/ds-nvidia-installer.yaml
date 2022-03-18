@@ -26,6 +26,7 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
+      serviceAccountName: node-untainter
       priorityClassName: system-node-critical
       {{- if .Values.nvidiaInstaller.nodeAffinity }}
       affinity:
@@ -76,7 +77,7 @@ spec:
           - /bin/sh
         args:
           - '-c'
-          - 'kubectl taint node "${NODE}" {{.Values.nvidiaInstaller.removeTaintWhenReady}}:NoSchedule- || true'
+          - 'kubectl taint node "${NODE}" "{{.Values.nvidiaInstaller.removeTaintWhenReady}}:NoSchedule-" || true'
         env:
           - name: NODE
             valueFrom:
