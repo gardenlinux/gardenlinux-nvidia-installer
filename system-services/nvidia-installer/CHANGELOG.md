@@ -1,6 +1,14 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.13](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.12...rel/system-services/nvidia-installer/1.5.13)
+### fix
+* use ignoredVulnerabilitiesFile for all component except FOSS ([#3541](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3541)) ([`852d00d`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/852d00d19df8a8f8d97ef8644075f773e04fec8f))
+
+### other
+* Fix nvidia toleration & taint ([#3931](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3931)) ([`26f4c04`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/26f4c04b740efdbd6da105d1469097aec754c334))
+
+
 ## [1.5.12](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.11...rel/system-services/nvidia-installer/1.5.12)
 ### other
 * add current gardenlinux version back to build ([#3928](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3928)) ([`5a05cc3`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/5a05cc378c532c62ce2537ec3d1312292b31f8bd))
