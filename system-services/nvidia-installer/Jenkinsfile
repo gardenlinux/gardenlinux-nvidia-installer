@@ -39,7 +39,7 @@ pipeline {
         booleanParam(name: 'RunPPMSComplianceForImage', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
         booleanParam(name: 'RunProtecode', defaultValue: true, description: '\'true\' triggers Protecode scan, any other value will not')
     }
-    
+
     environment {
         AUDITLOG_VALUES=""
         KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-west-1_aicore-pr-valid_config"
@@ -290,23 +290,21 @@ pipeline {
             when { expression { params.RunProtecode == true } }
             steps {
                 script {
-                    node('k8s-berlin'){
-                        dir("${WORKSPACE}/system-services/nvidia-installer"){
-                            // Scan only the first config, as all are using the same base image and just copy in the
-                            // compiled kernel modules
-                            def config = xmake.build_config[0]
-                            if(config.uri != "") {
-                                def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
-                                def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
-                                utils.runProtecodeScan("nvidia-installer", version, imageURI, params.Release)
+                    dir("${WORKSPACE}/system-services/nvidia-installer"){
+                        // Scan only the first config, as all are using the same base image and just copy in the
+                        // compiled kernel modules
+                        def config = xmake.build_config[0]
+                        if(config.uri != "") {
+                            def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
+                            def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
+                            utils.runProtecodeScan("nvidia-installer", version, imageURI, params.Release)
 
-                            }
                         }
                     }
                 }
             }
         }
-        
+
         stage('WhiteSource') {
             when { expression { params.RunWhitesource == true } }
             steps {
