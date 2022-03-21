@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.14](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.13...rel/system-services/nvidia-installer/1.5.14)
+### other
+* remove untainting logic ([#3944](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3944)) ([`603bf5b`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/603bf5ba93f840f77f069de69310ff4544e50617))
+
+
 ## [1.5.13](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.12...rel/system-services/nvidia-installer/1.5.13)
 ### fix
 * use ignoredVulnerabilitiesFile for all component except FOSS ([#3541](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3541)) ([`852d00d`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/852d00d19df8a8f8d97ef8644075f773e04fec8f))
