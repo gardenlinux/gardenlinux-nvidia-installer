@@ -69,22 +69,6 @@ spec:
           mountPath: /opt/modulus/cache
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
-{{- if .Values.nvidiaInstaller.removeTaintWhenReady }}
-      # Once the driver is installed, remove the specified taint so that GPU-requesting pods can run
-      - name: untaint
-        image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.kubectlImage }}
-        command:
-          - /bin/sh
-        args:
-          - '-c'
-          - 'kubectl taint node "${NODE}" "{{.Values.nvidiaInstaller.removeTaintWhenReady}}:NoSchedule-" || true'
-        env:
-          - name: NODE
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: spec.nodeName
-{{- end }}
       {{- if not .Values.debug }}
       containers:
       - image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.pauseImage }}
