@@ -1,6 +1,14 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.15](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.14...rel/system-services/nvidia-installer/1.5.15)
+### fix
+* nvidia-install, argocd and centaur ([#4020](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4020)) ([`c8fcfd5`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c8fcfd58d2fbb062198c9af671caa2b8a550c401))
+
+### chore
+* **ci:** fix whitesource url ([#3990](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3990)) ([`1f429fc`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/1f429fcb2cb5fecac5ad1f37cf5bc0e24a474b21))
+
+
 ## [1.5.14](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.13...rel/system-services/nvidia-installer/1.5.14)
 ### other
 * remove untainting logic ([#3944](https://github.wdf.sap.corp/ICN-ML/aicore/pull/3944)) ([`603bf5b`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/603bf5ba93f840f77f069de69310ff4544e50617))
