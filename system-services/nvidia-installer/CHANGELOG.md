@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.16](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.15...rel/system-services/nvidia-installer/1.5.16)
+### other
+* Run scan on PRs - PR-1 ([#4026](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4026)) ([`4b0c97a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/4b0c97aee7231360dd9485c66e53ef97a5bc53ba))
+
+
 ## [1.5.15](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.14...rel/system-services/nvidia-installer/1.5.15)
 ### fix
 * nvidia-install, argocd and centaur ([#4020](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4020)) ([`c8fcfd5`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c8fcfd58d2fbb062198c9af671caa2b8a550c401))
