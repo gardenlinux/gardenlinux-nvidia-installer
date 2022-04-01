@@ -35,8 +35,8 @@ pipeline {
         string(name: 'ComponentName', defaultValue: '', description: 'same as the image folder name')
         booleanParam(name: 'RunUnitTests', defaultValue: true, description: '\'true\' runs unit tests')
         booleanParam(name: 'RunStaticScans', defaultValue: true, description: '\'true\' runs linters')
-        booleanParam(name: 'RunWhitesource', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
-        booleanParam(name: 'RunPPMSComplianceForImage', defaultValue: false, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
+        booleanParam(name: 'RunWhitesource', defaultValue: true, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
+        booleanParam(name: 'RunPPMSComplianceForImage', defaultValue: true, description: '\'true\' triggers Whitesource scan for docker image, any other value will not')
         booleanParam(name: 'RunProtecode', defaultValue: true, description: '\'true\' triggers Protecode scan, any other value will not')
     }
 
