@@ -13,9 +13,9 @@ nvidiaInstaller:
   # Do not edit installerTag - this is generated from a patch in component.yaml
   installerTag: 1.5.16
   # Do not edit kubectlImage - this is generated from a patch in component.yaml
-  kubectlImage: com.sap.ai/kubectl:1.22.7-sap1
+  kubectlImage: com.sap.ai/kubectl:1.22.7-sap2
   # Do not edit pauseImage - this is generated from a patch in component.yaml
-  pauseImage: com.sap.ai/pause:3.1.0-sap1
+  pauseImage: com.sap.ai/pause:3.1.0-sap2
   hostDriverPath: /opt/drivers
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -56,7 +56,7 @@ nvidiaInstaller:
 
 nvidiaDevicePlugin:
   # Do not edit devicePluginImage - this is generated from a patch in component.yaml
-  devicePluginImage: com.sap.ai/nvidia-gpu-device-plugin:0.0.1
+  devicePluginImage: com.sap.ai/nvidia-gpu-device-plugin:0.0.1-sap1
   hostDevicePluginPath: /var/lib/kubelet/device-plugins
   nodeSelector: {}
   nodeAffinity:
