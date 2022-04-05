@@ -12,7 +12,7 @@ nvidiaInstaller:
   # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 1.5.17
+  installerTag: 1.5.18
   # Do not edit kubectlImage - this is generated from a patch in component.yaml
   kubectlImage: com.sap.ai/kubectl:1.22.7-sap2
   # Do not edit pauseImage - this is generated from a patch in component.yaml

@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.18](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.17...rel/system-services/nvidia-installer/1.5.18)
+### other
+* Nvidia untainter ([#4067](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4067)) ([`83fa719`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/83fa719c7d2604d615791175418feed49eb0a628))
+
+
 ## [1.5.17](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.16...rel/system-services/nvidia-installer/1.5.17)
 ### other
 * Nvidia drivers for 576.7 ([#4066](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4066)) ([`0017fe0`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/0017fe001c67fb731ae44549841ed58e9a3c78f0))
