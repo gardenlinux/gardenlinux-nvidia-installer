@@ -8,6 +8,7 @@ debug: false
 imagePullSecrets:
 
 nvidiaInstaller:
+  installRBAC: false
   # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
