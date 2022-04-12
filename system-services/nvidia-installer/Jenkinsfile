@@ -196,7 +196,9 @@ pipeline {
                     when { expression { params.BuildXmake == true } }
                     steps {
                         script {
-                            parallel xmake.make_build_jobs("build", env.GIT_COMMIT, env.PRERELEASE_VERSION)
+                            utils.retry(){
+                                parallel xmake.make_build_jobs("build", env.GIT_COMMIT, env.PRERELEASE_VERSION)
+                            }
                         }
                     }
                 }
@@ -207,7 +209,9 @@ pipeline {
             when { expression { params.Release == true } }
             steps {
                 script {
-                    parallel xmake.make_build_jobs("build_and_deploy", env.GIT_COMMIT, env.PRERELEASE_VERSION)
+                    utils.retry(){
+                        parallel xmake.make_build_jobs("build_and_deploy", env.GIT_COMMIT, env.PRERELEASE_VERSION)
+                    }
                 }
             }
         }
@@ -217,14 +221,16 @@ pipeline {
             steps {
                 script {
                     // iterate over all build configs (1 per Garden Linux/NVIDIA driver combination)
-                    xmake.build_config.each {
-                        if(it.uri != "") {
-                            sh "docker pull ${XMAKE_REGISTRY}/${it.uri}:${VERSION}"
-                            sh "docker tag \
-                                ${XMAKE_REGISTRY}/${it.uri}:${VERSION} \
-                                mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
-                            sh "docker push \
-                                mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
+                    utils.retry(){
+                        xmake.build_config.each {
+                            if(it.uri != "") {
+                                sh "docker pull ${XMAKE_REGISTRY}/${it.uri}:${VERSION}"
+                                sh "docker tag \
+                                    ${XMAKE_REGISTRY}/${it.uri}:${VERSION} \
+                                    mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
+                                sh "docker push \
+                                    mlf.docker.repositories.sap.ondemand.com/${it.uri}:${VERSION}"
+                            }
                         }
                     }
                 }
@@ -293,12 +299,14 @@ pipeline {
                     dir("${WORKSPACE}/system-services/nvidia-installer"){
                         // Scan only the first config, as all are using the same base image and just copy in the
                         // compiled kernel modules
-                        def config = xmake.build_config[0]
-                        if(config.uri != "") {
-                            def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
-                            def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
-                            utils.runProtecodeScan("nvidia-installer", version, imageURI, params.Release)
+                        utils.retry(){
+                            def config = xmake.build_config[0]
+                            if(config.uri != "") {
+                                def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
+                                def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
+                                utils.runProtecodeScan("nvidia-installer", version, imageURI, params.Release)
 
+                            }
                         }
                     }
                 }
@@ -315,12 +323,14 @@ pipeline {
                         // Scan only the first config, as all are using the same base image and just copy in the
                         // compiled kernel modules
                         def config = xmake.build_config[0]
-                        if(config.uri != "") {
-                            def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
-                            sh "docker pull ${imageURI}"
-                            wsDockerGeneratedProjectName = "${config.name} ${version}"
-                            new aif.WhitesourceScan(this).execute("${config.name}","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
-                            println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
+                        utils.retry(){
+                            if(config.uri != "") {
+                                def imageURI = "${DOCKER_REGISTRY}${config.uri}${IMAGE_SUFFIX}:${VERSION}"
+                                sh "docker pull ${imageURI}"
+                                wsDockerGeneratedProjectName = "${config.name} ${version}"
+                                new aif.WhitesourceScan(this).execute("${config.name}","${version}", "${wsDockerScanConfig}", env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, false,false, null,null,aif.WhiteSourceScanConstants.Mode.CONTAINER_SCAN, imageURI,env.VAULT_APPROLE_CRED_ID, vaultAddress)
+                                println("The generated ws Project name is ${wsDockerGeneratedProjectName}")
+                            }
                         }
                     }
                 }
@@ -339,9 +349,11 @@ pipeline {
                     // Scan only the first config, as all are using the same base image and just copy in the
                     // compiled kernel modules
                     def config = xmake.build_config[0]
-                    if(config.uri != "") {
-                        println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
-                        new aif.WhitesourceScan(this).execute("${config.name}", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)
+                    utils.retry(){
+                        if(config.uri != "") {
+                            println("Will run PPMS scan in this case for project ${wsDockerGeneratedProjectName}")
+                            new aif.WhitesourceScan(this).execute("${config.name}", "${VERSION}", null, env.SAP_REMOTE_CACHE_REGISTRY, env.SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID, true, true, wsDockerProductToken,  wsDockerGeneratedProjectName)
+                        }
                     }
                 }
             }
