@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.19](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.18...rel/system-services/nvidia-installer/1.5.19)
+### other
+* Enable retry for xmake steps for all components ([#4006](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4006)) ([`3c014fd`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/3c014fd145dbfbd8fcc18a435bb8265563d9c8d2))
+
+
 ## [1.5.18](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.17...rel/system-services/nvidia-installer/1.5.18)
 ### other
 * Nvidia untainter ([#4067](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4067)) ([`83fa719`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/83fa719c7d2604d615791175418feed49eb0a628))

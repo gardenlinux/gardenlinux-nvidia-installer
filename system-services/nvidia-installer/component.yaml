@@ -1,4 +1,4 @@
-version: 1.5.18
+version: 1.5.19
 description: system pod for installing nvidia gpu drivers in the host operating system
 
 ignoreVersion:
