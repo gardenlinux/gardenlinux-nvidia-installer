@@ -49,7 +49,7 @@ pipeline {
         SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID="sap-artifactory-dmz-api-token"
         SAP_REMOTE_CACHE_REGISTRY="remote-docker.docker.repositories.sapcdn.io"
         VAULT_APPROLE_CRED_ID="jenkins-ai-foundation-user-privileged"
-        XMAKE_REGISTRY="docker.wdf.sap.corp:51022"
+        XMAKE_REGISTRY="public.int.repositories.cloud.sap"
     }
 
     stages {
