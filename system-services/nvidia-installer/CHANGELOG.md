@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.20](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.19...rel/system-services/nvidia-installer/1.5.20)
+### other
+* Change docker registry ([#4068](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4068)) ([`5cd2896`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/5cd28961a48d5a393cf11fff3cbb359ceaf88ae7))
+
+
 ## [1.5.19](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.18...rel/system-services/nvidia-installer/1.5.19)
 ### other
 * Enable retry for xmake steps for all components ([#4006](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4006)) ([`3c014fd`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/3c014fd145dbfbd8fcc18a435bb8265563d9c8d2))
