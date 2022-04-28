@@ -1,6 +1,14 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.21](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.20...rel/system-services/nvidia-installer/1.5.21)
+### other
+* add ignore vulas ([#4223](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4223)) ([`0f3202a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/0f3202a6f4ffeeef6e4c9ef5952ac688ecbb776b))
+* add further things to ignore ([#4222](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4222)) ([`04c15b6`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/04c15b6985ed2bc60886aea1216f2b8ae4d92c09))
+* fix add jenkins api token for dashboard ([#4197](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4197)) ([`b6ad6e7`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/b6ad6e7523c9ec4686dd0f21781fd2b73dc5eac4))
+* change duplicate stage names ([#4049](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4049)) ([`47b8515`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/47b8515be74c7592ee085fd37feb8039372ea49f))
+
+
 ## [1.5.20](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.19...rel/system-services/nvidia-installer/1.5.20)
 ### other
 * Change docker registry ([#4068](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4068)) ([`5cd2896`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/5cd28961a48d5a393cf11fff3cbb359ceaf88ae7))
