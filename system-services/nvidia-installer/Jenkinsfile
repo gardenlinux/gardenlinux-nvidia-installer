@@ -133,7 +133,7 @@ pipeline {
             }
         }
 
-        stage('Unit test') {
+        stage('Unit Test') {
             when { expression { params.RunUnitTests == true } }
             steps {
                 sh "rm -rf nvidia-installer.yaml"
