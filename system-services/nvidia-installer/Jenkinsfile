@@ -50,6 +50,7 @@ pipeline {
         SAP_REMOTE_CACHE_REGISTRY="remote-docker.docker.repositories.sapcdn.io"
         VAULT_APPROLE_CRED_ID="jenkins-ai-foundation-user-privileged"
         XMAKE_REGISTRY="public.int.repositories.cloud.sap"
+        API_TOKEN_FOR_DASHBOARD="JENKINS_API_TOKEN"
     }
 
     stages {
