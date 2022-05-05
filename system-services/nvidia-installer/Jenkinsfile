@@ -280,8 +280,10 @@ pipeline {
                                       --name "${service_name}" \
                                       --copy-from-to "system-services/nvidia-installer/helm:${service_path}/service/chart" \
                                       --repository "${repo_url}" \
-                                      --version "${VERSION}"
+                                      --version "${VERSION}" \
+                                      --create-pr "false"
                                 """
+                                utils.create_gitops_pr_with_label(service_name, VERSION, repo_url, source_branch)
                             } finally {
                                 sh """
                                     rm -rf ${repo_folder}
