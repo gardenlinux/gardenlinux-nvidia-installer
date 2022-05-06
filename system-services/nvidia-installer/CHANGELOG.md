@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.22](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.21...rel/system-services/nvidia-installer/1.5.22)
+### other
+* Prolong ignoreUntil for CVE-2022-29458 ([#4280](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4280)) ([`f3e5bac`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/f3e5bac10d233726ab83cdcf46153a24068c9993))
+* Create PR using toolkit ([#4241](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4241)) ([`6524ffb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/6524ffb1ccf6679949694d14390b597e75c11c30))
+
+
 ## [1.5.21](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.20...rel/system-services/nvidia-installer/1.5.21)
 ### other
 * add ignore vulas ([#4223](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4223)) ([`0f3202a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/0f3202a6f4ffeeef6e4c9ef5952ac688ecbb776b))
