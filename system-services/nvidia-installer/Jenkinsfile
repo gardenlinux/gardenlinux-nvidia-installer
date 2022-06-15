@@ -263,7 +263,7 @@ pipeline {
 
                         script {
                             def repo_folder="tmp/mlf-gitops"
-                            def source_branch="main"
+                            def source_branch = env.BRANCH_NAME.startsWith("rel-") ? "integration" : "main"
                             def repo_url="https://github.wdf.sap.corp/ICN-ML/aicore"
                             def service_name="nvidia-installer"
                             def service_path="services/nvidia-installer/source"
