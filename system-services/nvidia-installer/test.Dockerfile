@@ -11,7 +11,7 @@ RUN apt-get install -y --allow-downgrades --no-install-recommends \
       wget && \
     apt autoremove -y
 
-ARG HELM_VERSION=3.5.2
+ARG HELM_VERSION=3.9.0
 
 RUN curl --silent \
     https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
