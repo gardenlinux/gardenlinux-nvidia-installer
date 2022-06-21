@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.24](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.23...rel/system-services/nvidia-installer/1.5.24)
+### fix
+* update helm to 3.9.0 ([#4483](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4483)) ([`3957d5d`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/3957d5d32d93b9bcab9f531af6bff6115ea407f0))
+
+
 ## [1.5.23](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.22...rel/system-services/nvidia-installer/1.5.23)
 ### other
 * Modify source branch in "Release to mlf-gitops repository" stage ([#4433](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4433)) ([`44ee278`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/44ee27800bd357c1e674d0f014f8adcdecf2c79e))
