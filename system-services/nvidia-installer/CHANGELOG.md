@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.25](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.24...rel/system-services/nvidia-installer/1.5.25)
+### fix
+* **ci:** test xmake api ([#4493](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4493)) ([`bdd5396`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bdd53967045578c59cc84eb4cc025630ea09128b))
+
+
 ## [1.5.24](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.23...rel/system-services/nvidia-installer/1.5.24)
 ### fix
 * update helm to 3.9.0 ([#4483](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4483)) ([`3957d5d`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/3957d5d32d93b9bcab9f531af6bff6115ea407f0))
