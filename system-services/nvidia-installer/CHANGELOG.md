@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.26](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.25...rel/system-services/nvidia-installer/1.5.26)
+### fix
+* **ci:** cumulus upload for security validation ([#4507](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4507)) ([`e52e0f1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/e52e0f17b67c3e81d0e9074e7088f9a60f48ba17))
+
+
 ## [1.5.25](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.24...rel/system-services/nvidia-installer/1.5.25)
 ### fix
 * **ci:** test xmake api ([#4493](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4493)) ([`bdd5396`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/bdd53967045578c59cc84eb4cc025630ea09128b))
