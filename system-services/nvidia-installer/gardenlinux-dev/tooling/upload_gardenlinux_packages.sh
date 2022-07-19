@@ -12,18 +12,13 @@ main() {
 #  linux_version="5.4.68-1"
 #  gcc_version="10.2.0-9"
 
-  gardenlinux_build_server="http://45.86.152.1"
-  gardenlinux_package_root="gardenlinux/pool/main/l/linux"
+  # Garden Linux - up to 576.7
+  #gardenlinux_build_server="http://45.86.152.1"
+  #gardenlinux_package_root="gardenlinux/pool/main/l/linux"
 
-  # Garden Linux 318
-#  kernel_version="5.4.0-6"
-#  linux_version="5.4.93-1"
-#  gcc_version="10.2.1-6"
-
-  # Garden Linux 576.1 & 576.2
-#  kernel_version="5.10.0-9"
-#  linux_version="5.10.83-1gardenlinux1"
-#  gcc_version="10.3.0-12"
+  # Garden Linux - from 576.10
+  gardenlinux_build_server="https://repo.gardenlinux.io"
+  gardenlinux_package_root="gardenlinux/pool/main/l/linux-5.10"
 
   if [ -z $KERNEL_VERSION ]; then
     echo "Please set KERNEL_VERSION - see image_versions"
@@ -42,6 +37,12 @@ main() {
     badargs=1
   fi
   gcc_version=${GCC_VERSION}
+
+  if [ -z $GCC_LINUX_VERSION ]; then
+    gcc_linux_version=${linux_version}
+  else
+    gcc_linux_version=${GCC_LINUX_VERSION}
+  fi
 
   # OpenStack Swift
   container="gardenlinux-packages"
@@ -72,10 +73,16 @@ main() {
 
   folder=kernel_${kernel_version}_linux_${linux_version}
 
+#  echo "kernel_version is ${kernel_version}"
+#  echo "linux_version is ${linux_version}"
+#  echo "gcc_major is ${gcc_major}"
+#  echo "gcc_linux_version is ${gcc_linux_version}"
+#  echo "kernel_version_major_minor is ${kernel_version_major_minor}"
+
   debs=( \
     "linux-headers-${kernel_version}-common_${linux_version}_all.deb" \
     "linux-headers-${kernel_version}-cloud-amd64_${linux_version}_amd64.deb" \
-    "linux-compiler-gcc-${gcc_major}-x86_${linux_version}_amd64.deb" \
+    "linux-compiler-gcc-${gcc_major}-x86_${gcc_linux_version}_amd64.deb" \
     "linux-kbuild-${kernel_version_major_minor}_${linux_version}_amd64.deb" \
     )
 

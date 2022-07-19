@@ -7,12 +7,17 @@ set -o pipefail
 # Given GARDENLINUX_VERSION is set, export variables for each entry in the relevant row of image_versions
 export $(GARDENLINUX_VERSION=$1 ./read_image_versions.sh | xargs)
 
-printf "\n-------------\ninputs:\n\nLINUX_VERSION=%s\nLINUX_DATE=%s\nKERNEL_VERSION=%s\nGCC_VERSION=%s\nGARDENLINUX_PACKAGES_URL=%s\n-------------" \
+printf "\n-------------\ninputs:\n\nLINUX_VERSION=%s\nLINUX_DATE=%s\nKERNEL_VERSION=%s\nGCC_VERSION=%s\nGCC_LINUX_VERSION=%s\nGARDENLINUX_PACKAGES_URL=%s\n-------------" \
   "${LINUX_VERSION}" \
   "${LINUX_DATE}" \
   "${KERNEL_VERSION}" \
   "${GCC_VERSION}" \
+  "${GCC_LINUX_VERSION}" \
   "${GARDENLINUX_PACKAGES_URL}" # This last one is a build arg, and is the location of the Swift container with the package files
+
+if [ -z $GCC_LINUX_VERSION ]; then
+  GCC_LINUX_VERSION=${LINUX_VERSION}
+fi
 
 DATESTAMP=$(echo ${LINUX_DATE} | sed 's/-//g') && rm -f /etc/apt/sources.list && \
   echo "deb http://snapshot.debian.org/archive/debian/${DATESTAMP}T000000Z testing main" >> /etc/apt/sources.list
@@ -45,7 +50,7 @@ GCC_MAJOR=$(echo $GCC_VERSION | cut -d '.' -f1) && \
     DEBS_URL=${GARDENLINUX_PACKAGES_URL}/kernel_${KERNEL_VERSION_PLAIN}_linux_${LINUX_VERSION} && \
     mkdir -p "/tmp/pkg" && \
     files=( \
-      linux-compiler-gcc-${GCC_MAJOR}-x86_${LINUX_VERSION}_amd64.deb \
+      linux-compiler-gcc-${GCC_MAJOR}-x86_${GCC_LINUX_VERSION}_amd64.deb \
       linux-headers-${KERNEL_VERSION_PLAIN}-common_${LINUX_VERSION}_all.deb \
       linux-kbuild-${KERNEL_VERSION_MAJOR_MINOR}_${LINUX_VERSION}_amd64.deb \
       linux-headers-${KERNEL_VERSION}_${LINUX_VERSION}_amd64.deb \

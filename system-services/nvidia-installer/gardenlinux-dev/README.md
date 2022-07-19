@@ -36,7 +36,7 @@ For each new version of Garden Linux a new developer image must be compiled.
  
 
 3. **Only if the previous step fails:**
-   Locate the relevant private gardenlinux packages (for example "http://45.86.152.1/gardenlinux/pool/main/l/linux")
+   Locate the relevant private gardenlinux packages (for example "https://repo.gardenlinux.io/gardenlinux/pool/main/l/linux-5.10")
    by asking in Slack channel #sap-tech-gardenlinux (see [here](https://sap-ml.slack.com/archives/CV1SWRHR6/p1629753024011500)
    for a previous request). 
  

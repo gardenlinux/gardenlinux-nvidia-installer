@@ -27,8 +27,11 @@ context:
 #    '576.1':
 #      version: 576.1.0
 #      debianBaseImageTag: bullseye-20200224-slim
-    '576.7':
-      version: 576.7.0
+#    '576.7':
+#      version: 576.7.0
+#      debianBaseImageTag: bullseye-20200224-slim
+    '576.10':
+      version: 576.10.0
       debianBaseImageTag: bullseye-20200224-slim
 
 
