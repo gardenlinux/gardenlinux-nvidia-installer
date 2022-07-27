@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.28](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.27...rel/system-services/nvidia-installer/1.5.28)
+### fix
+* **nvidia-installer:** Support Gardner Linux 576.7 ([#4656](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4656)) ([`f21a103`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/f21a103dc158be4bda6653cfb68a8f1df442c488))
+
+
 ## [1.5.27](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.26...rel/system-services/nvidia-installer/1.5.27)
 ### other
 * Build NVIDIA drivers for GL 576.10.0 ([#4609](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4609)) ([`c55399c`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c55399cf5331c9201ddc56a8248a8df653c1f832))
