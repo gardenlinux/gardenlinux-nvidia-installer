@@ -34,7 +34,7 @@ nvidiaInstaller:
    - key: "nvidia.com/gpu"
      operator: "Exists"
      effect: "NoSchedule"
-   - key: "ai.sap.com/gpu-not-ready"
+   - key: "resourcePlanId"
      operator: "Exists"
      effect: "NoSchedule"
   installerResources:
@@ -70,6 +70,9 @@ nvidiaDevicePlugin:
    - key: CriticalAddonsOnly
      operator: Exists
    - key: "nvidia.com/gpu"
+     operator: "Exists"
+     effect: "NoSchedule"
+   - key: "resourcePlanId"
      operator: "Exists"
      effect: "NoSchedule"
   resources:
