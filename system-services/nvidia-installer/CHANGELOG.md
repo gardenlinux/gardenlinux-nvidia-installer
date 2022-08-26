@@ -1,6 +1,14 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.29](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.28...rel/system-services/nvidia-installer/1.5.29)
+### chore
+* add chown in training-data-size-checker ([#4763](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4763)) ([`d1ed0cb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/d1ed0cb6f4b5e36b0dbc3150a66a1222c77aa24b))
+
+### other
+* nvidia-installer: tolerate resourcePlanId taint (on MLF nodes) ([#4772](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4772)) ([`244ac03`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/244ac037cc9490d06c99def0089780504018658f))
+
+
 ## [1.5.28](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.27...rel/system-services/nvidia-installer/1.5.28)
 ### fix
 * **nvidia-installer:** Support Gardner Linux 576.7 ([#4656](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4656)) ([`f21a103`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/f21a103dc158be4bda6653cfb68a8f1df442c488))
