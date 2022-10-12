@@ -3,10 +3,22 @@ CVE-2022-2068:
 CVE-2022-2097:
   ignoreUntil: 2022-10-31
 CVE-2022-2509:
-  ignoreUntil: 2022-09-31
+  ignoreUntil: 2022-10-31
 CVE-2021-46828:
-  ignoreUntil: 2022-09-31
+  ignoreUntil: 2022-10-31
 CVE-2022-35737:
-  ignoreUntil: 2022-09-31
+  ignoreUntil: 2022-10-31
 CVE-2022-37434:
-  ignoreUntil: 2022-09-31
+  ignoreUntil: 2022-10-31
+CVE-2021-4209:
+  ignoreUntil: 2022-10-31
+CVE-2022-28321:
+  ignoreUntil: 2022-10-31
+CVE-2021-20223:
+  ignoreUntil: 2022-10-31
+CVE-2021-3997:
+  ignoreUntil: 2022-10-31
+CVE-2021-3995:
+  ignoreUntil: 2022-10-31
+CVE-2021-3996:
+  ignoreUntil: 2022-10-31

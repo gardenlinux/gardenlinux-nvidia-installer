@@ -1,11 +1,12 @@
 # nvidia-installer
 
+
 This component compiles NVIDIA kernel modules for Garden Linux in a Docker image at build time.
 Running the image in a cluster as part of a DaemonSet installs the GPU driver on the required nodes.
 
-Normally 2 to 3 versions should be maintained of Garden Linux and NVIDIA drivers: 
-always previous & current versions, and a future/canary version when 
-the related Garden Linux or NVIDIA driver version is released. 
+Normally 2 to 3 versions should be maintained of Garden Linux and NVIDIA drivers:
+always previous & current versions, and a future/canary version when
+the related Garden Linux or NVIDIA driver version is released.
 Older versions should be commented out accordingly in order to avoid
 combinatorial explosion when building images. as we build an image for each combination of Garden Linux & NVIDIA driver.
 
@@ -29,17 +30,17 @@ See [gardenlinux-dev/README.md](gardenlinux-dev/README.md) for details, but in s
 
 * Commit any changes for this release & push to GitHub, check that PR validation runs OK
 * Merge the PR to `main` & check the main build runs OK
-* This should be done automatically, but in case it has not worked: 
+* This should be done automatically, but in case it has not worked:
 
   Build "with Parameters" the [AI Core Release job](https://jenkins.ml.only.sap/job/AI-Foundation/job/berlin-jenkins/job/AI-Core/job/Release/job/main/)
-  in Jenkins, specifying the component `system-services/nvidia-installer`. 
+  in Jenkins, specifying the component `system-services/nvidia-installer`.
 
-  This job will take care of incrementing the 
+  This job will take care of incrementing the
   version number in `component.yaml`, adding a message to `CHANGELOG.md`, building the images and pushing it to a Docker
   registry.
 * When this job is complete, Xmake will have published the images using the form:
 
-  `deploy-releases.common.repositories.cloud.sap/com.sap.ai/nvidia-installer-<GardenLinux-version>-<NVIDIA-version>:<component-version>` 
+  `deploy-releases.common.repositories.cloud.sap/com.sap.ai/nvidia-installer-<GardenLinux-version>-<NVIDIA-version>:<component-version>`
 
   For example,
 
@@ -57,7 +58,7 @@ See for example `mlf-gitops/cluster-service-list/templates/nvidia-installer-GL18
 
 ## High level structure of the Dockerfile
 
-The first stage installs the needed compilers & kernel headers, then calls 
+The first stage installs the needed compilers & kernel headers, then calls
 a script to download the NVIDIA driver files and compile the kernel modules, and finally creates a
 compressed tar archive of the required files.
 
