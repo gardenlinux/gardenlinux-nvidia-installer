@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.30](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.29...rel/system-services/nvidia-installer/1.5.30)
+### chore
+* fix scans nvidia installer ([#5004](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5004)) ([`fef7265`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/fef72652016164ab8f9e6191f2c36505a7ef6488))
+
+
 ## [1.5.29](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.28...rel/system-services/nvidia-installer/1.5.29)
 ### chore
 * add chown in training-data-size-checker ([#4763](https://github.wdf.sap.corp/ICN-ML/aicore/pull/4763)) ([`d1ed0cb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/d1ed0cb6f4b5e36b0dbc3150a66a1222c77aa24b))
