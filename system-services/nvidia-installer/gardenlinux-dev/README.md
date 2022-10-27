@@ -65,4 +65,5 @@ For each new version of Garden Linux a new developer image must be compiled.
 
 ----
 Recorded Walkthrough session(s) can be found below:
+
 [Session One](https://sap-my.sharepoint.com/:v:/p/rafik_takieddin/EdFZjH2VLfNFrM7ZOlGERRUB93JbCma61CuTDYF7bErNqw?e=D67nsw)
