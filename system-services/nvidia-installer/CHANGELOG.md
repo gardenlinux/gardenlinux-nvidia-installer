@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.31](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.30...rel/system-services/nvidia-installer/1.5.31)
+### other
+* Update README.md ([`aa60f49`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/aa60f495d464144c6db2ec06df7604ac30384832))
+* Update README.md ([`15a0f65`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/15a0f650d7b1f9aa98910bf0fc915ac6fa577511))
+
+
 ## [1.5.30](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.29...rel/system-services/nvidia-installer/1.5.30)
 ### chore
 * fix scans nvidia installer ([#5004](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5004)) ([`fef7265`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/fef72652016164ab8f9e6191f2c36505a7ef6488))
