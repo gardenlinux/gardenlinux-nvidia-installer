@@ -4,9 +4,9 @@ general:
   acknowledgeDeprecatedStepUsage: true
   whitesourceUserTokenCredentialsId: 'sap-ws-token'
 steps:
-  sapCumulusUpload:
-    cumulusFileCredentialsId: 'CumulusToken'
-    pipelineId: '2484658e-a82d-4162-81d4-601443e7234d'
+  # sapCumulusUpload:
+  #   cumulusFileCredentialsId: 'CumulusToken'
+  #   pipelineId: '2484658e-a82d-4162-81d4-601443e7234d'
   protecodeExecuteScan:
     protecodeCredentialsId: 'b9513ce4-c466-4d2b-b679-f6084432f0b5'
     group: '1169'
