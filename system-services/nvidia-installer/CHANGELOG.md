@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.33](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.32...rel/system-services/nvidia-installer/1.5.33)
+### other
+* Ignore vulnerabilites in protecode ([#5106](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5106)) ([`8d77792`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/8d77792a3b1addb84cf23e9a2f2966904f2128c7))
+
+
 ## [1.5.32](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.31...rel/system-services/nvidia-installer/1.5.32)
 ### other
 * Disable sapCumulusUpload due to our service account being disabled ([#5104](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5104)) ([`6e494b2`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/6e494b25ef3100abc7c412f7f2b455b3568d4f5c))
