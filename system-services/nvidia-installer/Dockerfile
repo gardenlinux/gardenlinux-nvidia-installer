@@ -15,6 +15,7 @@ COPY resources resources
 
 # Make sure GARDENLINUX_VERSION is set, then download & install the required deb files
 ARG GARDENLINUX_VERSION
+RUN chmod a+w /tmp
 RUN ./install_packages.sh $GARDENLINUX_VERSION
 
 # Make sure DRIVER_VERSION & KERNEL_VERSION are set, then compile the kernel modules
