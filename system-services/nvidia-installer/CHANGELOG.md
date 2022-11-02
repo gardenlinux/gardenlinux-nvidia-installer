@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.35](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.34...rel/system-services/nvidia-installer/1.5.35)
+### other
+* nvidia-installer: add whitesource apiKey ([#5117](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5117)) ([`1bf2f0c`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/1bf2f0c5035157b492533cf4970910408d8cc360))
+* nvidia-installer: improve resilience to flaky snapshot.debian.org ([#5118](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5118)) ([`e84e616`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/e84e6168cbe64053e076cefdb3fb5c84bac64f65))
+
+
 ## [1.5.34](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.33...rel/system-services/nvidia-installer/1.5.34)
 ### other
 * Extend NVIDIA driver protecode triage for another month ([#5111](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5111)) ([`2cb6e9b`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/2cb6e9b23a07909da9259fedb26c95ada38d7560))
