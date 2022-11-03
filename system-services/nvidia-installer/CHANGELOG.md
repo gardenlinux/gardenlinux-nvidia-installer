@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.36](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.35...rel/system-services/nvidia-installer/1.5.36)
+### other
+* Garden linux 576 12 ([#5097](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5097)) ([`25e8f28`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/25e8f2862920a3df3fffb98b06aeca9bccb17966))
+
+
 ## [1.5.35](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.34...rel/system-services/nvidia-installer/1.5.35)
 ### other
 * nvidia-installer: add whitesource apiKey ([#5117](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5117)) ([`1bf2f0c`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/1bf2f0c5035157b492533cf4970910408d8cc360))
