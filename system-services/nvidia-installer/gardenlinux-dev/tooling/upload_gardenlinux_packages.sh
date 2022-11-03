@@ -5,27 +5,13 @@ set -o pipefail
 
 main() {
 
-  # Garden Linux 184
-#  gardenlinux_build_server="http://18.185.215.86"
-#  gardenlinux_package_root="packages"
-#  kernel_version="5.4.0-5"
-#  linux_version="5.4.68-1"
-#  gcc_version="10.2.0-9"
-
-  # Garden Linux - up to 576.7
-  #gardenlinux_build_server="http://45.86.152.1"
-  #gardenlinux_package_root="gardenlinux/pool/main/l/linux"
-
-  # Garden Linux - from 576.10
-  gardenlinux_build_server="https://repo.gardenlinux.io"
-  gardenlinux_package_root="gardenlinux/pool/main/l/linux-5.10"
-
   if [ -z $KERNEL_VERSION ]; then
     echo "Please set KERNEL_VERSION - see image_versions"
     badargs=1
   fi
   kernel_version="${KERNEL_VERSION/-cloud-amd64/}"
-  
+  kernel_version_major_minor=$(echo $kernel_version | cut -d '.' -f1,2)
+
   if [ -z $LINUX_VERSION ]; then
     echo "Please set LINUX_VERSION - see image_versions"
     badargs=1
@@ -37,12 +23,17 @@ main() {
     badargs=1
   fi
   gcc_version=${GCC_VERSION}
+  gcc_major=$(echo $gcc_version | cut -d '.' -f1)
 
   if [ -z $GCC_LINUX_VERSION ]; then
     gcc_linux_version=${linux_version}
   else
     gcc_linux_version=${GCC_LINUX_VERSION}
   fi
+
+  # Garden Linux - from 576.10
+  gardenlinux_build_server="https://repo.gardenlinux.io"
+  gardenlinux_package_root="gardenlinux/pool/main/l/linux-${kernel_version_major_minor}"
 
   # OpenStack Swift
   container="gardenlinux-packages"
@@ -68,9 +59,6 @@ main() {
   tmp_dir="tmp/upload"
   mkdir -p "${tmp_dir}"
 
-  gcc_major=$(echo $gcc_version | cut -d '.' -f1)
-  kernel_version_major_minor=$(echo $kernel_version | cut -d '.' -f1,2)
-
   folder=kernel_${kernel_version}_linux_${linux_version}
 
 #  echo "kernel_version is ${kernel_version}"
@@ -87,8 +75,7 @@ main() {
     )
 
   for file in "${debs[@]}"; do
-    download $file
-    upload $container $folder $file
+    download $file && upload $container $folder $file
   done
 
   if [ -z "${DEBUG}" ]; then
@@ -103,8 +90,9 @@ download() {
   local -r name=$1
   echo "Downloading ${name}"
   if [ ! -f "${tmp_dir}/${name}" ]; then
-      wget -O "${tmp_dir}/${name}" "${gardenlinux_build_server}/${gardenlinux_package_root}/${name}"
+      wget -O "${tmp_dir}/${name}" "${gardenlinux_build_server}/${gardenlinux_package_root}/${name}" || return 1
   fi
+  return 0
 }
 
 # $1=container $2=folder $3=file
