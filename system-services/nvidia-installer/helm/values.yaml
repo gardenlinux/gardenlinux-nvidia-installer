@@ -29,14 +29,14 @@ nvidiaInstaller:
           values: ["318.8.0"]
           # Do not edit gardenlinuxVersion above - master value is in gardenlinux-dev/component.yaml context section.
   tolerations:
-   - key: CriticalAddonsOnly
-     operator: Exists
-   - key: "nvidia.com/gpu"
-     operator: "Exists"
-     effect: "NoSchedule"
-   - key: "resourcePlanId"
-     operator: "Exists"
-     effect: "NoSchedule"
+  - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
+    operator: Exists
+    effect: NoSchedule
+  - key: ""
+    operator: Exists
+    effect: NoExecute
+  - key: CriticalAddonsOnly
+    operator: Exists
   installerResources:
     requests:
       cpu: 10m
@@ -67,14 +67,14 @@ nvidiaDevicePlugin:
         - key: gpu
           operator: Exists
   tolerations:
-   - key: CriticalAddonsOnly
-     operator: Exists
-   - key: "nvidia.com/gpu"
-     operator: "Exists"
-     effect: "NoSchedule"
-   - key: "resourcePlanId"
-     operator: "Exists"
-     effect: "NoSchedule"
+  - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
+    operator: Exists
+    effect: NoSchedule
+  - key: ""
+    operator: Exists
+    effect: NoExecute
+  - key: CriticalAddonsOnly
+    operator: Exists
   resources:
     requests:
       cpu: 10m
