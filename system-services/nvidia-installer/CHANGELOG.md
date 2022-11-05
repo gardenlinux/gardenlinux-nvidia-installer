@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.37](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.36...rel/system-services/nvidia-installer/1.5.37)
+### other
+* Fix NVIDIA tolerations ([#5143](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5143)) ([`2e6c60c`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/2e6c60cff3b919867c4d5f45cbf12dce2dcfa002))
+
+
 ## [1.5.36](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.35...rel/system-services/nvidia-installer/1.5.36)
 ### other
 * Garden linux 576 12 ([#5097](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5097)) ([`25e8f28`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/25e8f2862920a3df3fffb98b06aeca9bccb17966))
