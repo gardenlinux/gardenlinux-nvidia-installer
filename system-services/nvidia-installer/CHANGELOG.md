@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.39](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.38...rel/system-services/nvidia-installer/1.5.39)
+### other
+* moved videos to our wiki page ([#5279](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5279)) ([`f30456b`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/f30456b286018a5f0bce4a4b2e91dd670656dd36))
+
+
 ## [1.5.38](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.37...rel/system-services/nvidia-installer/1.5.38)
 ### other
 * Revert "Disable sapCumulusUpload due to our service account being disabled (#5104)" ([#5180](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5180)) ([`ccfafbb`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/ccfafbba9a9854f5cc94d7d09ae3582eb9730524))
