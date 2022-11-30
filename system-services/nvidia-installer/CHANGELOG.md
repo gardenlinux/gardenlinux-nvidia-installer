@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.42](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.41...rel/system-services/nvidia-installer/1.5.42)
+### other
+* Fix build by extending nvidia protecode ignores, using 2023 :-) ([#5322](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5322)) ([`d5ab485`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/d5ab4858957abcea97b5bd61cf88650e9bf89ce6))
+
+
 ## [1.5.41](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.40...rel/system-services/nvidia-installer/1.5.41)
 ### other
 * Fix build by extending nvidia protecode ignores ([#5320](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5320)) ([`7a54b5a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/7a54b5a4b27e0c28d0107fab76fe6efae34348bb))
