@@ -13,8 +13,6 @@ nvidiaInstaller:
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
   installerTag: 1.5.39
-  # Do not edit kubectlImage - this is generated from a patch in component.yaml
-  kubectlImage: com.sap.ai/kubectl:1.22.7-sap2
   # Do not edit pauseImage - this is generated from a patch in component.yaml
   pauseImage: com.sap.ai/pause:3.1.0-sap2
   hostDriverPath: /opt/drivers

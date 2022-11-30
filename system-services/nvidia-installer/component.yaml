@@ -19,9 +19,6 @@ context:
   - 515.65.01
 
   gardenLinux:
-    '576.7':
-      version: 576.7.0
-      debianBaseImageTag: bullseye-20200224-slim
     '576.10':
       version: 576.10.0
       debianBaseImageTag: bullseye-20200224-slim
@@ -135,11 +132,6 @@ patch:
   replace: projectVersion={builtin.component_version}
 
 dependencies:
-- component: foss_images/kubectl
-  patch:
-  - file: helm/values.yaml
-    regexp: '  kubectlImage: .*'
-    replace: '  kubectlImage: {imageName}:{builtin.version}'
 - component: foss_images/pause
   patch:
   - file: helm/values.yaml

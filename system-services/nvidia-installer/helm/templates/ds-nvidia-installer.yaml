@@ -26,7 +26,7 @@ spec:
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      serviceAccountName: node-untainter
+      serviceAccountName: nvidia-installer
       priorityClassName: system-node-critical
       {{- if .Values.nvidiaInstaller.nodeAffinity }}
       affinity:
@@ -73,9 +73,9 @@ spec:
       containers:
       - image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.pauseImage }}
         name: pause
-      {{- end }}
         resources:
 {{ toYaml .Values.nvidiaInstaller.pauseResources | indent 12 }}
+      {{- end }}
 {{- if .Values.nvidiaInstaller.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nvidiaInstaller.nodeSelector | indent 8 }}
