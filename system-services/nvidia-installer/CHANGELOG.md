@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.41](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.40...rel/system-services/nvidia-installer/1.5.41)
+### other
+* Fix build by extending nvidia protecode ignores ([#5320](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5320)) ([`7a54b5a`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/7a54b5a4b27e0c28d0107fab76fe6efae34348bb))
+
+
 ## [1.5.40](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.39...rel/system-services/nvidia-installer/1.5.40)
 ### other
 * Fixes to NVIDIA Helm chart ([#5310](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5310)) ([`9877757`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/987775729ff70b9953c1f707a1af1b215c9bd953))
