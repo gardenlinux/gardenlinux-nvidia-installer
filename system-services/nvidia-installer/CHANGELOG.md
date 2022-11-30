@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.40](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.39...rel/system-services/nvidia-installer/1.5.40)
+### other
+* Fixes to NVIDIA Helm chart ([#5310](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5310)) ([`9877757`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/987775729ff70b9953c1f707a1af1b215c9bd953))
+
+
 ## [1.5.39](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.38...rel/system-services/nvidia-installer/1.5.39)
 ### other
 * moved videos to our wiki page ([#5279](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5279)) ([`f30456b`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/f30456b286018a5f0bce4a4b2e91dd670656dd36))
