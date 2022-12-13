@@ -24,3 +24,5 @@ CVE-2021-3996:
   ignoreUntil: 2023-01-31
 CVE-2021-46848:
   ignoreUntil: 2023-01-31
+CVE-2022-46908:
+  ignoreUntil: 2023-01-31
