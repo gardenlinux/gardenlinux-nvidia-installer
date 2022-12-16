@@ -1,6 +1,8 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.45](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.44...rel/system-services/nvidia-installer/1.5.45)
+
 ## [1.5.44](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.43...rel/system-services/nvidia-installer/1.5.44)
 ### other
 * nvidia-installer: Add new vulnerability to ignore ([#5378](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5378)) ([`43e1bf1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/43e1bf150a1e3dcf6ee01811c35fae8b32e96412))
