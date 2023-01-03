@@ -20,7 +20,7 @@ steps:
     custom_wsDockerScanConfig: 'wss-unified-agent.config'
 
   sapCheckPPMSCompliance:
-    ppmsCredentialsId: 'PPMSComplaince'
+    ppmsCredentialsId: 'PPMSCompliance'
     ppmsID: '73555000100200014405'
     uploadChangeRequest: false
     orgToken: '6971b2eec2d3420bad0caf173ec629f6a3c7d3ba63f3445ab99ffdbf1acfb1d0'
