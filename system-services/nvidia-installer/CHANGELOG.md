@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.47](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.46...rel/system-services/nvidia-installer/1.5.47)
+### fix
+* **rt:** protecode issues ([#5463](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5463)) ([`e108089`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/e1080891c702e7d538be77a7d08aa9d734e88448))
+
+
 ## [1.5.46](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.45...rel/system-services/nvidia-installer/1.5.46)
 ### chore
 * use PPMSCompliance ([#5449](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5449)) ([`6d8a627`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/6d8a6272f76149bed4ddd4556d9c601295fc5d0f))
