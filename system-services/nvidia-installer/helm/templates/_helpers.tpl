@@ -20,6 +20,12 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "garden-%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "image-pull-secret" -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+
 {{- define "nvidia-device-plugin.fullname" -}}
 {{- $name := default "nvidia-device-plugin" .Values.nameOverride -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}

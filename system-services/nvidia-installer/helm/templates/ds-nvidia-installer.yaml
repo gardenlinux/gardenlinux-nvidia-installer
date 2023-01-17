@@ -35,7 +35,7 @@ spec:
       {{- end}}
       hostPID: true
       imagePullSecrets:
-      - name: {{ template "garden-nvidia-installer.fullname" . }}
+      - name: {{ template "image-pull-secret" . }}
       {{- if .Values.debug }}
       containers:
       {{- else }}
