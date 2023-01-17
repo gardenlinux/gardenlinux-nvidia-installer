@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.49](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.48...rel/system-services/nvidia-installer/1.5.49)
+### other
+* nvidia-installer: fix service account ([#5595](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5595)) ([`c865508`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c8655087475b42a0db8ac264d53a197acdfca8da))
+* fix secret wiring ([#5591](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5591)) ([`c4e8519`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c4e8519c3d82a4974c3b6fc5a930d49a259d6b56))
+
+
 ## [1.5.48](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.47...rel/system-services/nvidia-installer/1.5.48)
 
 ## [1.5.47](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.46...rel/system-services/nvidia-installer/1.5.47)
