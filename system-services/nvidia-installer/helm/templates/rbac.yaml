@@ -1,14 +1,13 @@
-{{- if .Values.nvidiaInstaller.installRBAC }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: nvidia-installer
+  name: {{ template "service-account" . }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: update-nodes
+  name: {{ template "service-account" . }}
 rules:
   - apiGroups: [""]
     resources:
@@ -23,13 +22,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: update-nodes-to-nvidia-installer-sa
+  name: {{ template "service-account" . }}
 subjects:
 - kind: ServiceAccount
-  name: nvidia-installer
+  name: {{ template "service-account" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: update-nodes
+  name: {{ template "service-account" . }}
   apiGroup: rbac.authorization.k8s.io
-{{- end}}

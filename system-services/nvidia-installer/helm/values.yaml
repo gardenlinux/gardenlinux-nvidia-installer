@@ -8,7 +8,6 @@ debug: false
 imagePullSecrets:
 
 nvidiaInstaller:
-  installRBAC: false
   # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
@@ -25,7 +24,7 @@ nvidiaInstaller:
         - key: os-version
           operator: In
           values: ["318.8.0"]
-          # Do not edit gardenlinuxVersion above - master value is in gardenlinux-dev/component.yaml context section.
+          # Do not edit gardenlinuxVersion above - actual version is defined in mlf-gitops/services/nvidia-installer/values/<version>.yaml
   tolerations:
   - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
     operator: Exists
@@ -64,6 +63,10 @@ nvidiaDevicePlugin:
       - matchExpressions:
         - key: gpu
           operator: Exists
+        - key: os-version
+          operator: In
+          values: ["318.8.0"]
+          # Do not edit gardenlinuxVersion above - actual version is defined in mlf-gitops/services/nvidia-installer/values/<version>.yaml
   tolerations:
   - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
     operator: Exists
