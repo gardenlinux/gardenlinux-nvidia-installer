@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.50](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.49...rel/system-services/nvidia-installer/1.5.50)
+### chore
+* **deps:** update public.int.repositories.cloud.sap/debian docker tag to v11.2 ([#5692](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5692)) ([`285bd35`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/285bd3543b4b156c8a88e356bd0498db4f6614d5))
+
+
 ## [1.5.49](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.48...rel/system-services/nvidia-installer/1.5.49)
 ### other
 * nvidia-installer: fix service account ([#5595](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5595)) ([`c865508`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c8655087475b42a0db8ac264d53a197acdfca8da))
