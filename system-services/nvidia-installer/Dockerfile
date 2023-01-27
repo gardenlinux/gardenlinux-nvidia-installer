@@ -23,7 +23,7 @@ ARG DRIVER_VERSION
 RUN export $(./read_image_versions.sh | grep KERNEL_VERSION) && resources/compile.sh
 
 
-FROM public.int.repositories.cloud.sap/debian:11.1-slim
+FROM public.int.repositories.cloud.sap/debian:11.2-slim
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     kmod \
