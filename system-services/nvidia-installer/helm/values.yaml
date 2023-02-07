@@ -11,9 +11,9 @@ nvidiaInstaller:
   # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 1.5.50
+  installerTag: 1.5.51
   # Do not edit pauseImage - this is generated from a patch in component.yaml
-  pauseImage: com.sap.ai/pause:3.1.0-sap3
+  pauseImage: com.sap.ai/pause:3.1.0-sap4
   hostDriverPath: /opt/drivers
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
