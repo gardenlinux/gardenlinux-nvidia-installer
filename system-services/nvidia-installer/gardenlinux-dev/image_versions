@@ -30,4 +30,4 @@ GARDENLINUX_VERSION | KERNEL_VERSION                  | DEBIAN_BASE_IMAGE_TAG  |
 576.7.0             | 5.10.103-garden-cloud-amd64     | bullseye-20200224-slim | 10.3.0-14   | 5.10.103-0gardenlinux1 | 5.10.103-0gardenlinux1 | 2022-03-08
 576.10.0            | 5.10.123-garden-cloud-amd64     | bullseye-20200224-slim | 10.3.0-15   | 5.10.70-1gardenlinux1  | 5.10.123-0gardenlinux1 | 2022-06-20
 576.12.0            | 5.10.141-garden-cloud-amd64     | bullseye-20200224-slim | 10.4.0-4    | 5.10.141-0gardenlinux1 | 5.10.141-0gardenlinux1 | 2022-09-07
-934.0.0             | 5.15.74-gardenlinux-cloud-amd64 | bullseye-20200224-slim | 12.2.0-3    | 5.15.74-0gardenlinux1  | 5.15.74-0gardenlinux1  | 2022-10-17
+934.3.0             | 5.15.74-gardenlinux-cloud-amd64 | bullseye-20200224-slim | 12.2.0-3    | 5.15.74-0gardenlinux1  | 5.15.74-0gardenlinux1  | 2022-10-17
