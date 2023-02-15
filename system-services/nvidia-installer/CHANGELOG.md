@@ -1,6 +1,13 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.52](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.51...rel/system-services/nvidia-installer/1.5.52)
+### other
+* Switch CI from Artifactory to GCR ([#5993](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5993)) ([`120fabe`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/120fabe3ee6dd605e754c2e630dab40d17a7af36))
+* nvidia-installer: Garden Linux 934.3 support ([#5979](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5979)) ([`a029eb1`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a029eb18f153a0a2e7fdaba08603b0c479d27091))
+* update docker url for system services ([#5975](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5975)) ([`3dd81d9`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/3dd81d96e3900fee6131a02b400eda0701dd0aa1))
+
+
 ## [1.5.51](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.50...rel/system-services/nvidia-installer/1.5.51)
 
 ## [1.5.50](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.49...rel/system-services/nvidia-installer/1.5.50)
