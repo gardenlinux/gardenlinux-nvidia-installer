@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.53](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.52...rel/system-services/nvidia-installer/1.5.53)
+### other
+* nvidia-installer: Add support for A100 GPUs/NVIDIA Fabric Manager ([#6118](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6118)) ([`c571176`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c5711767d08afc8c0dd953488e8ddf37aa6e280f))
+
+
 ## [1.5.52](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.51...rel/system-services/nvidia-installer/1.5.52)
 ### other
 * Switch CI from Artifactory to GCR ([#5993](https://github.wdf.sap.corp/ICN-ML/aicore/pull/5993)) ([`120fabe`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/120fabe3ee6dd605e754c2e630dab40d17a7af36))
