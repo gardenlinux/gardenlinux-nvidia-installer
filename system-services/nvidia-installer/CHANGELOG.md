@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.54](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.53...rel/system-services/nvidia-installer/1.5.54)
+### other
+* nvidia-installer: Ignore protecode vulnerabilities ([#6132](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6132)) ([`11e5d92`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/11e5d92236d5370f10c1a54290e7972d0257d451))
+
+
 ## [1.5.53](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.52...rel/system-services/nvidia-installer/1.5.53)
 ### other
 * nvidia-installer: Add support for A100 GPUs/NVIDIA Fabric Manager ([#6118](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6118)) ([`c571176`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/c5711767d08afc8c0dd953488e8ddf37aa6e280f))
