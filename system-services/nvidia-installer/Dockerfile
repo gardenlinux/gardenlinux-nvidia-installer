@@ -11,7 +11,7 @@ RUN dpkg --add-architecture i386
 ARG GARDENLINUX_PACKAGES_URL="https://objectstore-3.eu-de-1.cloud.sap:443/v1/AUTH_535c582484f44532aa5e21b2bb5cb471/gardenlinux-packages"
 
 COPY gardenlinux-dev .
-COPY resources resources
+COPY resources/compile.sh resources/compile.sh
 
 # Make sure GARDENLINUX_VERSION is set, then download & install the required deb files
 ARG GARDENLINUX_VERSION
@@ -29,10 +29,14 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     kmod \
     pciutils \
     ca-certificates \
+    wget \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /out /out
+COPY resources/* /opt/nvidia-installer/
 
-COPY resources/load_install_gpu_driver.sh /opt/modulus/load_install_gpu_driver
-COPY resources/install.sh /opt/modulus/nvidia/install.sh
-ENTRYPOINT ["/opt/modulus/load_install_gpu_driver"]
+ARG DRIVER_VERSION
+RUN /opt/nvidia-installer/download_fabricmanager.sh
+
+ENTRYPOINT ["/opt/nvidia-installer/load_install_gpu_driver.sh"]

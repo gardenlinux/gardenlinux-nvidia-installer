@@ -41,13 +41,6 @@ nvidiaInstaller:
     limits:
       cpu: 8
       memory: 1Gi
-  pauseResources:
-    requests:
-      cpu: 10m
-      memory: 10Mi
-    limits:
-      cpu: 10m
-      memory: 10Mi
   environment:
    - name: IGNORE_MISSING_MODULE_SYMVERS
      value: "1"

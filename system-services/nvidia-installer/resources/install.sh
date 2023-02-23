@@ -27,4 +27,16 @@ if [ ! -e /dev/nvidia-uvm ] ; then
     mknod -m 666 /dev/nvidia-uvm c "$D" 0
 fi
 
+# For A100 GPUs we install additional device files to support Fabric Manager
+GPU_NAME=$("${NVIDIA_BIN}"/nvidia-smi -i 0 --query-gpu=name --format=csv,noheader)
+if [[ "$GPU_NAME" == *"A100"* ]]; then
+  "${NVIDIA_BIN}"/nvidia-modprobe --unified-memory --nvlink
+  "${NVIDIA_BIN}"/nvidia-modprobe --nvswitch -c 0
+  "${NVIDIA_BIN}"/nvidia-modprobe --nvswitch -c 1
+  "${NVIDIA_BIN}"/nvidia-modprobe --nvswitch -c 2
+  "${NVIDIA_BIN}"/nvidia-modprobe --nvswitch -c 3
+  "${NVIDIA_BIN}"/nvidia-modprobe --nvswitch -c 4
+  "${NVIDIA_BIN}"/nvidia-modprobe --nvswitch -c 5
+fi
+
 echo "NVIDIA driver installed OK"

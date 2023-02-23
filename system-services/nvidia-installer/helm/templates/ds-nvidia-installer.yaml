@@ -42,7 +42,7 @@ spec:
       initContainers:
       {{- end }}
       - image: {{ printf "%s/%s:%s" .Values.global.imageRepository .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
-        name: modulus
+        name: install-driver
         imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
         args:
         {{- if .Values.debug }}
@@ -66,16 +66,24 @@ spec:
         - name: ld-root
           mountPath: /root
         - name: module-cache
-          mountPath: /opt/modulus/cache
+          mountPath: /opt/nvidia-installer/cache
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
       {{- if not .Values.debug }}
       containers:
-      - image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaInstaller.pauseImage }}
-        name: pause
-        resources:
-{{ toYaml .Values.nvidiaInstaller.pauseResources | indent 12 }}
       {{- end }}
+      - image: {{ printf "%s/%s:%s" .Values.global.imageRepository .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+        command: ["/opt/nvidia-installer/install_fabricmanager.sh"]
+        name: fabricmanager
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: dev
+          mountPath: /dev
+        - name: module-cache
+          mountPath: /opt/nvidia-installer/cache
+        resources:
+{{ toYaml .Values.nvidiaInstaller.installerResources | indent 12 }}
 {{- if .Values.nvidiaInstaller.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nvidiaInstaller.nodeSelector | indent 8 }}
@@ -93,7 +101,7 @@ spec:
           path: /
       - name: module-cache
         hostPath:
-          path: /opt/modulus/cache
+          path: /opt/nvidia-installer/cache
       - name: module-install-dir-base
         hostPath:
           path: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}

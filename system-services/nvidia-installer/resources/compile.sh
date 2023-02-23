@@ -36,6 +36,8 @@ fi
 echo "Archiving assets"
 OUTDIR="/out/nvidia/$DRIVER_VERSION"
 mkdir -p "$OUTDIR"/lib/modules/"$KERNEL_VERSION" "$OUTDIR"/bin
+
+# Archive driver files
 cp ./*.so* "$OUTDIR"/lib
 cp kernel/*.ko /lib/modules/"$KERNEL_VERSION"/modules.* "$OUTDIR"/lib/modules/"$KERNEL_VERSION"
 

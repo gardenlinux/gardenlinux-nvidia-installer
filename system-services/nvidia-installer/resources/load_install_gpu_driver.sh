@@ -1,18 +1,11 @@
 #!/bin/bash
-echo "modulus begins"
+echo "nvidia-installer begins"
 set -e
 
-BIN_DIR=${BIN_DIR:-/opt/modulus}
+BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
 # shellcheck disable=SC1090
-[ -e "$BIN_DIR"/.env ] && source "$BIN_DIR"/.env
-CACHE_DIR=${CACHE_DIR:-$BIN_DIR/cache}
-INSTALL_DIR=${INSTALL_DIR:-/opt/drivers}
+source "$BIN_DIR"/set_env_vars.sh
 LD_ROOT=${LD_ROOT:-/}
-DEBUG=${DEBUG:-false}
-DRIVER_NAME=nvidia
-# Look for a file <driver version>.tar.gz and remove the .tar.gz to get the driver version
-# shellcheck disable=SC2012
-DRIVER_VERSION=$(ls /out/nvidia | sed 's/.tar.gz//')
 
 main() {
     parse_parameters "${@}"
@@ -32,10 +25,10 @@ main() {
       tar xzf /out/"${DRIVER_NAME}"/"${DRIVER_VERSION}".tar.gz -C "${CACHE_DIR}"/"${DRIVER_NAME}"
     fi
 
-    install "$DRIVER_NAME" "$DRIVER_VERSION"
+    NVIDIA_BIN="${NVIDIA_ROOT}/bin"
+    install "$DRIVER_NAME" "$DRIVER_VERSION" "$NVIDIA_BIN"
 
-    export LD_LIBRARY_PATH="${BIN_DIR}/cache/${DRIVER_NAME}/${DRIVER_VERSION}/lib"
-    if ! "${BIN_DIR}/cache/${DRIVER_NAME}/${DRIVER_VERSION}/bin/nvidia-smi"; then
+    if ! "${NVIDIA_BIN}/nvidia-smi"; then
         echo "[ERROR] driver installation failed. Could not run nvidia-smi."
         exit 1
     fi
@@ -91,6 +84,7 @@ driver_in_cache() {
 install() {
     local DRIVER_NAME=$1
     local DRIVER_VERSION=$2
+    local NVIDIA_BIN=$3
 
     mkdir -p "${INSTALL_DIR}"
     rm -rf "${INSTALL_DIR:?}/${DRIVER_NAME}"
@@ -103,7 +97,7 @@ install() {
         ldconfig -r "${LD_ROOT}" 2> /dev/null
     fi
     # shellcheck disable=SC1090
-    source "${BIN_DIR}/${DRIVER_NAME}/install.sh"
+    source "${BIN_DIR}/install.sh"
 }
 
 print_menu() {
