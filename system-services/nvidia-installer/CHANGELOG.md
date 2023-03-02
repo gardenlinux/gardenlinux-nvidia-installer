@@ -1,6 +1,8 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.55](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.54...rel/system-services/nvidia-installer/1.5.55)
+
 ## [1.5.54](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.53...rel/system-services/nvidia-installer/1.5.54)
 ### other
 * nvidia-installer: Ignore protecode vulnerabilities ([#6132](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6132)) ([`11e5d92`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/11e5d92236d5370f10c1a54290e7972d0257d451))
