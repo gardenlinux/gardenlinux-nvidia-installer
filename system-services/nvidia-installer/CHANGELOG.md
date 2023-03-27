@@ -1,6 +1,8 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.57](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.56...rel/system-services/nvidia-installer/1.5.57)
+
 ## [1.5.56](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.55...rel/system-services/nvidia-installer/1.5.56)
 ### other
 * nvidia-installer: add support for Garden Linux 934.6.0 ([#6345](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6345)) ([`3a6159f`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/3a6159f635e1dbb3cb7d67f74b15f642d6baed4b))

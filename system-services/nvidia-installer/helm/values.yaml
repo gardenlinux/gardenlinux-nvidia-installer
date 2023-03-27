@@ -11,7 +11,7 @@ nvidiaInstaller:
   # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
   installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
   # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 1.5.56
+  installerTag: 1.5.57
   # Do not edit pauseImage - this is generated from a patch in component.yaml
   pauseImage: com.sap.ai/pause:3.1.0-sap4
   hostDriverPath: /opt/drivers
@@ -47,7 +47,7 @@ nvidiaInstaller:
 
 nvidiaDevicePlugin:
   # Do not edit devicePluginImage - this is generated from a patch in component.yaml
-  devicePluginImage: com.sap.ai/nvidia-gpu-device-plugin:0.0.1-sap5
+  devicePluginImage: com.sap.ai/nvidia-gpu-device-plugin:0.0.1-sap6
   hostDevicePluginPath: /var/lib/kubelet/device-plugins
   nodeSelector: {}
   nodeAffinity:
