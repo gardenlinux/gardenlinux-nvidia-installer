@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.58](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.57...rel/system-services/nvidia-installer/1.5.58)
+### other
+* Fix nvidia whitesource & protecode ([#6625](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6625)) ([`a06cc96`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a06cc969c79a388a1c20153357b0bae55e4b3a81))
+
+
 ## [1.5.57](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.56...rel/system-services/nvidia-installer/1.5.57)
 
 ## [1.5.56](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.55...rel/system-services/nvidia-installer/1.5.56)
