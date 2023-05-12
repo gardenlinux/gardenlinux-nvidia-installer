@@ -3,6 +3,7 @@
 
 ## [1.5.58](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.57...rel/system-services/nvidia-installer/1.5.58)
 ### other
+* Fix protecode rt ([#6672](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6672)) ([`dccb6aa`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/dccb6aa69b3715d8e131f71e3eadc4b24057b682))
 * nvidia-installer: restore custom_CTNR_Product_Token ([#6662](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6662)) ([`6233293`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/6233293298eb450fca129cb6adfb31530febabe3))
 * Fix nvidia whitesource & protecode ([#6625](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6625)) ([`a06cc96`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/a06cc969c79a388a1c20153357b0bae55e4b3a81))
 
