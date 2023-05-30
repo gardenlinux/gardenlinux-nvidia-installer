@@ -2,6 +2,9 @@
 
 
 ## [1.5.58](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.57...rel/system-services/nvidia-installer/1.5.58)
+### chore
+* **nvidia-installer:** add back custom_wsDockerScanConfig ([#6770](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6770)) ([`65200ff`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/65200ff05fb420345a472522320b72ce1b83af1b))
+
 ### other
 * nvidia-installer: remove version pin from piper-lib-os ([#6693](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6693)) ([`8a10005`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/8a1000598e3fcd1576064deb82e9d87fb44df713))
 * Fix protecode rt ([#6672](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6672)) ([`dccb6aa`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/dccb6aa69b3715d8e131f71e3eadc4b24057b682))
