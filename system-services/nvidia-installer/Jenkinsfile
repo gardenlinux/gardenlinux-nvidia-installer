@@ -193,27 +193,6 @@ pipeline {
                         sh "mono/scripts/run_mono.sh run ${env.SERVICE_PATH}:build -e ${params.BuildContext}"
                     }
                 }
-                stage("Build xmake image (for testing)") {
-                    when { expression { params.BuildXmake == true } }
-                    steps {
-                        script {
-                            utils.retry(){
-                                parallel xmake.make_build_jobs("build", env.GIT_COMMIT, env.PRERELEASE_VERSION)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Xmake publish') {
-            when { expression { params.Release == true } }
-            steps {
-                script {
-                    utils.retry(){
-                        parallel xmake.make_build_jobs("build_and_deploy", env.GIT_COMMIT, env.PRERELEASE_VERSION)
-                    }
-                }
             }
         }
 
