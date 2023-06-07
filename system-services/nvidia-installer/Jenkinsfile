@@ -196,27 +196,6 @@ pipeline {
             }
         }
 
-        stage('Docker publish (will be removed once we consume images from xmake)') {
-            when { expression { params.Release == true } }
-            steps {
-                script {
-                    // iterate over all build configs (1 per Garden Linux/NVIDIA driver combination)
-                    utils.retry(){
-                        xmake.build_config.each {
-                            if(it.uri != "") {
-                                sh "docker pull ${XMAKE_REGISTRY}/${it.uri}:${VERSION}"
-                                sh "docker tag \
-                                    ${XMAKE_REGISTRY}/${it.uri}:${VERSION} \
-                                    eu.gcr.io/sap-ml-mlf-dev/${it.uri}:${VERSION}"
-                                sh "docker push \
-                                    eu.gcr.io/sap-ml-mlf-dev/${it.uri}:${VERSION}"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Setup Git Remote') {
             when { expression { params.Release == true } }
             steps {
