@@ -1,6 +1,12 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.59](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.58...rel/system-services/nvidia-installer/1.5.59)
+### chore
+* **ci:** remove docker push to gcr ([#6826](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6826)) ([`5160eee`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/5160eee1d9f67fd1670df6b9bcec580117dda14b))
+* **ci:** xmake deprecated push to internet facing artifactory from sp-od jobs ([#6817](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6817)) ([`328a838`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/328a8385e4fa6e4418ab750c409b803f3860e922))
+
+
 ## [1.5.58](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.57...rel/system-services/nvidia-installer/1.5.58)
 ### chore
 * **nvidia-installer:** add back custom_wsDockerScanConfig ([#6770](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6770)) ([`65200ff`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/65200ff05fb420345a472522320b72ce1b83af1b))
