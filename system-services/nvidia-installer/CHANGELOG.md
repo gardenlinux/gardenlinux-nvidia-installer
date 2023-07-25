@@ -1,6 +1,11 @@
 # Changelog - system-services/nvidia-installer
 
 
+## [1.5.60](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.59...rel/system-services/nvidia-installer/1.5.60)
+### other
+* chore(ci):create auto PR to mlf-gitops ([#7121](https://github.wdf.sap.corp/ICN-ML/aicore/pull/7121)) ([`8b8f739`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/8b8f739d6dc148bd970f4c35098f6608202b0a26))
+
+
 ## [1.5.59](https://github.wdf.sap.corp/ICN-ML/aicore/compare/rel/system-services/nvidia-installer/1.5.58...rel/system-services/nvidia-installer/1.5.59)
 ### chore
 * **ci:** remove docker push to gcr ([#6826](https://github.wdf.sap.corp/ICN-ML/aicore/pull/6826)) ([`5160eee`](https://github.wdf.sap.corp/ICN-ML/aicore/commit/5160eee1d9f67fd1670df6b9bcec580117dda14b))
