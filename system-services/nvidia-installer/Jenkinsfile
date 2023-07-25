@@ -211,47 +211,6 @@ pipeline {
             }
         }
 
-        stage('Push helm chart to mlf-gitops repository') {
-            when { expression { params.Release == true } }
-            steps {
-                dir("${WORKSPACE}") {
-                    withCredentials([usernamePassword(credentialsId: 'mlf-gitops-write-serviceuser',
-                        usernameVariable: 'GITHUB_USER',
-                        passwordVariable: 'GITHUB_TOKEN')]) {
-
-                        script {
-                            def repo_folder="tmp/mlf-gitops"
-                            def source_branch = env.BRANCH_NAME.startsWith("rel-") ? "integration" : "main"
-                            def repo_url="https://github.wdf.sap.corp/ICN-ML/aicore"
-                            def service_name="nvidia-installer"
-                            def service_path="services/nvidia-installer/source"
-                            try {
-                                sh """
-                                    git clone "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.tools.sap/MLF/mlf-gitops" \
-                                        --branch "${source_branch}" \
-                                        --depth 2 \
-                                        "${repo_folder}"
-                                """
-                                sh """
-                                    ./${repo_folder}/tooling/upload_component_resources_v2.sh \
-                                      --source-branch "${source_branch}" \
-                                      --name "${service_name}" \
-                                      --copy-from-to "system-services/nvidia-installer/helm:${service_path}/service/chart" \
-                                      --repository "${repo_url}" \
-                                      --version "${VERSION}" \
-                                      --create-pr "false"
-                                """
-                                utils.create_gitops_pr_with_label(service_name, VERSION, repo_url, source_branch)
-                            } finally {
-                                sh """
-                                    rm -rf ${repo_folder}
-                                """
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         stage('Protecode Scan') {
             when { expression { params.RunProtecode == true } }

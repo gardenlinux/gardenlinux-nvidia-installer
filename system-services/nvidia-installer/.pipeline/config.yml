@@ -26,5 +26,11 @@ steps:
     uploadChangeRequest: False
     orgToken: '6971b2eec2d3420bad0caf173ec629f6a3c7d3ba63f3445ab99ffdbf1acfb1d0'
     verbose: False
+
+ContinuousDelivery:
+- name: "nvidia-installer"
+  SourceTargetList:
+  - system-services/nvidia-installer/helm:services/nvidia-installer/source/service/chart
+
 InjectSecretInTestFromVault:
   whitesourceDockerSecretVaultPath: 'product/AI/aif_inject_secrets/ai_core/whitesource_docker'
