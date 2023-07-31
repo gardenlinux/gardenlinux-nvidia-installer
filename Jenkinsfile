@@ -43,8 +43,8 @@ pipeline {
     environment {
         AUDITLOG_VALUES=""
         KUBECONFIG="/var/lib/jenkins/.kube/kube_gardenerAws_eu-west-1_aicore-pr-valid_config"
-        SERVICE_PATH="system-services/nvidia-installer"
-        HELM_PATH="system-services/nvidia-installer/helm"
+        SERVICE_PATH="."
+        HELM_PATH="helm"
         CHART_NAME="nvidia-installer"
         SAP_ARTIFACTORY_DMZ_API_TOKEN_CREDENTIAL_ID="sap-artifactory-dmz-api-token"
         SAP_REMOTE_CACHE_REGISTRY="remote-docker.docker.repositories.sapcdn.io"
@@ -151,10 +151,10 @@ pipeline {
 
         stage('Piper Setup') {
             //Setting up for upcoming piper steps (SapCumulusUpload, )
-            // Update the configs in 'system-services/nvidia-installer/.pipeline/config.yml'
+            // Update the configs in '.pipeline/config.yml'
             steps {
                 script{
-                    dir("${WORKSPACE}/system-services/nvidia-installer"){
+                    dir("${WORKSPACE}"){
                         setupPipelineEnvironment script: this
                         //Setting up params for ws scan for docker images
                         if(params.RunWhitesource == true){
@@ -216,7 +216,7 @@ pipeline {
             when { expression { params.RunProtecode == true } }
             steps {
                 script {
-                    dir("${WORKSPACE}/system-services/nvidia-installer"){
+                    dir("${WORKSPACE}"){
                         // Scan only the first config, as all are using the same base image and just copy in the
                         // compiled kernel modules
                         utils.retry(){
@@ -239,7 +239,7 @@ pipeline {
                 script{
                     def vaultAddress = 'https://vault.ml.only.sap'
                     def version = env.BRANCH_NAME == 'main'? env.BRANCH_NAME : "${VERSION}"
-                    dir("${WORKSPACE}/system-services/nvidia-installer"){
+                    dir("${WORKSPACE}"){
                         // Scan only the first config, as all are using the same base image and just copy in the
                         // compiled kernel modules
                         def config = xmake.build_config[0]

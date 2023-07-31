@@ -34,7 +34,7 @@ steps:
     params:
       ComponentName: '{builtin.component_folder_basename}'
       BuildContext: '{builtin.encoded_contexts}'
-      applicationPath: system-services/nvidia-installer
+      applicationPath: gardenlinux-nvidia-installer
       RunStaticScans: '{RunStaticScans}'
       RunUnitTests: '{RunUnitTests}'
       RunTests: '{RunTests}'

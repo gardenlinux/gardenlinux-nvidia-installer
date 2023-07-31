@@ -61,6 +61,6 @@ For each new version of Garden Linux a new developer image must be compiled.
 5. Run `mono run build` to check if the build goes through locally.
 
 
-6. Release a new version of `nvidia-installer` - see `system-services/nvidia-installer/README.md` for details.
+6. Release a new version of `nvidia-installer` - see `README.md` for details.
 
 

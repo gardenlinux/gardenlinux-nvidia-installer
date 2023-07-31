@@ -30,7 +30,7 @@ steps:
 ContinuousDelivery:
 - name: "nvidia-installer"
   SourceTargetList:
-  - system-services/nvidia-installer/helm:services/nvidia-installer/source/service/chart
+  - helm:services/nvidia-installer/source/service/chart
 
 InjectSecretInTestFromVault:
   whitesourceDockerSecretVaultPath: 'product/AI/aif_inject_secrets/ai_core/whitesource_docker'
