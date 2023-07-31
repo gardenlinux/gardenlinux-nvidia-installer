@@ -68,19 +68,17 @@ the modules into the running kernel as part of a Daemonset.
 
 ### Background
 
-Compiling drivers on Container Linux is typically non-trivial because the OS ships
-without build tools and no obvious way to access the kernel sources. Modulus works
-by compiling your kernel modules inside of a Garden Linux developer container,
-which contains the kernel headers and compiler.
-
-### Compiling NVIDIA Kernel Modules
-
-Modulus makes it easy to automatically compile kernel modules for NVIDIA GPUs. See the [NVIDIA README](nvidia/README.md) for detailed instructions.
+Compiling drivers for Garden Linux is typically non-trivial because the OS ships
+without build tools and no obvious way to access the kernel sources. This project works
+by compiling the kernel modules at build-time inside of a Garden Linux developer container
+(which contains the kernel headers and compiler) and then placing the resulting files
+into a Docker image from which they can be installed at runtime.
 
 ### Local Build and release the installer image
 
 To locally build the nvidia-installer image, first make sure the required Garden Linux DEB files are uploaded
-to Swift (see [gardenlinux-dev/README.md](gardenlinux-dev/README.md)) and then run the following, changing the NVIDIA driver & Garden Linux versions as needed:
+to Swift (see [gardenlinux-dev/README.md](gardenlinux-dev/README.md)) and then run the following, changing the 
+NVIDIA driver & Garden Linux versions as needed:
 
 ```bash
 docker build --build-arg DRIVER_VERSION=515.65.01 --build-arg GARDENLINUX_VERSION=934.6.0 .
@@ -96,5 +94,5 @@ All instances of the nvidia-installer must run in a namespace that is allowed to
 spawn pods with `priorityClassName: system-node-critical` - this is e.g. the case
 for the `kube-system` namespace.
 
-In addition, the gpu nodepools must have appropriate node labels so that the
+In addition, the gpu nodepools must have appropriate node labels so that 
 the nvidia-installer instances can target the correct nodes.
