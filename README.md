@@ -79,10 +79,11 @@ Modulus makes it easy to automatically compile kernel modules for NVIDIA GPUs. S
 
 ### Local Build and release the installer image
 
-To locally build the nvidia-installer image run the following
+To locally build the nvidia-installer image, first make sure the required Garden Linux DEB files are uploaded
+to Swift (see [gardenlinux-dev/README.md](gardenlinux-dev/README.md)) and then run the following, changing the NVIDIA driver & Garden Linux versions as needed:
 
 ```bash
-mono run build
+docker build --build-arg DRIVER_VERSION=515.65.01 --build-arg GARDENLINUX_VERSION=934.6.0 .
 ```
 
 ### Practical setup

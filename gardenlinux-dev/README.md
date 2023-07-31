@@ -32,7 +32,8 @@ For each new version of Garden Linux a new developer image must be compiled.
 2. Set the environment variables `KERNEL_VERSION`, `LINUX_VERSION` and `GCC_VERSION` as determined above,
    and `OS_USERNAME` and `OS_PASSWORD` to your SAP credentials, then run `./tooling/upload_gardenlinux_packages.sh`
    This will copy the required packages from the Garden Linux build server to the Swift container
-   `gardenlinux-packages` in Converged Cloud project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home).
+   `gardenlinux-packages` in Converged Cloud project [hcp03/SAPCLEA](https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home) - see the lines beginning `# OpenStack Swift` 
+   in `gardenlinux-dev/tooling/upload_gardenlinux_packages.sh` if you need to change this location.
  
 
 3. **Only if the previous step fails:**

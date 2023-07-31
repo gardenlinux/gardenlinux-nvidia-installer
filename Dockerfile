@@ -7,7 +7,7 @@ RUN dpkg --add-architecture i386
 # This URL is a link to the publicly-readable OpenStack Swift container "gardenlinux-packages" in the
 # Converged Cloud project https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home
 # This container is NOT an official gardenlinux one but a mirror maintained by aicore.
-# The content can be updated following the documentation in ./README.md
+# The content can be updated following the documentation in gardenlinux-dev/README.md
 ARG GARDENLINUX_PACKAGES_URL="https://objectstore-3.eu-de-1.cloud.sap:443/v1/AUTH_535c582484f44532aa5e21b2bb5cb471/gardenlinux-packages"
 
 COPY gardenlinux-dev .
