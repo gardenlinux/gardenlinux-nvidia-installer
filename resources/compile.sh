@@ -1,20 +1,26 @@
 #!/bin/bash
 echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_VERSION"
+
 set -x
 mkdir -p /tmp/nvidia
+
+# TODO: select the correct architecture based on current build systems architecture (assume no cross-build)
+TARGET_ARCH="aarch64"
+
 # shellcheck disable=SC2164
 pushd /tmp/nvidia
-DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-x86_64-$DRIVER_VERSION.run"
+DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$TARGET_ARCH-$DRIVER_VERSION.run"
 if ! curl -Ls "${DRIVER_URL}" -o nvidia.run ; then
   echo "Failed to download ${DRIVER_URL}"
   exit 1
 fi
 chmod +x nvidia.run
-./nvidia.run -x -s || cat nvidia.run
+./nvidia.run -x -s
+
 # shellcheck disable=SC2164
-pushd "./NVIDIA-Linux-x86_64-$DRIVER_VERSION"
+pushd "./NVIDIA-Linux-$TARGET_ARCH-$DRIVER_VERSION"
 export IGNORE_MISSING_MODULE_SYMVERS=1
-if ./nvidia-installer --silent \
+if ./nvidia-installer \
     --no-opengl-files \
     --no-libglx-indirect \
     --no-install-libglvnd \

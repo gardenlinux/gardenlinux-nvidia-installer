@@ -1,29 +1,50 @@
-# Do not edit DEBIAN_BASE_IMAGE_TAG - master value is in component.yaml context section.
-ARG DEBIAN_BASE_IMAGE_TAG=bullseye-20200224-slim
-FROM debian:$DEBIAN_BASE_IMAGE_TAG as builder
+# TODO: We need to publish garden linux container with tags for supported versions.
+#       new releases will have these tags, but still need to backport them.
+# However, working with nightly should be fine as long as we setup the apt repository to the correct Garden Linux version
+FROM ghcr.io/gardenlinux/gardenlinux:nightly
 
+# TODO: verify if we (still) need to support 32bit compat
 RUN dpkg --add-architecture i386
-
-# This URL is a link to the publicly-readable OpenStack Swift container "gardenlinux-packages" in the
-# Converged Cloud project https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home
-# This container is NOT an official gardenlinux one but a mirror maintained by aicore.
-# The content can be updated following the documentation in gardenlinux-dev/README.md
-ARG GARDENLINUX_PACKAGES_URL="https://objectstore-3.eu-de-1.cloud.sap:443/v1/AUTH_535c582484f44532aa5e21b2bb5cb471/gardenlinux-packages"
 
 COPY gardenlinux-dev .
 COPY resources/compile.sh resources/compile.sh
 
-# Make sure GARDENLINUX_VERSION is set, then download & install the required deb files
+# This version is used to get the matching apt repository.
+# The apt repository contains the packages required to build nvidia for the targeted GL
 ARG GARDENLINUX_VERSION
+
+# TODO: pin the gcc version to the GARDENLINUX_VERSION dist.
+# TODO: pin the kernel package to the GARDENLINUX_VERSION dist.
+RUN echo "deb http://repo.gardenlinux.io/gardenlinux ${GARDENLINUX_VERSION} main" > /etc/apt/sources.list
+RUN echo "deb http://repo.gardenlinux.io/gardenlinux today main" > /etc/apt/sources.list
+
 RUN chmod a+w /tmp
-RUN ./install_packages.sh $GARDENLINUX_VERSION
 
-# Make sure DRIVER_VERSION & KERNEL_VERSION are set, then compile the kernel modules
+# Install nvidia kernel module build dependencies
+# NOTE: GCC, kernel header and kernel tools must match the versions used in the targeted Garden Linux version.
+# Install Kernel Headers
+RUN ARCH=$(dpkg --print-architecture) && \
+    sudo apt-get update && \
+    sudo apt-get install -y \
+        kmod \
+        linux-headers-cloud-$ARCH \
+        curl \
+        devscripts \
+        git \
+        pristine-lfs \
+        rsync \
+        ca-certificates \
+        sudo \
+        quilt \
+        dwarves \
+        kernel-wedge \
+        python3-debian \
+        python3-jinja2
+
 ARG DRIVER_VERSION
-RUN export $(./read_image_versions.sh | grep KERNEL_VERSION) && resources/compile.sh
+RUN export KERNEL_VERSION=$(./extract_kernel_version.sh) && resources/compile.sh
 
-
-FROM public.int.repositories.cloud.sap/debian:11.2-slim
+#FROM public.int.repositories.cloud.sap/debian:11.2-slim
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     kmod \
@@ -33,7 +54,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /out /out
+#COPY --from=builder /out /out
 COPY resources/* /opt/nvidia-installer/
 
 ARG DRIVER_VERSION
