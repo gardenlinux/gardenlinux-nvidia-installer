@@ -1,0 +1,15 @@
+Package: linux-image-__TARGET_ARCH__
+Pin: release o=Gardenlinux,n=__GARDENLINUX_VERSION__
+Pin-Priority: 700
+
+Package: linux-headers-__TARGET_ARCH__
+Pin: release o=Gardenlinux,n=__GARDENLINUX_VERSION__
+Pin-Priority: 700
+
+Package: linux-image-cloud-__TARGET_ARCH__
+Pin: release o=Gardenlinux,n=__GARDENLINUX_VERSION__
+Pin-Priority: 700
+
+Package: linux-headers-cloud-__TARGET_ARCH__
+Pin: release o=Gardenlinux,n=__GARDENLINUX_VERSION__
+Pin-Priority: 700

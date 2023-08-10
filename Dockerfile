@@ -4,7 +4,7 @@
 FROM ghcr.io/gardenlinux/gardenlinux:nightly
 
 # TODO: verify if we (still) need to support 32bit compat
-RUN dpkg --add-architecture i386
+#RUN dpkg --add-architecture i386
 
 COPY gardenlinux-dev .
 COPY resources/compile.sh resources/compile.sh
@@ -12,22 +12,26 @@ COPY resources/compile.sh resources/compile.sh
 # This version is used to get the matching apt repository.
 # The apt repository contains the packages required to build nvidia for the targeted GL
 ARG GARDENLINUX_VERSION
+ARG TARGET_ARCH
 
-# TODO: pin the gcc version to the GARDENLINUX_VERSION dist.
-# TODO: pin the kernel package to the GARDENLINUX_VERSION dist.
-RUN echo "deb http://repo.gardenlinux.io/gardenlinux ${GARDENLINUX_VERSION} main" > /etc/apt/sources.list
-RUN echo "deb http://repo.gardenlinux.io/gardenlinux today main" > /etc/apt/sources.list
+
+# Set the appropriate apt priorities.
+RUN sed "s/__GARDENLINUX_VERSION__/${GARDENLINUX_VERSION}/g" gardenlinux.pref >  gardenlinux.pref.versioned && \
+    sed "s/__TARGET_ARCH__/${TARGET_ARCH}/g" gardenlinux.pref.versioned > /etc/apt/preferences.d/gardenlinux && \
+    echo "deb http://repo.gardenlinux.io/gardenlinux ${GARDENLINUX_VERSION} main" > /etc/apt/sources.list && \
+    echo "deb http://repo.gardenlinux.io/gardenlinux today main" >> /etc/apt/sources.list && \
+    apt update && apt policy
+
 
 RUN chmod a+w /tmp
 
 # Install nvidia kernel module build dependencies
 # NOTE: GCC, kernel header and kernel tools must match the versions used in the targeted Garden Linux version.
 # Install Kernel Headers
-RUN ARCH=$(dpkg --print-architecture) && \
-    sudo apt-get update && \
+RUN sudo apt-get update && \
     sudo apt-get install -y \
         kmod \
-        linux-headers-cloud-$ARCH \
+        linux-headers-cloud-$TARGET_ARCH \
         curl \
         devscripts \
         git \
@@ -42,6 +46,7 @@ RUN ARCH=$(dpkg --print-architecture) && \
         python3-jinja2
 
 ARG DRIVER_VERSION
+
 RUN export KERNEL_VERSION=$(./extract_kernel_version.sh) && resources/compile.sh
 
 #FROM public.int.repositories.cloud.sap/debian:11.2-slim
