@@ -1,29 +1,61 @@
-# Do not edit DEBIAN_BASE_IMAGE_TAG - master value is in component.yaml context section.
-ARG DEBIAN_BASE_IMAGE_TAG=bullseye-20200224-slim
-FROM debian:$DEBIAN_BASE_IMAGE_TAG as builder
+# TODO: We need to publish garden linux container with tags for supported versions.
+#       new releases will have these tags, but still need to backport them.
+# However, working with nightly should be fine as long as we setup the apt repository to the correct Garden Linux version
+FROM ghcr.io/gardenlinux/gardenlinux:nightly AS builder
 
-RUN dpkg --add-architecture i386
+# Target NVIDIA Driver 
+ARG DRIVER_VERSION
+# This version is used to get the matching apt repository.
+# The apt repository contains the packages required to build nvidia for the targeted GL
+ARG GARDENLINUX_VERSION
+# Target architecture. 
+# WARNING: the fabric manager does currently not exist for arm64
+ARG TARGET_ARCH
 
-# This URL is a link to the publicly-readable OpenStack Swift container "gardenlinux-packages" in the
-# Converged Cloud project https://dashboard.eu-de-1.cloud.sap/hcp03/sapclea/home
-# This container is NOT an official gardenlinux one but a mirror maintained by aicore.
-# The content can be updated following the documentation in gardenlinux-dev/README.md
-ARG GARDENLINUX_PACKAGES_URL="https://objectstore-3.eu-de-1.cloud.sap:443/v1/AUTH_535c582484f44532aa5e21b2bb5cb471/gardenlinux-packages"
+# TODO: verify if we (still) need to support 32bit compat
+#RUN dpkg --add-architecture i386
 
 COPY gardenlinux-dev .
 COPY resources/compile.sh resources/compile.sh
 
-# Make sure GARDENLINUX_VERSION is set, then download & install the required deb files
-ARG GARDENLINUX_VERSION
-RUN chmod a+w /tmp
-RUN ./install_packages.sh $GARDENLINUX_VERSION
 
-# Make sure DRIVER_VERSION & KERNEL_VERSION are set, then compile the kernel modules
+COPY gardenlinux-dev/gardenlinux.pref gardenlinux.pref
+# Set the appropriate apt priorities.
+RUN sed "s/__GARDENLINUX_VERSION__/${GARDENLINUX_VERSION}/g" gardenlinux.pref >  gardenlinux.pref.versioned && \
+    sed "s/__TARGET_ARCH__/${TARGET_ARCH}/g" gardenlinux.pref.versioned > /etc/apt/preferences.d/gardenlinux && \
+    echo "deb http://repo.gardenlinux.io/gardenlinux ${GARDENLINUX_VERSION} main" > /etc/apt/sources.list && \
+    echo "deb http://repo.gardenlinux.io/gardenlinux today main" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian trixie main" >> /etc/apt/sources.list && \
+    apt update && apt policy
+
+RUN sudo apt-get update && \
+    sudo apt-get install -y \
+        kmod \
+        linux-headers-cloud-$TARGET_ARCH \
+        curl \
+        devscripts \
+        git \
+        pristine-lfs \
+        libncursesw6 libncurses6 libncurses-dev \
+        rsync \
+        ca-certificates \
+        sudo \
+        quilt \
+        dwarves \
+        kernel-wedge \
+        python3-debian \
+        python3-jinja2 \
+        build-essential
+
+RUN export KERNEL_VERSION=$(./extract_kernel_version.sh) && resources/compile.sh
+
+# FROM public.int.repositories.cloud.sap/debian:11.2-slim
+FROM debian:bookworm-slim
+ARG TARGET_ARCH
 ARG DRIVER_VERSION
-RUN export $(./read_image_versions.sh | grep KERNEL_VERSION) && resources/compile.sh
 
-
-FROM public.int.repositories.cloud.sap/debian:11.2-slim
+COPY --from=builder /out /out
+COPY resources/* /opt/nvidia-installer/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     kmod \
@@ -32,9 +64,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     wget \
     xz-utils \
     && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /out /out
-COPY resources/* /opt/nvidia-installer/
 
 ARG DRIVER_VERSION
 RUN /opt/nvidia-installer/download_fabricmanager.sh
