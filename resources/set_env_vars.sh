@@ -8,3 +8,7 @@ DRIVER_NAME=nvidia
 DRIVER_VERSION=$(ls /out/nvidia | sed 's/.tar.gz//')
 NVIDIA_ROOT="${BIN_DIR}/cache/${DRIVER_NAME}/${DRIVER_VERSION}"
 export LD_LIBRARY_PATH="${NVIDIA_ROOT}/lib"
+
+declare -A arch_translation
+arch_translation=(["amd64"]="x86_64" ["arm64"]="aarch64")
+ARCH_TYPE=${arch_translation[$TARGET_ARCH]}

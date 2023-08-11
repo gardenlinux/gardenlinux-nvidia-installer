@@ -43,6 +43,7 @@ case $TARGET_ARCH in
           --no-drm \
           --no-install-compat32-libs \
           --no-opengl-files \
+          --ui=none --no-questions \
           --no-kernel-module-source \
           --log-file-name="$PWD"/nvidia-installer.log \
         && test -e kernel/nvidia.ko
@@ -63,13 +64,16 @@ case $TARGET_ARCH in
           --no-drm \
           --no-opengl-files \
           --no-kernel-module-source \
+          --ui=none --no-questions \
           --log-file-name="$PWD"/nvidia-installer.log \
         && test -e kernel/nvidia.ko
       then
         echo "Successfully compiled NVIDIA modules"
       else 
         echo "[ERROR] Failed to compile NVIDIA modules"
+        cat /tmp/nvidia/NVIDIA-Linux-aarch64-535.86.10/nvidia-installer.log
         cat "$PWD"/nvidia-installer.log
+
         exit 1
       fi
         ;;

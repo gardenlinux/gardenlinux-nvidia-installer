@@ -14,12 +14,13 @@ COPY resources/compile.sh resources/compile.sh
 ARG GARDENLINUX_VERSION
 ARG TARGET_ARCH
 
-
+COPY gardenlinux-dev/gardenlinux.pref gardenlinux.pref
 # Set the appropriate apt priorities.
 RUN sed "s/__GARDENLINUX_VERSION__/${GARDENLINUX_VERSION}/g" gardenlinux.pref >  gardenlinux.pref.versioned && \
     sed "s/__TARGET_ARCH__/${TARGET_ARCH}/g" gardenlinux.pref.versioned > /etc/apt/preferences.d/gardenlinux && \
     echo "deb http://repo.gardenlinux.io/gardenlinux ${GARDENLINUX_VERSION} main" > /etc/apt/sources.list && \
     echo "deb http://repo.gardenlinux.io/gardenlinux today main" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian trixie main" >> /etc/apt/sources.list && \
     apt update && apt policy
 
 
@@ -36,6 +37,7 @@ RUN sudo apt-get update && \
         devscripts \
         git \
         pristine-lfs \
+        libncursesw6 libncurses6 libncurses-dev \
         rsync \
         ca-certificates \
         sudo \
@@ -43,7 +45,8 @@ RUN sudo apt-get update && \
         dwarves \
         kernel-wedge \
         python3-debian \
-        python3-jinja2
+        python3-jinja2 \
+        build-essential
 
 ARG DRIVER_VERSION
 
@@ -59,7 +62,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-#COPY --from=builder /out /out
+# COPY --from=builder /out /out
 COPY resources/* /opt/nvidia-installer/
 
 ARG DRIVER_VERSION
