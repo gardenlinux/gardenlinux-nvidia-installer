@@ -12,6 +12,11 @@ ARG GARDENLINUX_VERSION
 # WARNING: the fabric manager does currently not exist for arm64
 ARG TARGET_ARCH
 
+RUN \
+    : "${TARGET_ARCH:?Build argument needs to be set and non-empty.}" \
+    : "${DRIVER_VERSION:?Build argument needs to be set and non-empty.}" \
+    : "${GARDENLINUX_VERSION:?Build argument needs to be set and non-empty.}"
+
 # TODO: verify if we (still) need to support 32bit compat
 #RUN dpkg --add-architecture i386
 
@@ -47,7 +52,7 @@ RUN sudo apt-get update && \
         python3-jinja2 \
         build-essential
 
-RUN export KERNEL_VERSION=$(./extract_kernel_version.sh) && resources/compile.sh
+RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${TARGET_ARCH}) && resources/compile.sh
 
 # FROM public.int.repositories.cloud.sap/debian:11.2-slim
 FROM debian:bookworm-slim
