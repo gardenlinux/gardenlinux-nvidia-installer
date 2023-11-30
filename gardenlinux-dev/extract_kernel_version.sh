@@ -7,7 +7,9 @@
 # This script simply unfolds the package dependency until the real linux-header package is found. 
 # The real package contains the full kernel version (already in the name).
 
-kernel_pkg_name=linux-headers-cloud-arm64
+ARCH=$1
+
+kernel_pkg_name="linux-headers-cloud-$ARCH"
 
 get_depends(){
     apt-cache depends $1 | grep "Depends:" | cut -d':' -f2 | sed 's/^ //'
