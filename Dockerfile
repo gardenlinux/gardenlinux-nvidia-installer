@@ -50,12 +50,15 @@ RUN apt-get update && \
         kernel-wedge \
         python3-debian \
         python3-jinja2 \
-        build-essential
+        build-essential \
+
+# RUN export $(./read_image_versions.sh | xargs) && ./install_debian_packages.sh
+# RUN export $(./read_image_versions.sh | xargs) && ./install_gardenlinux_packages.sh
 
 RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${TARGET_ARCH}) && resources/compile.sh
 
 # FROM public.int.repositories.cloud.sap/debian:11.2-slim
-FROM debian:bookworm-slim
+FROM debian:bookworm-slim as packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
 
@@ -72,5 +75,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 ARG DRIVER_VERSION
 RUN /opt/nvidia-installer/download_fabricmanager.sh
+
+RUN apt-get remove -y --autoremove --allow-remove-essential openssl wget ncurses-base ncurses-bin gpg freeradius-krb5 libdb5.3 \
+    && rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x86_64-linux-gnu/libsystemd.so.0.30.0
+
+FROM scratch
+
+COPY --from=packager / /
 
 ENTRYPOINT ["/opt/nvidia-installer/load_install_gpu_driver.sh"]

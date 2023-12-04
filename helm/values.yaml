@@ -1,19 +1,20 @@
 global:
   imageRepository: "build-releases.common.repositories.cloud.sap"
   imagePullSecret:
-    location: cluster-secrets/docker-registry-gcr-eu
+    # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
+    dockercfg: "e30K"
+    annotations:
 
 debug: false
 
 imagePullSecrets:
 
 nvidiaInstaller:
-  # installerImage actual value should be set in mlf-gitops cluster-service-list/templates/nvidia-installer-XXX.yaml
-  installerImage: com.sap.ai/nvidia-installer-<gardlenlinux-version>-<driver version>
-  # Do not edit installerTag - this is generated from a patch in component.yaml
-  installerTag: 1.5.60
-  # Do not edit pauseImage - this is generated from a patch in component.yaml
-  pauseImage: com.sap.ai/pause:3.1.0-sap4
+  # TODO: Edit <gardenlinux-version> and <driver-version> accordingly
+  installerImage: com.sap.ai/nvidia-installer-<gardenlinux-version>-<driver-version>
+  # TODO: Edit image tag
+  installerTag: latest
+  pauseImage: gcr.io/google_containers/pause-amd64:3.0
   hostDriverPath: /opt/drivers
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -23,7 +24,8 @@ nvidiaInstaller:
           operator: Exists
         - key: os-version
           operator: In
-          values: ["318.8.0"]
+          # TODO: Edit <gardenlinux-version>
+          values: ["<gardenlinux-version>"]
           # Do not edit gardenlinuxVersion above - actual version is defined in mlf-gitops/services/nvidia-installer/values/<version>.yaml
   tolerations:
   - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
@@ -46,8 +48,10 @@ nvidiaInstaller:
      value: "1"
 
 nvidiaDevicePlugin:
-  # Do not edit devicePluginImage - this is generated from a patch in component.yaml
-  devicePluginImage: com.sap.ai/nvidia-gpu-device-plugin:0.0.1-sap6
+  # Image URI from https://github.com/GoogleCloudPlatform/container-engine-accelerators/blob/master/cmd/nvidia_gpu/device-plugin.yaml
+  devicePluginImage: gcr.io/gke-release/nvidia-gpu-device-plugin@sha256:6b25281cd0fa3ca55f3e837a18be4a14b44952105568f466530dd85bcebde62f
+  # TODO: Edit <driver-version>
+  nvidiaDriverVersion: <driver-version>
   hostDevicePluginPath: /var/lib/kubelet/device-plugins
   nodeSelector: {}
   nodeAffinity:
@@ -58,8 +62,8 @@ nvidiaDevicePlugin:
           operator: Exists
         - key: os-version
           operator: In
-          values: ["318.8.0"]
-          # Do not edit gardenlinuxVersion above - actual version is defined in mlf-gitops/services/nvidia-installer/values/<version>.yaml
+          # TODO: Edit <gardenlinux-version>
+          values: ["<gardenlinux-version>"]
   tolerations:
   - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
     operator: Exists
@@ -71,8 +75,7 @@ nvidiaDevicePlugin:
     operator: Exists
   resources:
     requests:
-      cpu: 10m
-      memory: 10Mi
-    limits:
       cpu: 50m
-      memory: 10Mi
+      memory: 100Mi
+    limits:
+      memory: 100Mi

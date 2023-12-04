@@ -20,12 +20,12 @@
 #
 # The various needed files should be sourced from the Garden Linux team (e.g. this thread:
 # https://sap-ml.slack.com/archives/CV1SWRHR6/p1629759358011800?thread_ts=1629753024.011500&cid=CV1SWRHR6)
-# and then put into the S3 bucket gardenlinux-packages-public, so the files will have URLs like:
-# https://gardenlinux-packages-public.s3.eu-central-1.amazonaws.com/kernel_5.4.0-6_linux_5.4.93-1/linux-compiler-gcc-10-x86_5.4.93-1_amd64.deb
 
 # You might be OK with just editing `upload_gardenlinux_packages.sh` with the needed versions from the table below and then running it.
 
 GARDENLINUX_VERSION | KERNEL_VERSION                   | DEBIAN_BASE_IMAGE_TAG  | GCC_VERSION | GCC_LINUX_VERSION      | LINUX_VERSION          | LINUX_DATE
 #-------------------+----------------------------------+------------------------+-------------+------------------------+------------------------+-----------
-576.12.0            | 5.10.141-garden-cloud-amd64      | bullseye-20200224-slim | 10.4.0-4    | 5.10.141-0gardenlinux1 | 5.10.141-0gardenlinux1 | 2022-09-07
-934.6.0             | 5.15.101-gardenlinux-cloud-amd64 | bullseye-20200224-slim | 12.2.0-14   | 5.15.101-0gardenlinux1 | 5.15.101-0gardenlinux1 | 2023-03-12
+934.8.0             | 5.15.110-gardenlinux-cloud-amd64 | bullseye-20200224-slim | 12.2.0-14   | 5.15.110-0gardenlinux1 | 5.15.110-0gardenlinux1 | 2023-05-04
+934.10.0            | 5.15.125-gardenlinux-cloud-amd64 | bullseye-20200224-slim | 13.2.0-1    | 5.15.125-0gardenlinux1 | 5.15.125-0gardenlinux1 | 2023-08-09
+934.11.0            | 5.15.135-gardenlinux-cloud-amd64 | bullseye-20200224-slim | 13.2.0-4    | 5.15.135-0gardenlinux1 | 5.15.135-0gardenlinux1 | 2023-10-12
+934.11.0-baremetal  | 5.15.135-gardenlinux-amd64       | bullseye-20200224-slim | 13.2.0-4    | 5.15.135-0gardenlinux1 | 5.15.135-0gardenlinux1 | 2023-10-12
