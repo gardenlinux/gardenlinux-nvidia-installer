@@ -33,8 +33,8 @@ RUN sed "s/__GARDENLINUX_VERSION__/${GARDENLINUX_VERSION}/g" gardenlinux.pref > 
     echo "deb http://deb.debian.org/debian trixie main" >> /etc/apt/sources.list && \
     apt update && apt policy
 
-RUN sudo apt-get update && \
-    sudo apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y \
         kmod \
         linux-headers-cloud-$TARGET_ARCH \
         curl \
