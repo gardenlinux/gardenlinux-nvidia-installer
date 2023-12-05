@@ -50,7 +50,7 @@ RUN apt-get update && \
         kernel-wedge \
         python3-debian \
         python3-jinja2 \
-        build-essential \
+        build-essential
 
 # RUN export $(./read_image_versions.sh | xargs) && ./install_debian_packages.sh
 # RUN export $(./read_image_versions.sh | xargs) && ./install_gardenlinux_packages.sh
