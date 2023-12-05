@@ -1,13 +1,14 @@
 ARG DEBIAN_BASE_IMAGE_TAG=bullseye-20200224-slim
 FROM debian:$DEBIAN_BASE_IMAGE_TAG
 
-RUN apt-get -o Acquire::Check-Valid-Until=false update
+RUN apt-get -o Acquire::Check-Valid-Until=false -o Acquire::AllowInsecureRepositories=true update
 
-RUN apt-get install -y --allow-downgrades --no-install-recommends \
+RUN apt-get install -y --allow-downgrades --no-install-recommends --allow-unauthenticated \
       build-essential \
       ca-certificates \
       curl \
       binutils \
+      shellcheck \
       wget && \
     apt autoremove -y
 
@@ -17,8 +18,6 @@ RUN curl --silent \
     https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     | tar xvzf - \
     && mv linux-amd64/helm /usr/local/bin/helm
-
-RUN apt-get -o Acquire::Check-Valid-Until=false update && apt install shellcheck
 
 RUN wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz && \
     tar xf kubeconform-linux-amd64.tar.gz && \

@@ -11,11 +11,16 @@ ARG GARDENLINUX_VERSION
 # Target architecture. 
 # WARNING: the fabric manager does currently not exist for arm64
 ARG TARGET_ARCH
+# Linux headers
+# Set to "linux-headers" if compiling for a baremetal (non-cloud) kernel version
+ARG LINUX_HEADERS=linux-headers-cloud
 
 RUN \
     : "${TARGET_ARCH:?Build argument needs to be set and non-empty.}" \
     : "${DRIVER_VERSION:?Build argument needs to be set and non-empty.}" \
     : "${GARDENLINUX_VERSION:?Build argument needs to be set and non-empty.}"
+
+ENV LINUX_HEADERS=${LINUX_HEADERS}-$TARGET_ARCH
 
 # TODO: verify if we (still) need to support 32bit compat
 #RUN dpkg --add-architecture i386
@@ -31,12 +36,12 @@ RUN sed "s/__GARDENLINUX_VERSION__/${GARDENLINUX_VERSION}/g" gardenlinux.pref > 
     echo "deb http://repo.gardenlinux.io/gardenlinux ${GARDENLINUX_VERSION} main" > /etc/apt/sources.list && \
     echo "deb http://repo.gardenlinux.io/gardenlinux today main" >> /etc/apt/sources.list && \
     echo "deb http://deb.debian.org/debian trixie main" >> /etc/apt/sources.list && \
-    apt update && apt policy
+    apt -o Acquire::AllowInsecureRepositories=true update && apt policy
 
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt-get -o Acquire::AllowInsecureRepositories=true update && \
+    apt-get install --allow-unauthenticated -y \
         kmod \
-        linux-headers-cloud-$TARGET_ARCH \
+        $LINUX_HEADERS \
         curl \
         devscripts \
         git \
@@ -52,10 +57,10 @@ RUN apt-get update && \
         python3-jinja2 \
         build-essential
 
-RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${TARGET_ARCH}) && resources/compile.sh
+RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${LINUX_HEADERS}) && resources/compile.sh
 
 # FROM public.int.repositories.cloud.sap/debian:11.2-slim
-FROM debian:bookworm-slim
+FROM debian:bookworm-slim as packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
 
@@ -72,5 +77,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 ARG DRIVER_VERSION
 RUN /opt/nvidia-installer/download_fabricmanager.sh
+
+FROM scratch
+
+COPY --from=packager / /
 
 ENTRYPOINT ["/opt/nvidia-installer/load_install_gpu_driver.sh"]
