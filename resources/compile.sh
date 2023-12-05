@@ -70,12 +70,7 @@ case $TARGET_ARCH in
           --no-opengl-files \
           --no-kernel-module-source \
           --ui=none --no-questions \
-          --no-systemd \
-          --skip-depmod \
           --log-file-name="$PWD"/nvidia-installer.log \
-          --utility-prefix="$OUTDIR" \
-          --utility-libdir=lib \
-          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_VERSION" \
         && test -e "$OUTDIR"/lib/modules/"$KERNEL_VERSION"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA modules"

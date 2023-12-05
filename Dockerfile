@@ -31,10 +31,10 @@ RUN sed "s/__GARDENLINUX_VERSION__/${GARDENLINUX_VERSION}/g" gardenlinux.pref > 
     echo "deb http://repo.gardenlinux.io/gardenlinux ${GARDENLINUX_VERSION} main" > /etc/apt/sources.list && \
     echo "deb http://repo.gardenlinux.io/gardenlinux today main" >> /etc/apt/sources.list && \
     echo "deb http://deb.debian.org/debian trixie main" >> /etc/apt/sources.list && \
-    apt update && apt policy
+    apt -o Acquire::AllowInsecureRepositories=true update && apt policy
 
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt-get -o Acquire::AllowInsecureRepositories=true update && \
+    apt-get install --allow-unauthenticated -y \
         kmod \
         linux-headers-cloud-$TARGET_ARCH \
         curl \
