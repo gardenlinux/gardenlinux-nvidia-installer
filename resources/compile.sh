@@ -32,6 +32,7 @@ chmod +x nvidia.run
 # shellcheck disable=SC2164
 pushd "./NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION"
 export IGNORE_MISSING_MODULE_SYMVERS=1
+OUTDIR="/out/nvidia/$DRIVER_VERSION"
 
 case $TARGET_ARCH in
     amd64)
@@ -70,7 +71,12 @@ case $TARGET_ARCH in
           --no-opengl-files \
           --no-kernel-module-source \
           --ui=none --no-questions \
+          --no-systemd \
+          --skip-depmod \
           --log-file-name="$PWD"/nvidia-installer.log \
+          --utility-prefix="$OUTDIR" \
+          --utility-libdir=lib \
+          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_VERSION" \
         && test -e "$OUTDIR"/lib/modules/"$KERNEL_VERSION"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA modules"
