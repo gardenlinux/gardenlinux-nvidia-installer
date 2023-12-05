@@ -57,9 +57,6 @@ RUN apt-get -o Acquire::AllowInsecureRepositories=true update && \
         python3-jinja2 \
         build-essential
 
-# RUN export $(./read_image_versions.sh | xargs) && ./install_debian_packages.sh
-# RUN export $(./read_image_versions.sh | xargs) && ./install_gardenlinux_packages.sh
-
 RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${LINUX_HEADERS}) && resources/compile.sh
 
 # FROM public.int.repositories.cloud.sap/debian:11.2-slim
