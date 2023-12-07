@@ -20,10 +20,10 @@ ENV LINUX_HEADERS=${LINUX_HEADERS}-$TARGET_ARCH
 # TODO: verify if we (still) need to support 32bit compat
 #RUN dpkg --add-architecture i386
 
-COPY gardenlinux-dev .
-COPY resources/compile.sh resources/compile.sh
+COPY resources/extract_kernel_version.sh .
+COPY resources/compile.sh .
 
-RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${LINUX_HEADERS}) && resources/compile.sh
+RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${LINUX_HEADERS}) && ./compile.sh
 
 # FROM public.int.repositories.cloud.sap/debian:11.2-slim
 FROM debian:bookworm-slim as packager

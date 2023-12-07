@@ -1,5 +1,4 @@
 global:
-  imageRepository: "build-releases.common.repositories.cloud.sap"
   imagePullSecret:
     # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
     dockercfg: "e30K"

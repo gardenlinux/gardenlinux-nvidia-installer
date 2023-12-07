@@ -9,6 +9,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+{{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
   updateStrategy:
     type: OnDelete
   selector:
@@ -19,8 +20,6 @@ spec:
       labels:
         name: {{ template "nvidia-installer.name" . }}
         k8s-app: {{ template "nvidia-installer.name" . }}
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       serviceAccountName: {{ template "service-account" . }}
       priorityClassName: system-node-critical
@@ -37,7 +36,7 @@ spec:
       {{- else }}
       initContainers:
       {{- end }}
-      - image: {{ printf "%s/%s:%s" .Values.global.imageRepository .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+      - image: {{ $imageUri }}
         name: install-driver
         imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
         args:
@@ -68,7 +67,7 @@ spec:
       {{- if not .Values.debug }}
       containers:
       {{- end }}
-      - image: {{ printf "%s/%s:%s" .Values.global.imageRepository .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+      - image: {{ $imageUri }}
         command: ["/opt/nvidia-installer/install_fabricmanager.sh"]
         name: fabricmanager
         securityContext:

@@ -14,15 +14,13 @@ spec:
       labels:
         name: {{ template "nvidia-device-plugin.name" . }}
         k8s-app: {{ template "nvidia-device-plugin.name" . }}
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       {{- if .Values.nvidiaDevicePlugin.nodeAffinity }}
       affinity:
         nodeAffinity:
 {{  toYaml .Values.nvidiaDevicePlugin.nodeAffinity | indent 10 }}
       {{- end}}
-      # priorityClassName: system-node-critical
+      priorityClassName: system-node-critical
       volumes:
       - name: device-plugin
         hostPath:
@@ -38,7 +36,7 @@ spec:
       - name: {{ template "image-pull-secret" . }}
       containers:
       - name: nvidia-gpu-device-plugin
-        image: {{ printf "%s/%s" .Values.global.imageRepository .Values.nvidiaDevicePlugin.devicePluginImage }}
+        image: {{ .Values.nvidiaDevicePlugin.devicePluginImage }}
         command:
         - "/usr/bin/nvidia-gpu-device-plugin"
         - "-logtostderr"
