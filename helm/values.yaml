@@ -1,0 +1,80 @@
+global:
+  imagePullSecret:
+    # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
+    dockercfg: "e30K"
+    annotations:
+
+debug: false
+
+imagePullSecrets:
+
+nvidiaInstaller:
+  # TODO: Edit <gardenlinux-version> and <driver-version> accordingly
+  installerImage: com.sap.ai/nvidia-installer-<gardenlinux-version>-<driver-version>
+  # TODO: Edit image tag
+  installerTag: latest
+  pauseImage: gcr.io/google_containers/pause-amd64:3.0
+  hostDriverPath: /opt/drivers
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: gpu
+          operator: Exists
+        - key: os-version
+          operator: In
+          # TODO: Edit <gardenlinux-version>
+          values: ["<gardenlinux-version>"]
+          # Do not edit gardenlinuxVersion above - actual version is defined in mlf-gitops/services/nvidia-installer/values/<version>.yaml
+  tolerations:
+  - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
+    operator: Exists
+    effect: NoSchedule
+  - key: ""
+    operator: Exists
+    effect: NoExecute
+  - key: CriticalAddonsOnly
+    operator: Exists
+  installerResources:
+    requests:
+      cpu: 10m
+      memory: 10Mi
+    limits:
+      cpu: 8
+      memory: 1Gi
+  environment:
+   - name: IGNORE_MISSING_MODULE_SYMVERS
+     value: "1"
+
+nvidiaDevicePlugin:
+  # Image URI from https://github.com/GoogleCloudPlatform/container-engine-accelerators/blob/master/cmd/nvidia_gpu/device-plugin.yaml
+  devicePluginImage: gcr.io/gke-release/nvidia-gpu-device-plugin@sha256:6b25281cd0fa3ca55f3e837a18be4a14b44952105568f466530dd85bcebde62f
+  # TODO: Edit <driver-version>
+  nvidiaDriverVersion: <driver-version>
+  hostDevicePluginPath: /var/lib/kubelet/device-plugins
+  nodeSelector: {}
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: gpu
+          operator: Exists
+        - key: os-version
+          operator: In
+          # TODO: Edit <gardenlinux-version>
+          values: ["<gardenlinux-version>"]
+  tolerations:
+  - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
+    operator: Exists
+    effect: NoSchedule
+  - key: ""
+    operator: Exists
+    effect: NoExecute
+  - key: CriticalAddonsOnly
+    operator: Exists
+  resources:
+    requests:
+      cpu: 50m
+      memory: 100Mi
+    limits:
+      memory: 100Mi

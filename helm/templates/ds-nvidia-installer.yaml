@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ template "garden-nvidia-installer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "nvidia-installer.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+{{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+  updateStrategy:
+    type: OnDelete
+  selector:
+    matchLabels:
+      name: {{ template "nvidia-installer.name" . }}
+  template:
+    metadata:
+      labels:
+        name: {{ template "nvidia-installer.name" . }}
+        k8s-app: {{ template "nvidia-installer.name" . }}
+    spec:
+      serviceAccountName: {{ template "service-account" . }}
+      priorityClassName: system-node-critical
+      {{- if .Values.nvidiaInstaller.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+{{ toYaml .Values.nvidiaInstaller.nodeAffinity | indent 10 }}
+      {{- end}}
+      hostPID: true
+      imagePullSecrets:
+      - name: {{ template "image-pull-secret" . }}
+      {{- if .Values.debug }}
+      containers:
+      {{- else }}
+      initContainers:
+      {{- end }}
+      - image: {{ $imageUri }}
+        name: install-driver
+        imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
+        args:
+        {{- if .Values.debug }}
+        - "--debug"
+        {{- end }}
+        securityContext:
+          privileged: true
+{{- if .Values.nvidiaInstaller.installerResources }}
+        resources:
+{{ toYaml .Values.nvidiaInstaller.installerResources | indent 12 }}
+{{- end }}
+        env:
+        - name: LD_ROOT
+          value: /root
+{{- if .Values.nvidiaInstaller.environment }}
+{{ toYaml .Values.nvidiaInstaller.environment | indent 8 }}
+{{- end }}
+        volumeMounts:
+        - name: dev
+          mountPath: /dev
+        - name: ld-root
+          mountPath: /root
+        - name: module-cache
+          mountPath: /opt/nvidia-installer/cache
+        - name: module-install-dir-base
+          mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
+      {{- if not .Values.debug }}
+      containers:
+      {{- end }}
+      - image: {{ $imageUri }}
+        command: ["/opt/nvidia-installer/install_fabricmanager.sh"]
+        name: fabricmanager
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: dev
+          mountPath: /dev
+        - name: module-cache
+          mountPath: /opt/nvidia-installer/cache
+        resources:
+{{ toYaml .Values.nvidiaInstaller.installerResources | indent 12 }}
+{{- if .Values.nvidiaInstaller.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nvidiaInstaller.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.nvidiaInstaller.tolerations }}
+      tolerations:
+{{ toYaml .Values.nvidiaInstaller.tolerations | indent 6 }}
+{{- end }}
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: ld-root
+        hostPath:
+          path: /
+      - name: module-cache
+        hostPath:
+          path: /opt/nvidia-installer/cache
+      - name: module-install-dir-base
+        hostPath:
+          path: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
