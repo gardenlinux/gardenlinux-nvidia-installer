@@ -76,13 +76,12 @@ into a Docker image from which they can be installed at runtime.
 
 ### Local Build and release the installer image
 
-To locally build the nvidia-installer image, first make sure the required Garden Linux DEB files are uploaded
-to Swift (see [gardenlinux-dev/README.md](gardenlinux-dev/README.md)) and then run the following, changing the 
-NVIDIA driver & Garden Linux versions as needed:
+To locally build the nvidia-installer image run the following
 
 ```bash
-docker build --build-arg DRIVER_VERSION=515.65.01 --build-arg GARDENLINUX_VERSION=934.6.0 .
+docker build . --build-arg TARGET_ARCH=amd64 --build-arg DRIVER_VERSION=535.86.10 --build-arg GARDENLINUX_VERSION=934.11
 ```
+To build for a bare-metal version of Garden Linux, add `--build-arg LINUX_HEADERS=linux-headers`.
 
 ### Practical setup
 
@@ -94,5 +93,5 @@ All instances of the nvidia-installer must run in a namespace that is allowed to
 spawn pods with `priorityClassName: system-node-critical` - this is e.g. the case
 for the `kube-system` namespace.
 
-In addition, the gpu nodepools must have appropriate node labels so that 
+In addition, the gpu nodepools must have appropriate node labels so that
 the nvidia-installer instances can target the correct nodes.

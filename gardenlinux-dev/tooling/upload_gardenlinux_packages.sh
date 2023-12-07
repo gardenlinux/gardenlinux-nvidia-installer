@@ -71,7 +71,7 @@ main() {
     "linux-headers-${kernel_version}-common_${linux_version}_all.deb" \
     "linux-headers-${kernel_version}-cloud-amd64_${linux_version}_amd64.deb" \
     "linux-compiler-gcc-${gcc_major}-x86_${gcc_linux_version}_amd64.deb" \
-    "linux-kbuild-${kernel_version_major_minor}_${linux_version}_amd64.deb" \
+    "linux-kbuild-${kernel_version}_${linux_version}_amd64.deb" \
     )
 
   for file in "${debs[@]}"; do

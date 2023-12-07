@@ -6,6 +6,9 @@ ARG DRIVER_VERSION
 
 # TODO: check if the fabric manager exists for arm64
 ARG TARGET_ARCH
+# Linux headers
+# Set to "linux-headers" if compiling for a baremetal (non-cloud) kernel version
+ARG LINUX_HEADERS=linux-headers-cloud
 
 RUN \
     : "${TARGET_ARCH:?Build argument needs to be set and non-empty.}" \
@@ -18,7 +21,7 @@ COPY resources/compile.sh resources/compile.sh
 RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${TARGET_ARCH}) && resources/compile.sh
 
 # FROM public.int.repositories.cloud.sap/debian:11.2-slim
-FROM debian:bookworm-slim
+FROM debian:bookworm-slim as packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
 
@@ -35,5 +38,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 ARG DRIVER_VERSION
 RUN /opt/nvidia-installer/download_fabricmanager.sh
+
+FROM scratch
+
+COPY --from=packager / /
 
 ENTRYPOINT ["/opt/nvidia-installer/load_install_gpu_driver.sh"]

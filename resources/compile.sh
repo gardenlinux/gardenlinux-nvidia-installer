@@ -32,6 +32,7 @@ chmod +x nvidia.run
 # shellcheck disable=SC2164
 pushd "./NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION"
 export IGNORE_MISSING_MODULE_SYMVERS=1
+OUTDIR="/out/nvidia/$DRIVER_VERSION"
 
 case $TARGET_ARCH in
     amd64)
@@ -45,8 +46,13 @@ case $TARGET_ARCH in
           --no-opengl-files \
           --ui=none --no-questions \
           --no-kernel-module-source \
+          --no-systemd \
+          --skip-depmod \
           --log-file-name="$PWD"/nvidia-installer.log \
-        && test -e kernel/nvidia.ko
+          --utility-prefix="$OUTDIR" \
+          --utility-libdir=lib \
+          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_VERSION" \
+        && test -e "$OUTDIR"/lib/modules/"$KERNEL_VERSION"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA modules"
       else 
@@ -65,8 +71,13 @@ case $TARGET_ARCH in
           --no-opengl-files \
           --no-kernel-module-source \
           --ui=none --no-questions \
+          --no-systemd \
+          --skip-depmod \
           --log-file-name="$PWD"/nvidia-installer.log \
-        && test -e kernel/nvidia.ko
+          --utility-prefix="$OUTDIR" \
+          --utility-libdir=lib \
+          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_VERSION" \
+        && test -e "$OUTDIR"/lib/modules/"$KERNEL_VERSION"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA modules"
       else 
@@ -83,30 +94,13 @@ case $TARGET_ARCH in
         ;;
 esac
 
-
-
 echo "Archiving assets"
-OUTDIR="/out/nvidia/$DRIVER_VERSION"
-mkdir -p "$OUTDIR"/lib/modules/"$KERNEL_VERSION" "$OUTDIR"/bin
 
-# Archive driver files
-cp ./*.so* "$OUTDIR"/lib
-pushd "$OUTDIR"/lib ; ln -s ./libcuda.so.* libcuda.so.1 ; popd
-cp kernel/*.ko /lib/modules/"$KERNEL_VERSION"/modules.* "$OUTDIR"/lib/modules/"$KERNEL_VERSION"
+# Archive library .so files
+cp /usr/lib/x86_64-linux-gnu/*nvidia* /usr/lib/x86_64-linux-gnu/*cuda* "$OUTDIR"/lib
 
-files=(\
-  nvidia-debugdump \
-  nvidia-cuda-mps-control \
-  nvidia-xconfig \
-  nvidia-modprobe \
-  nvidia-smi \
-  nvidia-cuda-mps-server \
-  nvidia-persistenced \
-  nvidia-settings 
-)
-for f in "${files[@]}"; do \
-    cp "$f" "$OUTDIR"/bin/;
-done
+# We don't need the installer binaries, or the icons/desktop files in /share
+rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
 
 # shellcheck disable=SC2046
 tar czf "$OUTDIR".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"

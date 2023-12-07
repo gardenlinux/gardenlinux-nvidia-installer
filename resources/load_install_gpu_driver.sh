@@ -38,34 +38,13 @@ main() {
 check_status() {
     local DRIVER_NAME=$1
     local DRIVER_VERSION=$2
-    # shellcheck disable=SC2155
-    local KERNEL_VERSION=$(uname -r)
-    # the "-ef" operator means: True if file1 and file2 refer to the same device and inode numbers.
-    # source: https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Bash-Conditional-Expressions
-    if [ -d "${INSTALL_DIR}/${DRIVER_NAME}/lib/modules/${KERNEL_VERSION}" ] \
-    && [ "${CACHE_DIR}/${DRIVER_NAME}/${DRIVER_VERSION}" -ef "${INSTALL_DIR}/${DRIVER_NAME}" ]; then
-
-        up_to_date="true"
-        if [ ! -e /dev/nvidia0 ] ; then
-            echo "$DRIVER_NAME $DRIVER_VERSION is out of date: (\"/dev/nvidia0\" does not exist)" 1>&2
-            up_to_date="false";
-        fi
-        if [ ! -e /dev/nvidiactl ] ; then
-            echo "$DRIVER_NAME $DRIVER_VERSION is out of date: (\"/dev/nvidiactl\" does not exist)" 1>&2
-            up_to_date="false";
-        fi
-        if [ ! -e /dev/nvidia-uvm ] ; then
-            echo "$DRIVER_NAME $DRIVER_VERSION is out of date: (\"/dev/nvidia-uvm\" does not exist)" 1>&2
-            up_to_date="false";
-        fi
-        if ${up_to_date}; then
-            echo "$DRIVER_NAME $DRIVER_VERSION is up to date"
-            return 0;
-        else
-            return 1;
-        fi
+    # Check to see if /dev/nvidia0 exists already - this means that a previous driver version already exists,
+    #  in which case we don't want to overwrite with a conflicting new version
+    if [ -e /dev/nvidia0 ] && [ -e /dev/nvidiactl ] && [ -e /dev/nvidia-uvm ]; then
+      echo "[INFO] /dev/nvidia* files exist - driver version $(ls "${CACHE_DIR}"/"${DRIVER_NAME}") already installed"
+      return 0
     fi
-    
+
     echo "$DRIVER_NAME $DRIVER_VERSION is out of date" 1>&2
     return 1;
 }
