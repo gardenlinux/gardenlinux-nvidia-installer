@@ -9,7 +9,7 @@ export DRIVER_VERSION=$(ls /out/nvidia | sed 's/.tar.gz//')
 export NVIDIA_ROOT="${CACHE_DIR}/${DRIVER_NAME}/${DRIVER_VERSION}"
 export LD_LIBRARY_PATH="${NVIDIA_ROOT}/lib"
 
-if [ -z $TARGET_ARCH ]; then
+if [ -z "$TARGET_ARCH" ]; then
   export ARCH_TYPE=$(uname -m)
 else
   declare -A arch_translation
