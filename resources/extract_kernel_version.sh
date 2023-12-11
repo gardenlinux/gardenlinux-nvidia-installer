@@ -15,6 +15,6 @@ get_depends(){
 
 intermediate_meta_pkg=$(get_depends "$kernel_pkg_name")
 kernel_package=$(get_depends "$intermediate_meta_pkg")
-kernel_version=$(echo "$kernel_package" | sed 's/^linux-headers-//')
+kernel_version=${kernel_package//linux-headers-/}
 
 echo "$kernel_version"
