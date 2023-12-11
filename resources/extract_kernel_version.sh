@@ -10,11 +10,11 @@
 kernel_pkg_name=$1
 
 get_depends(){
-    apt-cache depends $1 | grep "Depends:" | cut -d':' -f2 | sed 's/^ //'
+    apt-cache depends "$1" | grep "Depends:" | cut -d':' -f2 | sed 's/^ //'
 }
 
-intermediate_meta_pkg=$(get_depends $kernel_pkg_name)
-kernel_package=$(get_depends $intermediate_meta_pkg)
-kernel_version=$(echo $kernel_package | sed 's/^linux-headers-//')
+intermediate_meta_pkg=$(get_depends "$kernel_pkg_name")
+kernel_package=$(get_depends "$intermediate_meta_pkg")
+kernel_version=$(echo "$kernel_package" | sed 's/^linux-headers-//')
 
 echo "$kernel_version"
