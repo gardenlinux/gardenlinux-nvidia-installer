@@ -2,4 +2,4 @@ apiVersion: v1
 description: >
   A Helm chart to install NVIDIA GPU Support on Garden Linux-based Gardener clusters
 name: nvidia-installer
-version: 1.5.97
+version: 1.5.98
