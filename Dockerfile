@@ -25,7 +25,6 @@ COPY resources/compile.sh .
 
 RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${LINUX_HEADERS}) && ./compile.sh
 
-# FROM public.int.repositories.cloud.sap/debian:11.2-slim
 FROM debian:bookworm-slim as packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
@@ -43,6 +42,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 ARG DRIVER_VERSION
 RUN /opt/nvidia-installer/download_fabricmanager.sh
+
+RUN apt-get remove -y --autoremove --allow-remove-essential --ignore-hold \
+      openssl wget ncurses-base ncurses-bin \
+    && rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x86_64-linux-gnu/libsystemd.so.0.30.0 \
+         /var/lib/dpkg/info/libdb5.3* /usr/lib/x86_64-linux-gnu/libdb-5.3.so /usr/share/doc/libdb5.3
 
 FROM scratch
 
