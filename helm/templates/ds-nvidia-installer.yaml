@@ -29,8 +29,7 @@ spec:
 {{ toYaml .Values.nvidiaInstaller.nodeAffinity | indent 10 }}
       {{- end}}
       hostPID: true
-      imagePullSecrets:
-      - name: {{ template "image-pull-secret" . }}
+      imagePullSecrets: {{ template "image-pull-secrets" . }}
       {{- if .Values.debug }}
       containers:
       {{- else }}

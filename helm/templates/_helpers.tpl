@@ -25,6 +25,18 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "image-pull-secrets" -}}
+{{- if .Values.global.imagePullSecret.enabled }}
+        - name: {{ template "image-pull-secret" . }}
+{{- end }}
+{{- with .Values.global.imagePullSecrets }}
+{{- toYaml . | nindent 8 }}
+{{- end }}
+{{- if and (not .Values.global.imagePullSecret.enabled) (empty .Values.global.imagePullSecrets) -}}
+[]
+{{- end }}
+{{- end -}}
+
 {{- define "service-account" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}

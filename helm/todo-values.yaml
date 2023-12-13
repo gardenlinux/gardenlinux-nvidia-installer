@@ -1,10 +1,21 @@
 # This file contains the values that will usually need to be updated when changing versions of Garden Linux or NVIDIA driver
 
-# The Docker config will likely need to be set only once for a given deployment
+# The pull secret config will likely need to be set only once for a given deployment
 global:
+  # TODO: List of pre-existing secrets containing private registry credentials
+  # For example
+  # imagePullSecrets:
+  # - name: myRegistryKeySecretName
+  imagePullSecrets:
+  - name: myRegistryKeySecretName
+
+  # Configure a secret that should be created and then used for pulling images
   imagePullSecret:
+    # TODO: decide whether you want to create a new secret or use an existing one (using imagePullSecrets above)
+    enabled: false
     # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
     dockercfg: "e30K"
+    annotations:
 
 nvidiaInstaller:
   # TODO: Set to the name of the image in the Docker registry
