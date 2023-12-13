@@ -1,5 +1,14 @@
 global:
+  # TODO: List of pre-existing secrets containing private registry credentials
+  # For example
+  # imagePullSecrets:
+  # - name: myRegistryKeySecretName
+  imagePullSecrets: []
+
+  # Configure a secret that should be created and then used for pulling images
   imagePullSecret:
+    # TODO: decide whether you want to create a new secret or use an existing one (using imagePullSecrets above)
+    enabled: false
     # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
     dockercfg: "e30K"
     annotations:
@@ -42,8 +51,8 @@ nvidiaInstaller:
       cpu: 8
       memory: 1Gi
   environment:
-   - name: IGNORE_MISSING_MODULE_SYMVERS
-     value: "1"
+  - name: IGNORE_MISSING_MODULE_SYMVERS
+    value: "1"
 
 nvidiaDevicePlugin:
   # Image URI from https://github.com/GoogleCloudPlatform/container-engine-accelerators/blob/master/cmd/nvidia_gpu/device-plugin.yaml

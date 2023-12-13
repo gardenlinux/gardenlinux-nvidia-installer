@@ -32,8 +32,7 @@ spec:
           path: /opt/nvidia-installer/cache/nvidia/{{ required "nvidiaDevicePlugin.nvidiaDriverVersion" .Values.nvidiaDevicePlugin.nvidiaDriverVersion }}
           type: Directory
         name: nvidia
-      imagePullSecrets:
-      - name: {{ template "image-pull-secret" . }}
+      imagePullSecrets: {{ template "image-pull-secrets" . }}
       containers:
       - name: nvidia-gpu-device-plugin
         image: {{ .Values.nvidiaDevicePlugin.devicePluginImage }}
