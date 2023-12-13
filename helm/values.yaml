@@ -25,7 +25,6 @@ nvidiaInstaller:
           operator: In
           # TODO: Edit <gardenlinux-version>
           values: ["<gardenlinux-version>"]
-          # Do not edit gardenlinuxVersion above - actual version is defined in mlf-gitops/services/nvidia-installer/values/<version>.yaml
   tolerations:
   - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
     operator: Exists
