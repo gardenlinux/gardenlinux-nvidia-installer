@@ -8,11 +8,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      name: {{ template "nvidia-device-plugin.name" . }}
+      name: {{ template "nvidia-device-plugin.fullname" . }}
   template:
     metadata:
       labels:
-        name: {{ template "nvidia-device-plugin.name" . }}
+        name: {{ template "nvidia-device-plugin.fullname" . }}
         k8s-app: {{ template "nvidia-device-plugin.name" . }}
     spec:
       {{- if .Values.nodeAffinity }}
