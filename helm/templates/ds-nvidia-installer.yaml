@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ template "garden-nvidia-installer.fullname" . }}
+  name: {{ template "nvidia-installer.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "nvidia-installer.name" . }}
@@ -14,11 +14,11 @@ spec:
     type: OnDelete
   selector:
     matchLabels:
-      name: {{ template "nvidia-installer.name" . }}
+      name: {{ template "nvidia-installer.fullname" . }}
   template:
     metadata:
       labels:
-        name: {{ template "nvidia-installer.name" . }}
+        name: {{ template "nvidia-installer.fullname" . }}
         k8s-app: {{ template "nvidia-installer.name" . }}
     spec:
       serviceAccountName: {{ template "service-account" . }}
