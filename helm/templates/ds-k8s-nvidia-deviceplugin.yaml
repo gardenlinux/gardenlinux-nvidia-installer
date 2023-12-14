@@ -15,10 +15,10 @@ spec:
         name: {{ template "nvidia-device-plugin.name" . }}
         k8s-app: {{ template "nvidia-device-plugin.name" . }}
     spec:
-      {{- if .Values.nvidiaDevicePlugin.nodeAffinity }}
+      {{- if .Values.nodeAffinity }}
       affinity:
         nodeAffinity:
-{{  toYaml .Values.nvidiaDevicePlugin.nodeAffinity | indent 10 }}
+{{  toYaml .Values.nodeAffinity | indent 10 }}
       {{- end}}
       priorityClassName: system-node-critical
       volumes:
@@ -56,13 +56,13 @@ spec:
           mountPath: /dev
         - mountPath: /usr/local/nvidia
           name: nvidia
-{{- if .Values.nvidiaDevicePlugin.nodeSelector }}
+{{- if .Values.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nvidiaDevicePlugin.nodeSelector | indent 8 }}
+{{ toYaml .Values.nodeSelector | indent 8 }}
 {{- end }}
-{{- if .Values.nvidiaDevicePlugin.tolerations }}
+{{- if .Values.tolerations }}
       tolerations:
-{{ toYaml .Values.nvidiaDevicePlugin.tolerations | indent 6 }}
+{{ toYaml .Values.tolerations | indent 6 }}
 {{- end }}
   updateStrategy:
     type: RollingUpdate
