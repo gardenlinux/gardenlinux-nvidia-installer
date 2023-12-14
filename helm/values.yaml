@@ -13,6 +13,7 @@ global:
     dockercfg: "e30K"
     annotations:
 
+# nameOverride: used-instead-of-chart-name
 debug: false
 
 imagePullSecrets:
