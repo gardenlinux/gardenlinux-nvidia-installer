@@ -23,11 +23,11 @@ spec:
     spec:
       serviceAccountName: {{ template "service-account" . }}
       priorityClassName: system-node-critical
-      {{- if .Values.nvidiaInstaller.nodeAffinity }}
+      {{- if .Values.nodeAffinity }}
       affinity:
         nodeAffinity:
-{{ toYaml .Values.nvidiaInstaller.nodeAffinity | indent 10 }}
-      {{- end}}
+{{ toYaml .Values.nodeAffinity | indent 10 }}
+      {{- end }}
       hostPID: true
       imagePullSecrets: {{ template "image-pull-secrets" . }}
       {{- if .Values.debug }}
@@ -78,13 +78,13 @@ spec:
           mountPath: /opt/nvidia-installer/cache
         resources:
 {{ toYaml .Values.nvidiaInstaller.installerResources | indent 12 }}
-{{- if .Values.nvidiaInstaller.nodeSelector }}
+{{- if .Values.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nvidiaInstaller.nodeSelector | indent 8 }}
+{{ toYaml .Values.nodeSelector | indent 8 }}
 {{- end }}
-{{- if .Values.nvidiaInstaller.tolerations }}
+{{- if .Values.tolerations }}
       tolerations:
-{{ toYaml .Values.nvidiaInstaller.tolerations | indent 6 }}
+{{ toYaml .Values.tolerations | indent 6 }}
 {{- end }}
       volumes:
       - name: dev

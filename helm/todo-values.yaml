@@ -17,33 +17,23 @@ global:
     dockercfg: "e30K"
     annotations:
 
+nodeAffinity:
+  requiredDuringSchedulingIgnoredDuringExecution:
+    nodeSelectorTerms:
+    - matchExpressions:
+      - key: gpu
+        operator: Exists
+      - key: os-version
+        operator: In
+        # TODO: Edit <gardenlinux-version>
+        values: ["<gardenlinux-version>"]
+
 nvidiaInstaller:
   # TODO: Set to the name of the image in the Docker registry
   installerImage: nvidia-installer-<gardenlinux-version>-<driver-version>
   # TODO: Edit image tag
   installerTag: latest
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: gpu
-          operator: Exists
-        - key: os-version
-          operator: In
-          # TODO: Edit <gardenlinux-version>
-          values: ["<gardenlinux-version>"]
-          # Do not edit gardenlinuxVersion above - actual version is defined in mlf-gitops/services/nvidia-installer/values/<version>.yaml
 
 nvidiaDevicePlugin:
   # TODO: Edit <driver-version>
   nvidiaDriverVersion: <driver-version>
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: gpu
-          operator: Exists
-        - key: os-version
-          operator: In
-          # TODO: Edit <gardenlinux-version>
-          values: ["<gardenlinux-version>"]

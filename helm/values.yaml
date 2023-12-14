@@ -13,9 +13,29 @@ global:
     dockercfg: "e30K"
     annotations:
 
+# nameOverride: used-instead-of-chart-name
 debug: false
 
-imagePullSecrets:
+nodeSelector: {}
+nodeAffinity:
+  requiredDuringSchedulingIgnoredDuringExecution:
+    nodeSelectorTerms:
+    - matchExpressions:
+      - key: gpu
+        operator: Exists
+      - key: os-version
+        operator: In
+        # TODO: Edit <gardenlinux-version>
+        values: ["<gardenlinux-version>2"]
+tolerations:
+- key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
+  operator: Exists
+  effect: NoSchedule
+- key: ""
+  operator: Exists
+  effect: NoExecute
+- key: CriticalAddonsOnly
+  operator: Exists
 
 nvidiaInstaller:
   # TODO: Edit <gardenlinux-version> and <driver-version> accordingly
@@ -24,25 +44,6 @@ nvidiaInstaller:
   installerTag: latest
   pauseImage: gcr.io/google_containers/pause-amd64:3.0
   hostDriverPath: /opt/drivers
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: gpu
-          operator: Exists
-        - key: os-version
-          operator: In
-          # TODO: Edit <gardenlinux-version>
-          values: ["<gardenlinux-version>"]
-  tolerations:
-  - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
-    operator: Exists
-    effect: NoSchedule
-  - key: ""
-    operator: Exists
-    effect: NoExecute
-  - key: CriticalAddonsOnly
-    operator: Exists
   installerResources:
     requests:
       cpu: 10m
@@ -60,26 +61,6 @@ nvidiaDevicePlugin:
   # TODO: Edit <driver-version>
   nvidiaDriverVersion: <driver-version>
   hostDevicePluginPath: /var/lib/kubelet/device-plugins
-  nodeSelector: {}
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: gpu
-          operator: Exists
-        - key: os-version
-          operator: In
-          # TODO: Edit <gardenlinux-version>
-          values: ["<gardenlinux-version>"]
-  tolerations:
-  - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
-    operator: Exists
-    effect: NoSchedule
-  - key: ""
-    operator: Exists
-    effect: NoExecute
-  - key: CriticalAddonsOnly
-    operator: Exists
   resources:
     requests:
       cpu: 50m
