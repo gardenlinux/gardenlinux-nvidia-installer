@@ -23,7 +23,7 @@ ENV LINUX_HEADERS=${LINUX_HEADERS}-$TARGET_ARCH
 COPY resources/extract_kernel_version.sh .
 COPY resources/compile.sh .
 
-RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${LINUX_HEADERS}) && ./compile.sh
+RUN export KERNEL_VERSION=$(./extract_kernel_version.sh) && ./compile.sh
 
 FROM debian:bookworm-slim as packager
 ARG TARGET_ARCH

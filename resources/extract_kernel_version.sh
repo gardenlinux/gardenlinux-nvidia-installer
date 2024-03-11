@@ -1,16 +1,12 @@
 #!/bin/bash
 
-# This helper script assumes you have the garden linux repository in your /etc/apt/sources.list configured
-#
-# Example: linux-headers-amd64 -> linux-headers-5.15-amd64 -> linux-headers-5.15.114-gardenlinux-amd64 
-# 
-# This script simply unfolds the package dependency until the real linux-header package is found. 
-# The real package contains the full kernel version (already in the name).
+# Assuming we are within a driver build container and want the latest kernel headers,
+# this line detects the kernel version by looking for the directory name format
+# inside /usr/lib/modules. Only the version number is extracted using grep and sorted numerically.
 
-kernel_pkg_name=$1
 
 get_depends(){
-    apt-cache depends "$1" | grep "Depends:" | cut -d':' -f2 | sed 's/^ //'
+    ls /usr/lib/modules | grep -Eo '[0-9]+\.[0-9]+.[0-9]+' | sort -V | tail -n 1
 }
 
 intermediate_meta_pkg=$(get_depends "$kernel_pkg_name")
