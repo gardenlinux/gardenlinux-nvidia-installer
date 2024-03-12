@@ -1,4 +1,13 @@
 #!/bin/bash
+if [ -z "$DRIVER_VERSION" ]; then
+    echo "Error: DRIVER_VERSION is not set."
+    exit 1
+fi
+if [ -z "$KERNEL_VERSION" ]; then
+    echo "Error: KERNEL_VERSION is not set."
+    exit 1
+fi
+
 echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_VERSION"
 
 set -x
