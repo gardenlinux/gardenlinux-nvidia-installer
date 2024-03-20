@@ -1,5 +1,5 @@
 ARG GARDENLINUX_VERSION
-FROM ghcr.io/gardenlinux/driver-build:${GARDENLINUX_VERSION} AS builder
+FROM ghcr.io/gardenlinux/gardenlinux/kmodbuild:${GARDENLINUX_VERSION} AS builder
 
 # Target NVIDIA Driver 
 ARG DRIVER_VERSION
