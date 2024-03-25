@@ -6,7 +6,9 @@ source "$BIN_DIR"/set_env_vars.sh
 
 GPU_NAME=$("${NVIDIA_ROOT}"/bin/nvidia-smi -i 0 --query-gpu=name --format=csv,noheader)
 
-if [[ "$GPU_NAME" == *"A100"* ]]; then
+# Typical GPU name is something like "NVIDIA H100 80GB HBM3"
+# Fabric manager is required by the newer, bigger GPUs like A100, H100, etc. so we match those GPU types here
+if [[ "$GPU_NAME" =~ (A100|H100|H200|B100|B200) ]]; then
   OUTDIR=/out/nvidia-fabricmanager/$DRIVER_VERSION
   FABRICMANAGER_ARCHIVE="fabricmanager-linux-x86_64-$DRIVER_VERSION-archive"
 
