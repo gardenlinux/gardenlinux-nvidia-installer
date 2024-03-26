@@ -1,4 +1,5 @@
 ARG GARDENLINUX_VERSION
+ARG REGISTRY_PATH=gardenlinux/kmodbuild
 FROM ghcr.io/gardenlinux/gardenlinux/kmodbuild:${GARDENLINUX_VERSION} AS builder
 
 # Target NVIDIA Driver 
