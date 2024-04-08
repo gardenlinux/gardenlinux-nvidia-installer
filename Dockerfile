@@ -40,4 +40,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 RUN /opt/nvidia-installer/download_fabricmanager.sh
 
+# Remove several things that are not needed, some of which raise Black Duck scan vulnerabilities
+RUN apt-get remove -y --autoremove --allow-remove-essential --ignore-hold \
+      libgnutls30 apt openssl wget ncurses-base ncurses-bin
+
+RUN rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x86_64-linux-gnu/libsystemd.so* \
+         /var/lib/dpkg/info/libdb5.3* /usr/lib/x86_64-linux-gnu/libdb-5.3.so* /usr/share/doc/libdb5.3 \
+         /usr/bin/chfn /usr/bin/gpasswd
+
 ENTRYPOINT ["/opt/nvidia-installer/load_install_gpu_driver.sh"]
