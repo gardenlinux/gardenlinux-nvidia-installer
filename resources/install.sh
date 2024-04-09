@@ -1,10 +1,7 @@
 #!/bin/bash
 echo "Installing NVIDIA modules for driver version $DRIVER_VERSION"
 set -e
-set -x
-depmod -b "$LD_ROOT"
-# This is an NVIDIA dep that is not specified in the module.dep file.
-#modprobe -d "$LD_ROOT" ipmi_devintf
+#set -x
 
 error_out=$(depmod -b "$INSTALL_DIR/$DRIVER_NAME" 2>&1)
 # "grep -v ..." removes warnings that do not cause a problem for the gpu driver installation

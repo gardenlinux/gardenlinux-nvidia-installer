@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 ARG GARDENLINUX_VERSION
 ARG REGISTRY_PATH=gardenlinux/kmodbuild
 FROM ghcr.io/gardenlinux/${REGISTRY_PATH}:${GARDENLINUX_VERSION} AS builder
@@ -47,5 +48,12 @@ RUN apt-get remove -y --autoremove --allow-remove-essential --ignore-hold \
 RUN rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x86_64-linux-gnu/libsystemd.so* \
          /var/lib/dpkg/info/libdb5.3* /usr/lib/x86_64-linux-gnu/libdb-5.3.so* /usr/share/doc/libdb5.3 \
          /usr/bin/chfn /usr/bin/gpasswd
+
+RUN mkdir -p /rootfs \
+        && cp -ar /bin /boot /etc /home /lib /lib64 /media /mnt /opt /out /root /run /sbin /srv /tmp /usr /var /rootfs
+
+FROM scratch
+
+COPY --from=packager /rootfs    /
 
 ENTRYPOINT ["/opt/nvidia-installer/load_install_gpu_driver.sh"]
