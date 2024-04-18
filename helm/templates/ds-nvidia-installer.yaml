@@ -10,6 +10,9 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
 {{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+  {{- if .Values.global.imageRegistry }}
+    {{ $imageUri = printf "%s/%s" .Values.global.imageRegistry $imageUri }}
+  {{- end }}
   updateStrategy:
     type: OnDelete
   selector:

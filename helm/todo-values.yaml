@@ -17,6 +17,9 @@ global:
     dockercfg: "e30K"
     annotations:
 
+  # TODO: set your registry host/path if using a non-"docker.io" regsistry
+  imageRegistry: "registry.example.com"
+
 nodeAffinity:
   requiredDuringSchedulingIgnoredDuringExecution:
     nodeSelectorTerms:
