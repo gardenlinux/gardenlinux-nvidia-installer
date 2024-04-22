@@ -1,5 +1,11 @@
 #!/bin/bash
-set -x
+
+export DEBUG=${DEBUG:-false}
+
+if ${DEBUG}; then
+  set -x
+fi
+
 BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
 # shellcheck disable=SC1090
 source "$BIN_DIR"/set_env_vars.sh

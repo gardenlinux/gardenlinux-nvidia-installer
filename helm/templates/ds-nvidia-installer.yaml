@@ -9,9 +9,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-{{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
-  {{- if .Values.global.imageRegistry }}
-    {{ $imageUri = printf "%s/%s" .Values.global.imageRegistry $imageUri }}
+  {{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+  {{- if .Values.nvidiaInstaller.imageRegistry }}
+    {{ $imageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $imageUri }}
   {{- end }}
   updateStrategy:
     type: OnDelete
@@ -41,10 +41,6 @@ spec:
       - image: {{ $imageUri }}
         name: install-driver
         imagePullPolicy: {{ ternary "Always" "IfNotPresent" .Values.debug }}
-        args:
-        {{- if .Values.debug }}
-        - "--debug"
-        {{- end }}
         securityContext:
           privileged: true
 {{- if .Values.nvidiaInstaller.installerResources }}
@@ -54,6 +50,8 @@ spec:
         env:
         - name: LD_ROOT
           value: /root
+        - name: DEBUG
+          value: {{ .Values.debug | quote }}
 {{- if .Values.nvidiaInstaller.environment }}
 {{ toYaml .Values.nvidiaInstaller.environment | indent 8 }}
 {{- end }}
@@ -69,9 +67,12 @@ spec:
       {{- if not .Values.debug }}
       containers:
       {{- end }}
-      - image: {{ $imageUri }}
+      - name: fabricmanager
+        image: {{ $imageUri }}
         command: ["/opt/nvidia-installer/install_fabricmanager.sh"]
-        name: fabricmanager
+        env:
+        - name: DEBUG
+          value: {{ .Values.debug | quote }}
         securityContext:
           privileged: true
         volumeMounts:
