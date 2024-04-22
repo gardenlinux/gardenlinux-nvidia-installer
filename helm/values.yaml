@@ -1,22 +1,18 @@
-global:
-  # TODO: List of pre-existing secrets containing private registry credentials
-  # For example
-  # imagePullSecrets:
-  # - name: myRegistryKeySecretName
-  imagePullSecrets: []
+# TODO: List of pre-existing secrets containing private registry credentials
+# For example
+# imagePullSecrets:
+# - name: myRegistryKeySecretName
+imagePullSecrets: []
 
-  # Configure a secret that should be created and then used for pulling images
-  imagePullSecret:
-    # TODO: decide whether you want to create a new secret or use an existing one (using imagePullSecrets above)
-    enabled: false
-    # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
-    dockercfg: "e30K"
-    annotations:
+# Configure a secret that should be created and then used for pulling images
+imagePullSecret:
+  # TODO: decide whether you want to create a new secret or use an existing one (using imagePullSecrets above)
+  enabled: false
+  # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
+  dockercfg: "e30K"
+  annotations:
 
-  imageRegistry: "" # Set to custom registry if required, e.g. "eu.gcr.io/project-name"
-
-# nameOverride: used-instead-of-chart-name
-debug: false
+debug: false  # Set to true to output all shell commands (enables `set -x` in scripts)
 
 nodeSelector: {}
 nodeAffinity:
@@ -28,7 +24,7 @@ nodeAffinity:
       - key: os-version
         operator: In
         # TODO: Edit <gardenlinux-version>
-        values: ["<gardenlinux-version>2"]
+        values: ["<gardenlinux-version>"]
 tolerations:
 - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
   operator: Exists
@@ -40,6 +36,8 @@ tolerations:
   operator: Exists
 
 nvidiaInstaller:
+  # TODO: Set custom image registry, if required, e.g. "eu.gcr.io/project-name"
+  imageRegistry: ""
   # TODO: Edit <gardenlinux-version> and <driver-version> accordingly
   installerImage: com.sap.ai/nvidia-installer-<gardenlinux-version>-<driver-version>
   # TODO: Edit image tag
@@ -58,6 +56,8 @@ nvidiaInstaller:
     value: "1"
 
 nvidiaDevicePlugin:
+  # TODO: Set custom image registry, if required, e.g. "eu.gcr.io/project-name"
+  imageRegistry: ""
   # Image URI from https://github.com/GoogleCloudPlatform/container-engine-accelerators/blob/master/cmd/nvidia_gpu/device-plugin.yaml
   devicePluginImage: gcr.io/gke-release/nvidia-gpu-device-plugin@sha256:6b25281cd0fa3ca55f3e837a18be4a14b44952105568f466530dd85bcebde62f
   # TODO: Edit <driver-version>
