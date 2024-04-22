@@ -67,8 +67,8 @@ spec:
       {{- if not .Values.debug }}
       containers:
       {{- end }}
-        name: fabricmanager
-      - image: {{ $imageUri }}
+      - name: fabricmanager
+        image: {{ $imageUri }}
         command: ["/opt/nvidia-installer/install_fabricmanager.sh"]
         env:
         - name: DEBUG
