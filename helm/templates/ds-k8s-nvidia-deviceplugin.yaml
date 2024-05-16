@@ -6,6 +6,10 @@ metadata:
   labels:
     app: {{ template "nvidia-device-plugin.name" . }}
 spec:
+  {{- $imageUri := .Values.nvidiaDevicePlugin.devicePluginImage }}
+  {{- if .Values.nvidiaDevicePlugin.imageRegistry }}
+    {{ $imageUri = printf "%s/%s" .Values.nvidiaDevicePlugin.imageRegistry $imageUri }}
+  {{- end }}
   selector:
     matchLabels:
       name: {{ template "nvidia-device-plugin.fullname" . }}
@@ -35,7 +39,7 @@ spec:
       imagePullSecrets: {{ template "image-pull-secrets" . }}
       containers:
       - name: nvidia-gpu-device-plugin
-        image: {{ .Values.nvidiaDevicePlugin.devicePluginImage }}
+        image: {{ $imageUri }}
         command:
         - "/usr/bin/nvidia-gpu-device-plugin"
         - "-logtostderr"
