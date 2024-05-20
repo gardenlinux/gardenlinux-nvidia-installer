@@ -9,20 +9,18 @@ ARG DRIVER_VERSION
 # Target architecture - WARNING: the fabric manager does currently not exist for arm64
 ARG TARGET_ARCH
 
-# Linux headers
+# kernel type = set to "cloud" for a cloud kernel (default), or empty value for a bare-metal kernel
 # Set to "linux-headers" if compiling for a baremetal (non-cloud) kernel version
-ARG LINUX_HEADERS=linux-headers-cloud
+ARG KERNEL_TYPE=cloud
 
 RUN \
     : "${TARGET_ARCH:?Build argument needs to be set and non-empty.}" \
     : "${DRIVER_VERSION:?Build argument needs to be set and non-empty.}" 
     
-ENV LINUX_HEADERS=${LINUX_HEADERS}-$TARGET_ARCH
-
-COPY resources/extract_kernel_version.sh .
+COPY resources/extract_kernel_name.sh .
 COPY resources/compile.sh .
 
-RUN export KERNEL_VERSION=$(./extract_kernel_version.sh ${LINUX_HEADERS}) && ./compile.sh
+RUN export KERNEL_NAME=$(./extract_kernel_name.sh ${KERNEL_TYPE} ${TARGET_ARCH}) && ./compile.sh
 
 FROM debian:bookworm-slim as packager
 ARG TARGET_ARCH

@@ -53,8 +53,8 @@ driver_in_cache() {
     local DRIVER_NAME=$1
     local DRIVER_VERSION=$2
     # shellcheck disable=SC2155
-    local KERNEL_VERSION=$(uname -r)
-    if [ -d "${CACHE_DIR}/${DRIVER_NAME}/${DRIVER_VERSION}/lib/modules/${KERNEL_VERSION}" ]; then
+    local KERNEL_NAME=$(uname -r)
+    if [ -d "${CACHE_DIR}/${DRIVER_NAME}/${DRIVER_VERSION}/lib/modules/${KERNEL_NAME}" ]; then
         echo "true"
     fi
     echo "false"

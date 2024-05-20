@@ -3,12 +3,12 @@ if [ -z "$DRIVER_VERSION" ]; then
     echo "Error: DRIVER_VERSION is not set."
     exit 1
 fi
-if [ -z "$KERNEL_VERSION" ]; then
-    echo "Error: KERNEL_VERSION is not set."
+if [ -z "$KERNEL_NAME" ]; then
+    echo "Error: KERNEL_NAME is not set."
     exit 1
 fi
 
-echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_VERSION"
+echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_NAME"
 
 set -x
 mkdir -p /tmp/nvidia
@@ -49,7 +49,7 @@ case $TARGET_ARCH in
           --no-opengl-files \
           --no-libglx-indirect \
           --no-install-libglvnd \
-          --kernel-name="$KERNEL_VERSION" \
+          --kernel-name="$KERNEL_NAME" \
           --no-drm \
           --no-install-compat32-libs \
           --no-opengl-files \
@@ -60,8 +60,8 @@ case $TARGET_ARCH in
           --log-file-name="$PWD"/nvidia-installer.log \
           --utility-prefix="$OUTDIR" \
           --utility-libdir=lib \
-          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_VERSION" \
-        && test -e "$OUTDIR"/lib/modules/"$KERNEL_VERSION"/nvidia.ko
+          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_NAME" \
+        && test -e "$OUTDIR"/lib/modules/"$KERNEL_NAME"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA modules"
       else 
@@ -75,7 +75,7 @@ case $TARGET_ARCH in
           --no-opengl-files \
           --no-libglx-indirect \
           --no-install-libglvnd \
-          --kernel-name="$KERNEL_VERSION" \
+          --kernel-name="$KERNEL_NAME" \
           --no-drm \
           --no-opengl-files \
           --no-kernel-module-source \
@@ -85,8 +85,8 @@ case $TARGET_ARCH in
           --log-file-name="$PWD"/nvidia-installer.log \
           --utility-prefix="$OUTDIR" \
           --utility-libdir=lib \
-          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_VERSION" \
-        && test -e "$OUTDIR"/lib/modules/"$KERNEL_VERSION"/nvidia.ko
+          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_NAME" \
+        && test -e "$OUTDIR"/lib/modules/"$KERNEL_NAME"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA modules"
       else 

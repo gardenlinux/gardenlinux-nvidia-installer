@@ -9,7 +9,7 @@ To build the image for NVIDIA driver version `535.86.10` on Garden Linux `934.11
 ```bash
 docker build . --build-arg TARGET_ARCH=amd64 --build-arg DRIVER_VERSION=535.86.10 --build-arg GARDENLINUX_VERSION=934.11
 ```
-If you need to build for a baremetal node (as opposed to a cloud VM) then add `--build-arg LINUX_HEADERS=linux-headers` 
+If you need to build for a baremetal node (as opposed to a cloud VM) then add `--build-arg KERNEL_TYPE=baremetal` 
 to the above command.
 
 ## Deploying nvidia-installer with Helm
