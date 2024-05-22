@@ -13,6 +13,7 @@ fi
 
 kernel_arch=$2
 #                List the linux-headers folders for the arch & kernel type -------------- | Sort by line length (shortest first) ---------------- | Pick the first line
+# shellcheck disable=SC2010,SC2086
 kernel_headers=$(ls -d /usr/src/linux-headers-* | grep "${kernel_arch}" | grep $grep_args | awk '{ print length, $0 }' | sort -n | cut -d" " -f2- | head -n 1)
 
 kernel_name=${kernel_headers//linux-headers-/}
