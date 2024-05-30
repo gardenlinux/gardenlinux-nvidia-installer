@@ -49,7 +49,10 @@ RUN rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x
 
 RUN mkdir -p /rootfs \
         && cp -ar /bin /boot /etc /home /lib /lib64 /media /mnt /opt /out /root /run /sbin /srv /tmp /usr /var /rootfs \
-        && rm -rf /rootfs/opt/actions-runner
+        && rm -rf /rootfs/opt/actions-runner \
+
+# Clear the library cache so that Whitesource doesn't complain about libdb
+RUN rm /etc/ld.so.cache ; ldconfig
 
 FROM scratch
 
