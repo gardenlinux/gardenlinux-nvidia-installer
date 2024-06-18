@@ -20,22 +20,22 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "image-pull-secret" -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{/*{{- define "image-pull-secret" -}}*/}}
+{{/*{{- $name := default .Chart.Name .Values.nameOverride -}}*/}}
+{{/*{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}*/}}
+{{/*{{- end -}}*/}}
 
-{{- define "image-pull-secrets" -}}
-{{- if .Values.imagePullSecret.enabled }}
-        - name: {{ template "image-pull-secret" . }}
-{{- end }}
-{{- with .Values.imagePullSecrets }}
-{{- toYaml . | nindent 8 }}
-{{- end }}
-{{- if and (not .Values.imagePullSecret.enabled) (empty .Values.imagePullSecrets) -}}
-[]
-{{- end }}
-{{- end -}}
+{{/*{{- define "image-pull-secrets" -}}*/}}
+{{/*{{- if .Values.imagePullSecret.enabled }}*/}}
+{{/*        - name: {{ template "image-pull-secret" . }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- with .Values.imagePullSecrets }}*/}}
+{{/*{{- toYaml . | nindent 8 }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- if and (not .Values.imagePullSecret.enabled) (empty .Values.imagePullSecrets) -}}*/}}
+{{/*[]*/}}
+{{/*{{- end }}*/}}
+{{/*{{- end -}}*/}}
 
 {{- define "service-account" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}

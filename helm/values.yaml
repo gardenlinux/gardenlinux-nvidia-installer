@@ -2,29 +2,20 @@
 # For example
 # imagePullSecrets:
 # - name: myRegistryKeySecretName
-imagePullSecrets: []
-
-# Configure a secret that should be created and then used for pulling images
-imagePullSecret:
-  # TODO: decide whether you want to create a new secret or use an existing one (using imagePullSecrets above)
-  enabled: false
-  # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
-  dockercfg: "e30K"
-  annotations:
+#imagePullSecrets: []
+#
+## Configure a secret that should be created and then used for pulling images
+#imagePullSecret:
+#  # TODO: decide whether you want to create a new secret or use an existing one (using imagePullSecrets above)
+#  enabled: false
+#  # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
+#  dockercfg: "e30K"
+#  annotations:
 
 debug: false  # Set to true to output all shell commands (enables `set -x` in scripts)
 
-nodeSelector: {}
-nodeAffinity:
-  requiredDuringSchedulingIgnoredDuringExecution:
-    nodeSelectorTerms:
-    - matchExpressions:
-      - key: gpu
-        operator: Exists
-      - key: os-version
-        operator: In
-        # TODO: Edit <gardenlinux-version>
-        values: ["<gardenlinux-version>"]
+nodeSelector:
+  usage: "gpu"
 tolerations:
 - key: "" # An empty key with operator Exists matches all keys, values and effects which means this will tolerate everything.
   operator: Exists
@@ -39,9 +30,9 @@ nvidiaInstaller:
   # TODO: Set custom image registry, if required, e.g. "eu.gcr.io/project-name"
   imageRegistry: ""
   # TODO: Edit <gardenlinux-version> and <driver-version> accordingly
-  installerImage: com.sap.ai/nvidia-installer-<gardenlinux-version>-<driver-version>
+  installerImage: cxsdatalake.int.repositories.cloud.sap/qod/nvidia-installer-1443.3-535.86.10
   # TODO: Edit image tag
-  installerTag: latest
+  installerTag: v0.0.1
   pauseImage: gcr.io/google_containers/pause-amd64:3.0
   hostDriverPath: /opt/drivers
   installerResources:
