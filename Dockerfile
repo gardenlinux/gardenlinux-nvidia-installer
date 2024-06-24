@@ -22,7 +22,7 @@ COPY resources/compile.sh .
 
 RUN export KERNEL_NAME=$(./extract_kernel_name.sh ${KERNEL_TYPE} ${TARGET_ARCH}) && ./compile.sh
 
-FROM debian:bookworm-slim as packager
+FROM debian:bookworm-slim AS packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
 
