@@ -18,19 +18,23 @@ if [[ "$GPU_NAME" =~ (A100|H100|H200|B100|B200) ]]; then
   OUTDIR=/out/nvidia-fabricmanager/$DRIVER_VERSION
   FABRICMANAGER_ARCHIVE="fabricmanager-linux-x86_64-$DRIVER_VERSION-archive"
 
-  # Extract archive
-  xz -d -v "${OUTDIR}/${FABRICMANAGER_ARCHIVE}.tar.xz"
-  tar xf "${OUTDIR}/${FABRICMANAGER_ARCHIVE}.tar" --directory="${OUTDIR}"
+  if [ -e ${OUTDIR}/${FABRICMANAGER_ARCHIVE}.tar.xz ]; then
+    # Extract archive
+    xz -d -v "${OUTDIR}/${FABRICMANAGER_ARCHIVE}.tar.xz"
+    tar xf "${OUTDIR}/${FABRICMANAGER_ARCHIVE}.tar" --directory="${OUTDIR}"
 
-  # Copy files to the right places
-  cp "${OUTDIR}"/"${FABRICMANAGER_ARCHIVE}"/bin/* /usr/local/bin
-  cp "${OUTDIR}"/"${FABRICMANAGER_ARCHIVE}"/lib/* /usr/local/lib
-  cp -ar "${OUTDIR}"/"${FABRICMANAGER_ARCHIVE}"/share/* /usr/share
-  sed 's/DAEMONIZE=1/DAEMONIZE=0/g' "${OUTDIR}/${FABRICMANAGER_ARCHIVE}/etc/fabricmanager.cfg" > /etc/fabricmanager.cfg
-  sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
+    # Copy files to the right places
+    cp "${OUTDIR}"/"${FABRICMANAGER_ARCHIVE}"/bin/* /usr/local/bin
+    cp "${OUTDIR}"/"${FABRICMANAGER_ARCHIVE}"/lib/* /usr/local/lib
+    cp -ar "${OUTDIR}"/"${FABRICMANAGER_ARCHIVE}"/share/* /usr/share
+    sed 's/DAEMONIZE=1/DAEMONIZE=0/g' "${OUTDIR}/${FABRICMANAGER_ARCHIVE}/etc/fabricmanager.cfg" > /etc/fabricmanager.cfg
+    sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
 
-  # Run Fabric Manager
-  nv-fabricmanager -c /etc/fabricmanager.cfg
+    # Run Fabric Manager
+    nv-fabricmanager -c /etc/fabricmanager.cfg
+  else
+    echo "No NVIDIA Fabric Manager archive was found. Skipping."
+  fi
 fi
 echo "Sleep infinity"
 sleep infinity
