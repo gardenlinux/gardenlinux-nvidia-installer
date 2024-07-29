@@ -26,7 +26,7 @@ pushd /tmp/nvidia
 OUTDIR=/out/nvidia-fabricmanager/$DRIVER_VERSION
 FABRICMANAGER_ARCHIVE="fabricmanager-linux-$ARCH_TYPE-$DRIVER_VERSION-archive"
 FABRICMANAGER_URL="https://developer.download.nvidia.com/compute/cuda/redist/fabricmanager/linux-$ARCH_TYPE/${FABRICMANAGER_ARCHIVE}.tar.xz"
-if [[ `wget  -S --spider FABRICMANAGER_URL  2>&1 | grep 'HTTP/1.1 200 OK'` ]]; then
+if wget -q --spider FABRICMANAGER_URL; then
   mkdir -p "$OUTDIR"
   wget --directory-prefix="${OUTDIR}" "${FABRICMANAGER_URL}"
 else
