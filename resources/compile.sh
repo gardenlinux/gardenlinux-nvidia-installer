@@ -91,7 +91,7 @@ case $TARGET_ARCH in
         echo "Successfully compiled NVIDIA modules"
       else 
         echo "[ERROR] Failed to compile NVIDIA modules"
-        cat /tmp/nvidia/NVIDIA-Linux-aarch64-535.86.10/nvidia-installer.log
+        cat /tmp/nvidia/NVIDIA-Linux-aarch64-"$DRIVER_VERSION"/nvidia-installer.log
         cat "$PWD"/nvidia-installer.log
 
         exit 1
