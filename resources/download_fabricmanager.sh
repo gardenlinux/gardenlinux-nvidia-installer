@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Downloading NVIDIA fabric manager for driver version $DRIVER_VERSION"
 set -x
-DRIVER_BRANCH=`echo $DRIVER_VERSION | grep -oE '^[0-9]+'`
+DRIVER_BRANCH=$(echo "$DRIVER_VERSION" | grep -oE '^[0-9]+')
 if [ -z "$TARGET_ARCH" ]; then
     echo "Error: TARGET_ARCH is not set."
     exit 1
@@ -14,8 +14,6 @@ if [[ ! ${arch_translation[$TARGET_ARCH]+_} ]]; then
     echo "Error: Unsupported TARGET_ARCH value."
     exit 2
 fi
-
-ARCH_TYPE=${arch_translation[$TARGET_ARCH]}
 
 mkdir -p /tmp/nvidia
 
