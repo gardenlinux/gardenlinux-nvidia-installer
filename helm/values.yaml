@@ -58,8 +58,8 @@ nvidiaInstaller:
 nvidiaDevicePlugin:
   # TODO: Set custom image registry, if required, e.g. "eu.gcr.io/project-name"
   imageRegistry: ""
-  # Image URI from https://github.com/GoogleCloudPlatform/container-engine-accelerators/blob/master/cmd/nvidia_gpu/device-plugin.yaml
-  devicePluginImage: gcr.io/gke-release/nvidia-gpu-device-plugin@sha256:6b25281cd0fa3ca55f3e837a18be4a14b44952105568f466530dd85bcebde62f
+  # Image URI from https://github.com/GoogleCloudPlatform/container-engine-accelerators/blob/master/cmd/nvidia_gpu/device-plugin.yaml or from https://console.cloud.google.com/artifacts/docker/gke-release/us/gcr.io/nvidia-gpu-device-plugin
+  devicePluginImage: gcr.io/gke-release/nvidia-gpu-device-plugin:1.0.25-gke.56
   # TODO: Edit <driver-version>
   nvidiaDriverVersion: <driver-version>
   hostDevicePluginPath: /var/lib/kubelet/device-plugins
