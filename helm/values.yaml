@@ -69,3 +69,12 @@ nvidiaDevicePlugin:
       memory: 100Mi
     limits:
       memory: 100Mi
+  gpuConfig:
+    enabled: false
+    # Based on the go struct found here: https://github.com/GoogleCloudPlatform/container-engine-accelerators/blob/master/pkg/gpu/nvidia/manager.go#L70
+    data:
+      GPUPartitionSize: ""
+      GPUSharingConfig:
+        GPUSharingStrategy: ""
+        MaxSharedClientsPerGPU: 0
+      HealthCriticalXid: []
