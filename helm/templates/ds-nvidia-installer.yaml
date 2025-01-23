@@ -65,7 +65,7 @@ spec:
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
 
-      {{- $kubectlImageUri := printf "%s:%s" .Values.nvidiaInstaller.kubectlImage }}
+      {{- $kubectlImageUri := printf "%s" .Values.nvidiaInstaller.kubectlImage }}
       {{- if .Values.nvidiaInstaller.imageRegistry }}
         {{ $kubectlImageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $kubectlImageUri }}
       {{- end }}
