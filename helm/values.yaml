@@ -43,6 +43,7 @@ nvidiaInstaller:
   # TODO: Edit image tag
   installerTag: latest
   pauseImage: gcr.io/google_containers/pause-amd64:3.0
+  kubectlImage: bitnami/kubectl:latest
   hostDriverPath: /opt/drivers
   installerResources:
     requests:
