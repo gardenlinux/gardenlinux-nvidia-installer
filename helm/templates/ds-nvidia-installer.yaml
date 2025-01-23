@@ -9,10 +9,6 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  {{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
-  {{- if .Values.nvidiaInstaller.imageRegistry }}
-    {{ $imageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $imageUri }}
-  {{- end }}
   updateStrategy:
     type: OnDelete
   selector:
@@ -37,6 +33,10 @@ spec:
       containers:
       {{- else }}
       initContainers:
+      {{- end }}
+      {{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+      {{- if .Values.nvidiaInstaller.imageRegistry }}
+        {{ $imageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $imageUri }}
       {{- end }}
       - image: {{ $imageUri }}
         name: install-driver
@@ -64,7 +64,12 @@ spec:
           mountPath: /opt/nvidia-installer/cache
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
-      - image: {{ .Values.nvidiaInstaller.kubectlImage }}
+
+      {{- $kubectlImageUri := printf "%s:%s" .Values.nvidiaInstaller.kubectlImage }}
+      {{- if .Values.nvidiaInstaller.imageRegistry }}
+        {{ $kubectlImageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $kubectlImageUri }}
+      {{- end }}
+      - image: {{ $kubectlImageUri }}
         name: label-with-nvidia-driver-version
         securityContext:
           runAsUser: 65534
