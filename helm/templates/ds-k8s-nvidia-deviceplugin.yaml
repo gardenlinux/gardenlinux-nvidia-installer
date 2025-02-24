@@ -36,6 +36,11 @@ spec:
           path: /opt/nvidia-installer/cache/nvidia/{{ required "nvidiaDevicePlugin.nvidiaDriverVersion" .Values.nvidiaDevicePlugin.nvidiaDriverVersion }}
           type: Directory
         name: nvidia
+{{- if .Values.nvidiaDevicePlugin.gpuConfig }}
+      - configMap:
+          name: {{ template "nvidia-device-plugin.gpuConfig.fullname" . }}
+        name: gpu-config
+{{- end }}
       imagePullSecrets: {{ template "image-pull-secrets" . }}
       containers:
       - name: nvidia-gpu-device-plugin
@@ -60,6 +65,10 @@ spec:
           mountPath: /dev
         - mountPath: /usr/local/nvidia
           name: nvidia
+{{- if .Values.nvidiaDevicePlugin.gpuConfig }}
+        - mountPath: /etc/nvidia
+          name: gpu-config
+{{- end }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
