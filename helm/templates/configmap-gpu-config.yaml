@@ -1,4 +1,4 @@
-{{- if .Values.nvidiaDevicePlugin.gpuConfig.enabled }}
+{{- if .Values.nvidiaDevicePlugin.gpuConfig }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,5 +8,5 @@ metadata:
     app: {{ template "nvidia-device-plugin.name" . }}
 data:
   gpu_config.json: |
-{{ .Values.nvidiaDevicePlugin.gpuConfig.data | toJson | indent 4 }}
+{{ .Values.nvidiaDevicePlugin.gpuConfig | toJson | indent 4 }}
 {{- end }}

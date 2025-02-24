@@ -36,7 +36,7 @@ spec:
           path: /opt/nvidia-installer/cache/nvidia/{{ required "nvidiaDevicePlugin.nvidiaDriverVersion" .Values.nvidiaDevicePlugin.nvidiaDriverVersion }}
           type: Directory
         name: nvidia
-{{- if .Values.nvidiaDevicePlugin.gpuConfig.enabled }}
+{{- if .Values.nvidiaDevicePlugin.gpuConfig }}
       - configMap:
           name: {{ template "nvidia-device-plugin.gpuConfig.fullname" . }}
         name: gpu-config
@@ -65,7 +65,7 @@ spec:
           mountPath: /dev
         - mountPath: /usr/local/nvidia
           name: nvidia
-{{- if .Values.nvidiaDevicePlugin.gpuConfig.enabled }}
+{{- if .Values.nvidiaDevicePlugin.gpuConfig }}
         - mountPath: /etc/nvidia
           name: gpu-config
 {{- end }}
