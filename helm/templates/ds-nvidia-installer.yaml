@@ -9,10 +9,6 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  {{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
-  {{- if .Values.nvidiaInstaller.imageRegistry }}
-    {{ $imageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $imageUri }}
-  {{- end }}
   updateStrategy:
     type: OnDelete
   selector:
@@ -37,6 +33,10 @@ spec:
       containers:
       {{- else }}
       initContainers:
+      {{- end }}
+      {{- $imageUri := printf "%s:%s" .Values.nvidiaInstaller.installerImage (.Values.nvidiaInstaller.installerTag | default .Chart.Version) }}
+      {{- if .Values.nvidiaInstaller.imageRegistry }}
+        {{ $imageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $imageUri }}
       {{- end }}
       - image: {{ $imageUri }}
         name: install-driver
@@ -64,7 +64,33 @@ spec:
           mountPath: /opt/nvidia-installer/cache
         - name: module-install-dir-base
           mountPath: {{ required "nvidiaInstaller.hostDriverPath" .Values.nvidiaInstaller.hostDriverPath }}
-      {{- if not .Values.debug }}
+
+      {{- $kubectlImageUri := printf "%s" .Values.nvidiaInstaller.kubectlImage }}
+      {{- if .Values.nvidiaInstaller.imageRegistry }}
+        {{ $kubectlImageUri = printf "%s/%s" .Values.nvidiaInstaller.imageRegistry $kubectlImageUri }}
+      {{- end }}
+      - image: {{ $kubectlImageUri }}
+        name: label-with-nvidia-driver-version
+        securityContext:
+          runAsUser: 65534
+          runAsGroup: 65534
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - "ALL"
+        command:
+          - "sh"
+          - "-c"
+        args:
+          - >
+            echo $NODENAME; kubectl label node $NODENAME ai.sap.com/nvidia-driver-version={{.Values.nvidiaDevicePlugin.nvidiaDriverVersion}} --overwrite
+        env:
+          - name: NODENAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+    {{- if not .Values.debug }}
       containers:
       {{- end }}
       - name: fabricmanager
