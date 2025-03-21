@@ -9,7 +9,7 @@ imagePullSecret:
   # TODO: decide whether you want to create a new secret or use an existing one (using imagePullSecrets above)
   enabled: false
   # TODO: change e30k to a base64-encoded Docker registry JSON authentication file
-  dockercfg: "e30K"
+  dockerconfigjson: "e30K"
   annotations:
 
 debug: false  # Set to true to output all shell commands (enables `set -x` in scripts)
