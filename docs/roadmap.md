@@ -226,13 +226,14 @@ installer is [squat/modulus](https://github.com/squat/modulus), which
 was designed to do something very similar for Flatcar Linux / CoreOS.
 This project supports having a S3 bucket, such that kernel modules are
 still downloaded & compiled at runtime, but only once - the resulting
-files are stored in the S3 bucket. This has the advantages of the
-default GPU operator behaviour (no need to build an image for each
+files are stored in the S3 bucket and the installer checks this bucket
+for pre-built kernel modules. This has the advantages of the
+default GPU operator behaviour (no need to build a container image for each
 kernel & driver version) along with the advantages of the precompiled
 images approach (no need to download & compile for every node in the
-cluster). Indeed a whole set of clusters could share the same S3 bucket
+cluster). All of a user's clusters could share the same S3 bucket
 such that the initial compilation is done in a preproduction cluster
-such that production clusters would always have access to prebuild
+and then production clusters would always have access to prebuilt
 kernel modules.
 
 ### Step 3 - Add support for NFS PV storage to the NVIDIA GPU Operator
@@ -247,14 +248,14 @@ using a particular kernel/driver combination would trigger module
 download & compilation, but all future nodes could just get the required
 files from the PV. This would deliver exactly the required user
 experience, subject to Gardener deploying the required components in
-response to the user enabling GPU functionality in the cluster.
+response to the user enabling GPU functionality in the cluster (see next step).
 
 ### Step 4 - Enable GPU support in the Gardener UI
 
 Up until this point GPU support is made easier, but is still not automatic - the
 user needs to take care of configuring and deploying the GPU operator and the
 Node Feature Discovery operator. The next step is to add a checkbox to the Gardener UI
-to enable GPU support. This would automatically deploy the NVIDIA GPU Operator and
+to enable GPU support in a cluster. This would automatically deploy the NVIDIA GPU Operator and
 the Node Feature Discovery operator (and associated rule to label nodes with the
 Garden Linux version) and would enable the NVIDIA Container runtime as an option
 for worker pools.
