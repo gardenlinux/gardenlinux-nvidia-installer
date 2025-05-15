@@ -14,7 +14,7 @@ In a perfect world a user would create a worker pool of GPU instances,
 and everything "just works".
 
 In an almost-perfect world a user would select an NVIDIA GPU option
-    in Container Runtime dropdown in the Gardener UI.
+as "Additional OCI Runtime" (dropdown) in the Gardener UI / `containerRuntime` in the shoot spec.
 
 ## How we do it now
 
