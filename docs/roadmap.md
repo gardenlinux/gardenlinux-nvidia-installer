@@ -4,7 +4,7 @@
 This document outlines the current state and future plans for GPU support in Gardener, focusing primarily on NVIDIA GPUs.
 ### Current State
 - GPU support is possible but requires significant manual effort
-- Uses three main DaemonSets:
+- Requires three DaemonSets to be configured and deployed:
     1. NVIDIA driver installer
     2. GKE Device Plugin
     3. DCGM Exporter
@@ -14,6 +14,10 @@ This document outlines the current state and future plans for GPU support in Gar
     - Relies on Google's GKE Device Plugin
     - Requires manual node labeling
     - Limited to basic GPU features
+
+- The above effort and limitations can be avoided by enabling Gardener to use the 
+    NVIDIA GPU Operator, but this requires some development work. This work would also 
+    enable the use of AMD and Intel GPUs in future.
 
 ### Future Roadmap
 #### Step 1: Add Garden Linux Support to NVIDIA GPU Operator
