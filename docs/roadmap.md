@@ -104,7 +104,7 @@ Linux version, each GPU node requires a label identifying this version,
 for example **os-version: 1592.4.0**. Gardener does not take care of
 adding such labels, so this becomes a chore for the operations team.
 
-Note: This can now be automated by deploying the [Node Feature
+Note: This can be automated by deploying the [Node Feature
     Discovery](https://kubernetes-sigs.github.io/node-feature-discovery/v0.17/get-started/index.html)
     operator and creating the following rule:
 
@@ -121,7 +121,7 @@ Note: This can now be automated by deploying the [Node Feature
           matchFeatures:
             - feature: system.osrelease
               matchExpressions:
-        GARDENLINUX_VERSION: {op: Exists}
+                GARDENLINUX_VERSION: {op: Exists}
 
 
 This rule will result in a label similar to this:
@@ -131,7 +131,7 @@ This rule will result in a label similar to this:
 
 ### Pros & Cons
 
-#### Pro: It is the official method supported by NVIDIA
+#### Pro: It is the official method supported by NVIDIA and does everything for you
 
 The [NVIDIA GPU Operator](https://github.com/NVIDIA/gpu-operator) takes
 care of installing the following:
@@ -146,6 +146,12 @@ care of installing the following:
   - DCGM Exporter
 
   - vGPU manager
+
+#### Pro: Enables advanced GPU features
+
+Features such as multi-instace GPU, vGPU, GPU time slicing and GPUDirect RDMA are
+    supported by the NVIDIA GPU Operator. These features are not
+    supported by the current AI Core implementation.
 
 #### Con: Driver installer by default downloads and compiles at runtime
 
@@ -250,19 +256,38 @@ files from the PV. This would deliver exactly the required user
 experience, subject to Gardener deploying the required components in
 response to the user enabling GPU functionality in the cluster (see next step).
 
-### Step 4 - Enable GPU support in the Gardener UI
+### Step 4 - Enable GPU support in the Gardener UI and Shoot specification
 
 Up until this point GPU support is made easier, but is still not automatic - the
 user needs to take care of configuring and deploying the GPU operator and the
-Node Feature Discovery operator. The next step is to add a checkbox to the Gardener UI
+`NodeFeatureRule` that enables the node label for the Garden Linux version. 
+The next step is to add a checkbox to the Gardener UI
 to enable GPU support in a cluster. This would automatically deploy the NVIDIA GPU Operator and
 the Node Feature Discovery operator (and associated rule to label nodes with the
 Garden Linux version) and would enable the NVIDIA Container runtime as an option
 for worker pools.
 
-### Step 5 - Consider extending the NVIDIA GPU Operator to support AMD & Intel GPUs
+With the NVIDIA GPU Operator deployed to the cluster, its configuration would be
+maintained by editing the deployed `NVIDIADriver` custom resource - see 
+[here](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-driver-configuration.html#about-the-nvidia-driver-custom-resource)
+for details. 
+This custom resource would be embedded in the Gardener `shoot.yaml` in a `spec.extensions.providerConfig` 
+for an extension of type `gpu-support` (to be developed). One or more such CRs could be included in the 
+`providerConfig`; each `NVIDIADriver` CR can contain a `nodeSelector` and a `version`, and this would allow different 
+driver versions to be deployed to different worker pools based on a node label.
 
-The principles of the NVIDIA GPU Operator can also be extended to AMD
-and Intel GPUs. This is a larger multi-vendor project, but could lead to
-a globally better user experience and less maintenance overhead for all
-parties involved (Gardener, GPU vendors and end users).
+### Step 5a - Extend the NVIDIA GPU Operator to support AMD & Intel GPUs
+
+NVIDIA, Intel and AMD are all currently maintaining operators for supporting 
+their GPUs on Kubernetes. This is not a competitive differentiator for any of them. 
+Bringing them together would reduce the overhead for all, and improve the user experience. 
+Something similar is already happening with [Project HAMi](https://github.com/Project-HAMi/HAMi), 
+which supports the GPUs of multiple vendors. With that said, such unification may be unlikely
+due to political/marketing reasons. 
+
+### Step 5b - Extend the Gardener GPU extension to support multiple vendors
+
+An alternative to Step 5a above is for the Gardener GPU extension to supports operators from 
+multiple vendors, and the extension `providerConfig` could then include CRs of type 
+`nvidia.com/v1alpha1/NVIDIADriver`, `amd.com/v1alpha1/DeviceConfig`, 
+`deviceplugin.intel.com/v1/GpuDevicePlugin` and others.
