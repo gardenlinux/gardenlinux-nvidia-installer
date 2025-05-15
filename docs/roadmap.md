@@ -1,9 +1,58 @@
 # Future GPU support in Gardener
 
-## What do we want?
+## Executive Summary (AI generated, human-edited)
+This document outlines the current state and future plans for GPU support in Gardener, focusing primarily on NVIDIA GPUs.
+### Current State
+- GPU support is possible but requires significant manual effort
+- Uses three main DaemonSets:
+    1. NVIDIA driver installer
+    2. GKE Device Plugin
+    3. DCGM Exporter
+
+- Current implementation has some limitations:
+    - Requires building images for each Garden Linux & NVIDIA driver version combination
+    - Relies on Google's GKE Device Plugin
+    - Requires manual node labeling
+    - Limited to basic GPU features
+
+### Future Roadmap
+#### Step 1: Add Garden Linux Support to NVIDIA GPU Operator
+- Add Garden Linux support to NVIDIA GPU Driver Container
+- Implement NVIDIA Container Toolkit installation for Garden Linux
+- Integrate Garden Linux support into NVIDIA GPU Operator
+
+#### Step 2: S3 Storage Support
+- Add S3 bucket support for storing pre-built kernel modules
+- Enable sharing compiled modules across clusters
+- Reduce compilation overhead
+
+#### Step 3: NFS PV Storage Integration
+- Implement NFS-based Persistent Volume storage
+- Enable first-time compilation with cached results for subsequent nodes
+- Leverage hyperscaler's NFS CSI driver
+
+#### Step 4: Gardener UI and Shoot Specification Enhancement
+- Add GPU support checkbox in Gardener UI
+- Automate deployment of NVIDIA GPU Operator (with Node Feature Discovery operator)
+- Enable NVIDIA Container runtime options for worker pools
+- Implement GPU configuration through `shoot.yaml` specifications
+
+#### Step 5: Multi-vendor Support (Two possible approaches)
+1. Extend NVIDIA GPU Operator
+    - Add support for AMD & Intel GPUs
+    - Align with projects like HAMi
+
+2. Extend Gardener GPU Extension
+    - Support multiple vendor operators
+    - Enable configuration for different GPU vendors through custom resources
+
+The ultimate goal is to simplify GPU deployment in Gardener clusters while providing flexible options for different GPU vendors and use cases.
+
+
+## Introduction: What do we want?
 
 We want easy-to-consume support for using GPUs in a Gardener cluster,
-    beginning with NVIDIA GPUs
+    beginning with NVIDIA GPUs.
     
 Using GPUs in Gardener is possible right now, but involves a lot
     of work. What we want is to create a worker pool of GPU nodes, and to be
