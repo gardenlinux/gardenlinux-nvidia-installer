@@ -58,4 +58,7 @@ FROM scratch
 
 COPY --from=packager /rootfs /
 
-ENTRYPOINT ["/opt/nvidia-installer/load_install_gpu_driver.sh"]
+# Make this image compatible with the NVIDIA GPU Operator by using "nvidia-driver" as entrypoint
+COPY nvidia-driver /usr/local/bin
+
+ENTRYPOINT ["nvidia-driver"]

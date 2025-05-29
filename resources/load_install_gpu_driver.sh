@@ -28,6 +28,9 @@ main() {
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
     install "$DRIVER_NAME" "$DRIVER_VERSION" "$NVIDIA_BIN"
 
+    # For compatibility with the NVIDIA GPU Operator
+    cp "$NVIDIA_BIN"/* /usr/bin
+
     if ! "${NVIDIA_BIN}/nvidia-smi"; then
         echo "[ERROR] driver installation failed. Could not run nvidia-smi."
         exit 1
