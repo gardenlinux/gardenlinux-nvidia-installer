@@ -5,7 +5,7 @@ set -e
 BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
 # shellcheck disable=SC1090
 source "$BIN_DIR"/set_env_vars.sh
-LD_ROOT=${LD_ROOT:-/}
+LD_ROOT=${LD_ROOT:-/root}
 
 main() {
     parse_parameters "${@}"
@@ -18,15 +18,11 @@ main() {
 
     check_status "${DRIVER_NAME}" "${DRIVER_VERSION}" && exit 0
 
-    driver_cached=$(driver_in_cache "${DRIVER_NAME}" "${DRIVER_VERSION}")
-
-    if ! ${driver_cached}; then
-      mkdir -p "${CACHE_DIR}"/"${DRIVER_NAME}"
-      tar xzf /out/"${DRIVER_NAME}"/"${DRIVER_VERSION}".tar.gz -C "${CACHE_DIR}"/"${DRIVER_NAME}"
-    fi
+    tar xzf /out/nvidia/driver.tar.gz -C "/run/nvidia"
+    cp -a /run/nvidia/driver/usr/lib/* /usr/lib  # May not be needed
 
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
-    install "$DRIVER_NAME" "$DRIVER_VERSION" "$NVIDIA_BIN"
+    install "$DRIVER_NAME" "$NVIDIA_BIN"
 
     # For compatibility with the NVIDIA GPU Operator
     cp "$NVIDIA_BIN"/* /usr/bin
@@ -44,7 +40,7 @@ check_status() {
     # Check to see if /dev/nvidia0 exists already - this means that a previous driver version already exists,
     #  in which case we don't want to overwrite with a conflicting new version
     if [ -e /dev/nvidia0 ] && [ -e /dev/nvidiactl ] && [ -e /dev/nvidia-uvm ]; then
-      echo "[INFO] /dev/nvidia* files exist - driver version $(ls "${CACHE_DIR}"/"${DRIVER_NAME}") already installed"
+      echo "[INFO] /dev/nvidia* files exist - driver version ${DRIVER_VERSION} already installed"
       return 0
     fi
 
@@ -52,25 +48,9 @@ check_status() {
     return 1;
 }
 
-driver_in_cache() {
-    local DRIVER_NAME=$1
-    local DRIVER_VERSION=$2
-    # shellcheck disable=SC2155
-    local KERNEL_NAME=$(uname -r)
-    if [ -d "${CACHE_DIR}/${DRIVER_NAME}/${DRIVER_VERSION}/lib/modules/${KERNEL_NAME}" ]; then
-        echo "true"
-    fi
-    echo "false"
-}
-
 install() {
     local DRIVER_NAME=$1
-    local DRIVER_VERSION=$2
-    local NVIDIA_BIN=$3
-
-    mkdir -p "${INSTALL_DIR}"
-    rm -rf "${INSTALL_DIR:?}/${DRIVER_NAME}"
-    ln -s "${CACHE_DIR}/${DRIVER_NAME}/${DRIVER_VERSION}" "${INSTALL_DIR}/${DRIVER_NAME}"
+    local NVIDIA_BIN=$2
 
     if [ -d "${INSTALL_DIR}/${DRIVER_NAME}/lib" ] ; then
         mkdir -p "${LD_ROOT}/etc/ld.so.conf.d"
