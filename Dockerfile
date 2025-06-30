@@ -63,6 +63,6 @@ COPY --from=packager /rootfs /
 # Make this image compatible with the NVIDIA GPU Operator by using "nvidia-driver" as entrypoint
 COPY nvidia-driver /usr/local/bin
 
-ENV LD_LIBRARY_PATH=/run/nvidia/driver/lib
+ENV LD_LIBRARY_PATH=/run/nvidia/driver/lib:/run/nvidia/driver/usr/lib/x86_64-linux-gnu
 
 ENTRYPOINT ["nvidia-driver"]
