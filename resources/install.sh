@@ -13,7 +13,7 @@ if [ ! -e /dev/nvidia0 ] ; then
     N3D=$(echo "$NVDEVS" | grep -c "3D controller") || true
     NVGA=$(echo "$NVDEVS" | grep -c "VGA compatible controller") || true
     N=$((N3D + NVGA - 1)) || true
-    for i in $(seq 0 $N); do mknod -m 666 /dev/nvidia"$i" c 195 "$i"; done
+    for i in $(seq 0 $N); do nsenter -t 1 -m -u -n -i mknod -m 666 /dev/nvidia"$i" c 195 "$i"; done
 fi
 if [ ! -e /dev/nvidiactl ] ; then
     mknod -m 666 /dev/nvidiactl c 195 255

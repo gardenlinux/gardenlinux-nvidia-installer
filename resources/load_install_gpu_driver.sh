@@ -18,13 +18,6 @@ main() {
 
     check_status "${DRIVER_NAME}" "${DRIVER_VERSION}" && exit 0
 
-    # Remount /usr as read-write and create nvidia folder, so that we can install the driver binaries & libraries
-    nsenter -t 1 -m -u -n -i mount -o remount,rw /usr
-
-    # Create a writable /usr/local/nvidia directory for the container toolkit that will stay writable after we make /usr read-only again
-    #nsenter -t 1 -m -u -n -i mkdir /tmp/nvidia /usr/local/nvidia
-    #nsenter -t 1 -m -u -n -i mount --bind /tmp/nvidia /usr/local/nvidia
-
     tar xzf /out/nvidia/driver.tar.gz -C "/run/nvidia"
 
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
@@ -38,9 +31,6 @@ main() {
         exit 1
     fi
 
-    # Remount /usr back as read-only
-    #nsenter -t 1 -m -u -n -i mount -o remount,ro /usr
-    # We need to leave /usr as read/write because the toolkit installer copies NVIDIA bins & libs to /usr/bin and /usr/lib
 }
 
 check_status() {
