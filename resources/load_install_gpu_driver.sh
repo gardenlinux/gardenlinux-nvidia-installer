@@ -26,6 +26,9 @@ main() {
     # So that nvidia-smi works for the NVIDIA GPU Operator startup probe
     cp "$NVIDIA_BIN"/* /usr/bin
 
+    # For compatibility with the NVIDIA GPU Operator
+    cp "$NVIDIA_BIN"/* /usr/bin
+
     if ! "${NVIDIA_BIN}/nvidia-smi"; then
         echo "[ERROR] driver installation failed. Could not run nvidia-smi."
         exit 1
