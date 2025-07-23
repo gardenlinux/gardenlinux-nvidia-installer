@@ -1,18 +1,22 @@
 cdi:
-  enabled=true
-  default=true
+  enabled: true
+  default: true
 toolkit:
-  installDir=/opt/nvidia
+  installDir: /opt/nvidia
 driver:
-  usePrecompiled=true
-  version=570
-  repository=$PUBLIC_REGISTRY_URI
+  usePrecompiled: true
+  version: 570
+  repository: $PUBLIC_REGISTRY_URI
 node-feature-discovery:
-  custom:
-    - name: "gardenlinux-version"
-      labels:
-        "feature.node.kubernetes.io/system-os_release.VERSION_ID": "@system.osrelease.GARDENLINUX_VERSION"
-      matchFeatures:
-        - feature: system.osrelease
-          matchExpressions:
-            GARDENLINUX_VERSION: {op: Exists}
+  worker:
+    config:
+      sources:
+        custom:
+          - name: "gardenlinux-version"
+            labelsTemplate: |
+              {{ range .system.osrelease }}feature.node.kubernetes.io/system-os_release.VERSION_ID={{ .Value }}
+              {{ end }}
+            matchFeatures:
+              - feature: system.osrelease
+                matchExpressions:
+                  GARDENLINUX_VERSION: {op: Exists}
