@@ -1,40 +1,37 @@
-# .github/workflows/build_driver.yml
-
-name: Compile Kernel
+name: Build Drivers
 
 on:
   workflow_dispatch:
-    inputs:
-      target_arch:
-        description: "Target architecture (e.g. x86_64)"
-        required: true
-        default: "arm64"
-      kernel_flavour:
-        description: "Kernel flavour (e.g. cloud)"
-        required: true
-        default: "cloud"
-        type: choice
-        options:
-          - cloud
-          - metal
-      gl_version:
-        description: "Garden linux version"
-        required: true
-        default: "1877.1"
-      driver_version:
-        description: "Driver version (e.g. 570.172.08)"
-        required: true
-        default: "570.172.08"
 
 jobs:
-  build:
+  generate-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Generate matrix
+        id: set-matrix
+        run: |
+          MATRIX=$(./.ci/generate_matrix.py)
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  build:
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
     env:
-      TARGET_ARCH: ${{ inputs.target_arch }}
-      KERNEL_FLAVOUR: ${{ inputs.kernel_flavour }}
-      GL_VERSION: ${{ inputs.gl_version }}
-      DRIVER_VERSION: ${{ inputs.driver_version }}
+      TARGET_ARCH: ${{ matrix.arch }}
+      GL_VERSION: ${{ matrix.os_version }}
+      DRIVER_VERSION: ${{ matrix.driver_version }}
+      KERNEL_TYPE: ${{ matrix.kernel_flavour }}
 
     steps:
       - name: Checkout code
@@ -43,6 +40,7 @@ jobs:
       - name: Extract kernel name
         id: extract_kernel
         run: |
+          echo "using ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION}"
           KERNEL_NAME=$(docker run --rm \
             -v "${PWD}:/workspace" \
             -w /workspace \
@@ -52,15 +50,17 @@ jobs:
           echo "kernel_name=$KERNEL_NAME"
           echo "kernel_name=$KERNEL_NAME" >> $GITHUB_OUTPUT
         env:
-          KERNEL_TYPE: ${{ env.KERNEL_TYPE }}
+          KERNEL_TYPE: ${{ env.KERNEL_FLAVOUR }}
           TARGET_ARCH: ${{ env.TARGET_ARCH }}
 
-      - name: Extract kernel name and compile
+      - name: Compile module
         env:
           KERNEL_NAME: ${{ steps.extract_kernel.outputs.kernel_name }}
         run: |
+          mkdir ${{ github.workspace }}/out
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
+            -v ${{ github.workspace }}/out:/out \
             -w /workspace \
             --env TARGET_ARCH \
             --env GL_VERSION \
@@ -73,5 +73,6 @@ jobs:
       - name: Upload built driver
         uses: actions/upload-artifact@v4
         with:
-          name: driver-${{ env.DRIVER_VERSION }}
-          path: ./out/nvidia/${{ env.DRIVER_VERSION }}.tar.gz
+          name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
+          path: ${{ github.workspace }}/out/nvidia/${{ matrix.driver_version }}.tar.gz
+
