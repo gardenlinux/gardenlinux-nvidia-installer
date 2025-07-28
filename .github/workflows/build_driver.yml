@@ -2,6 +2,9 @@ name: Build Drivers
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   generate-matrix:
