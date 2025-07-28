@@ -1,2 +1,3 @@
 #!/bin/bash
 /opt/nvidia-installer/load_install_gpu_driver.sh
+/opt/nvidia-installer/install_fabricmanager.sh

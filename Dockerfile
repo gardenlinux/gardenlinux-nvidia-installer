@@ -47,9 +47,11 @@ RUN rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x
          /var/lib/dpkg/info/libdb5.3* /usr/lib/x86_64-linux-gnu/libdb-5.3.so* /usr/share/doc/libdb5.3 \
          /usr/bin/chfn /usr/bin/gpasswd
 
+RUN echo "${DRIVER_VERSION}" > /tmp/driver-version
+
 RUN mkdir -p /rootfs \
         && cp -ar /bin /boot /etc /home /lib /lib64 /media /mnt /opt /out /root /run /sbin /srv /tmp /usr /var /rootfs \
-        && rm -rf /rootfs/opt/actions-runner \
+        && rm -rf /rootfs/opt/actions-runner
 
 # Clear the library cache so that Whitesource doesn't complain about libdb
 RUN rm /etc/ld.so.cache ; ldconfig
@@ -60,5 +62,7 @@ COPY --from=packager /rootfs /
 
 # Make this image compatible with the NVIDIA GPU Operator by using "nvidia-driver" as entrypoint
 COPY nvidia-driver /usr/local/bin
+
+ENV LD_LIBRARY_PATH=/run/nvidia/driver/lib:/run/nvidia/driver/usr/lib/x86_64-linux-gnu
 
 ENTRYPOINT ["nvidia-driver"]

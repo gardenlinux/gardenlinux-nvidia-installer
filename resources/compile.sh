@@ -41,7 +41,8 @@ chmod +x nvidia.run
 # shellcheck disable=SC2164
 pushd "./NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION"
 export IGNORE_MISSING_MODULE_SYMVERS=1
-OUTDIR="/out/nvidia/$DRIVER_VERSION"
+#OUTDIR="/out/nvidia/$DRIVER_VERSION"
+OUTDIR="/out/nvidia/driver"
 
 case $TARGET_ARCH in
     amd64)
@@ -106,7 +107,8 @@ esac
 echo "Archiving assets"
 
 # Archive library .so files
-cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$OUTDIR"/lib
+mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
+cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
 
 # We don't need the installer binaries, or the icons/desktop files in /share
 rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share

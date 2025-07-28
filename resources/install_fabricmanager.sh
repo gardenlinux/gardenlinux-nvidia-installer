@@ -20,6 +20,7 @@ if [[ "$GPU_NAME" =~ (A100|H100|H200|B100|B200) ]]; then
 
   # Run Fabric Manager
   nv-fabricmanager -c /etc/fabricmanager.cfg
+  echo "Fabric manager running"
 fi
 echo "Sleep infinity"
 sleep infinity
