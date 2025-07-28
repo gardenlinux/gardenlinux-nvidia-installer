@@ -53,5 +53,5 @@ into a Docker image from which they can be installed at runtime.
 
 ## Disclaimer 
 
-Drivers build with this project are only supported on Garden Linux, the open source operating system. 
+Drivers built with this project are only supported on Garden Linux, the open source operating system. 
 Furthermore, only drivers for non consumer graphics cards are supported.
