@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+  pull_request:
+
 
 jobs:
   generate-matrix:
@@ -76,6 +78,7 @@ jobs:
 
       - name: Upload built driver
         uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
         with:
           name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
           path: ${{ github.workspace }}/out/nvidia/driver.tar.gz
