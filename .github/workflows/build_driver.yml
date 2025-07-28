@@ -83,3 +83,15 @@ jobs:
           name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
           path: ${{ github.workspace }}/out/nvidia/driver.tar.gz
 
+  check-complete:
+    name: Pull Request Check
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request'
+    needs: build
+    steps:
+      - name: Ensure all matrix jobs passed
+        run: |
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "One or more build jobs failed."
+            exit 1
+          fi
