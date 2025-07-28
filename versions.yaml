@@ -1,0 +1,23 @@
+os_versions:
+  - name: "1592"
+    version: "1592.11"
+    kernel_flavour:
+      - "cloud"
+      - "metal"
+    cpu_arch:
+      - "amd64"
+      - "arm64"
+    nvidia_drivers:
+      - "550.127.08"
+
+  - name: "1877"
+    version: "1877.1"
+    kernel_flavour:
+      - "cloud"
+      - "metal"
+    cpu_arch:
+      - "amd64"
+      - "arm64"
+    nvidia_drivers:
+      - "570.172.08"
+

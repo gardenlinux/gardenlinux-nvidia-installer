@@ -11,10 +11,10 @@ else
   grep_args="-v cloud"
 fi
 
-kernel_arch=$2
 # shellcheck disable=SC2010,SC2086
 #                List the linux-headers folders for the arch & kernel type ------------------- | Sort by line length (shortest first) ---------------- | Pick the first line
-kernel_headers=$(ls /usr/src | grep "linux-headers-" | grep "${kernel_arch}" | grep $grep_args | awk '{ print length, $0 }' | sort -n | cut -d" " -f2- | head -n 1)
+kernel_headers=$(ls /usr/src | grep "linux-headers-" | grep $grep_args | awk '{ print length, $0 }' | sort -n | cut -d" " -f2- | head -n 1)
+
 
 kernel_name=${kernel_headers//linux-headers-/}
 

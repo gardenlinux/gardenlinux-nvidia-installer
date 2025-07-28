@@ -48,3 +48,8 @@ without build tools and no obvious way to access the kernel sources. This projec
 by compiling the kernel modules at build-time inside a Garden Linux developer container
 (which contains the kernel headers and compiler) and then placing the resulting files
 into a Docker image from which they can be installed at runtime.
+
+## Disclaimer 
+
+Drivers built with this project are only supported on Garden Linux, the open source operating system. 
+Furthermore, only drivers for non consumer graphics cards are supported.
