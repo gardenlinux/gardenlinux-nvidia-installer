@@ -75,5 +75,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
-          path: ${{ github.workspace }}/out/nvidia/${{ matrix.driver_version }}.tar.gz
+          path: ${{ github.workspace }}/out/nvidia/driver.tar.gz
 
