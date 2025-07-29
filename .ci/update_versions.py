@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from urllib.request import urlopen
 import html2text
 import re
