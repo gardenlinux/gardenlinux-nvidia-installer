@@ -1,12 +1,7 @@
-name: Build Drivers
+name: Build Drivers (non-container artifacts)
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
-
+  workflow_call:
 
 jobs:
   generate-matrix:
