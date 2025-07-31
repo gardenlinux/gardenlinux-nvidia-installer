@@ -8,7 +8,8 @@ import sys
 def update_versions(release_tag):
     with open("versions.yaml", 'r') as version_file:
         data = yaml.safe_load(version_file)
-        update_new_gl_release(data, release_tag)
+        if release_tag != "no_update":
+            update_new_gl_release(data, release_tag)
         update_driver_version(data)
     with open("versions.yaml", 'w') as version_file:
         yaml.dump(data, version_file, default_flow_style=False, sort_keys=False)
