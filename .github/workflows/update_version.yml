@@ -5,8 +5,11 @@ on:
     inputs:
       gl_version:
         description: "GL version"
+        default: "no_update"
         required: true
 
+  schedule:
+    - cron: '0 0 * * *'
 jobs:
   update-version:
     runs-on: ubuntu-latest
