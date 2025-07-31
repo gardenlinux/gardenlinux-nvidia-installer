@@ -1,0 +1,14 @@
+name: Release
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-driver:
+    uses: ./.github/workflows/build_driver.yml
+
+  build-image:
+    needs: build-driver
+    uses: ./.github/workflows/build_image.yml
