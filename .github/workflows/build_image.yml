@@ -1,11 +1,7 @@
 name: Build and Publish Docker Images (matrix)
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
+  workflow_call:
 
 env:
   REGISTRY: ghcr.io
@@ -50,6 +46,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download driver artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
 
       - name: Lowercase github.repository
         run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
