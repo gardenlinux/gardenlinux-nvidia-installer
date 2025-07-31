@@ -9,10 +9,10 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ toLower(github.repository) }}
 
 permissions:
   id-token: write
+  packages: write
 
 jobs:
   generate-matrix:
@@ -42,8 +42,17 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.build_matrix) }}
 
+    env:
+      TARGET_ARCH: ${{ matrix.arch }}
+      GL_VERSION: ${{ matrix.os_version }}
+      DRIVER_VERSION: ${{ matrix.driver_version }}
+      KERNEL_TYPE: ${{ matrix.kernel_flavour }}
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Lowercase github.repository
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -54,12 +63,12 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          TAG="${{ matrix.arch }}-${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
+          TAG="$TARGET_ARCH-$GL_VERSION-$KERNEL_TYPE-$DRIVER_VERSION"
           docker build \
-            --build-arg GL_VERSION=${{ matrix.os_version }} \
-            --build-arg KERNEL_FLAVOUR=${{ matrix.kernel_flavour }} \
-            --build-arg DRIVER_VERSION=${{ matrix.driver_version }} \
-            --build-arg ARCH=${{ matrix.arch }} \
+            --build-arg GARDENLINUX_VERSION=$GL_VERSION \
+            --build-arg KERNEL_TYPE=$KERNEL_TYPE \
+            --build-arg DRIVER_VERSION=$DRIVER_VERSION \
+            --build-arg TARGET_ARCH=$TARGET_ARCH \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} .
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}
 
@@ -76,6 +85,9 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase github.repository
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
 
       - name: Create and push multi-arch manifest
         run: |
