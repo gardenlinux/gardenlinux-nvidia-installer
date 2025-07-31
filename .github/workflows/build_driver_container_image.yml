@@ -45,6 +45,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Lowercase github.repository
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -76,6 +79,9 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase github.repository
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
 
       - name: Create and push multi-arch manifest
         run: |
