@@ -1,0 +1,22 @@
+name: Update Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      gl_version:
+        description: "GL version"
+        required: true
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Pip packages
+        run: pip install html2text pyyaml
+
+      - name: Update Version
+        run: |
+          ./.ci/update_versions.py "${{ github.event.inputs.gl_version }}"
