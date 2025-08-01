@@ -36,7 +36,7 @@ def update_driver_version(data):
                         update = True
                         old_version = match.group(0)
         if update == True:
-            print(f"Driver Version update : {match.group(0)} \n")
+            print(f"Driver Version update : {match.group(0)}")
 
 
 def update_new_gl_release(data, release_tag):
@@ -45,7 +45,7 @@ def update_new_gl_release(data, release_tag):
         if(gl_version != release_tag):
             if(gl_version.split('.')[0] == release_tag.split('.')[0]):
                 elements['version'] = release_tag
-                print(f"GL Version update : {release_tag} \n")
+                print(f"GL Version update : {release_tag}")
 
 def main(release_tag):
     update_versions(release_tag)
