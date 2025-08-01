@@ -70,8 +70,6 @@ jobs:
         run: |
           TAG="$TARGET_ARCH-$GL_VERSION-$KERNEL_TYPE-$DRIVER_VERSION"
           docker build \
-            --build-arg GARDENLINUX_VERSION=$GL_VERSION \
-            --build-arg KERNEL_TYPE=$KERNEL_TYPE \
             --build-arg DRIVER_VERSION=$DRIVER_VERSION \
             --build-arg TARGET_ARCH=$TARGET_ARCH \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} \
