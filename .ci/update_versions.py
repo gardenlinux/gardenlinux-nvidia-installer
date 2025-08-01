@@ -20,6 +20,7 @@ def update_driver_version(data):
         lines = html_data.splitlines()
         version_pattern = re.compile(r"\b\d{3,}\.\d+\.\d+\b")
     for elements in data.get('os_versions', []):
+        update = False
         old_version = elements.get('nvidia_drivers', [])[0]
         for line in lines:
             if old_version.split('.')[0] in line:
@@ -27,11 +28,16 @@ def update_driver_version(data):
                 if match:
                     if (int(old_version.split('.')[1]) < int(match.group(0).split('.')[1])):
                         elements['nvidia_drivers'] = [match.group(0)]
+                        update = True
                         old_version = match.group(0)
                     elif ((int(old_version.split('.')[1]) == int(match.group(0).split('.')[1])) &
                         (int(old_version.split('.')[2]) < int(match.group(0).split('.')[2]))):
                         elements['nvidia_drivers'] = [match.group(0)]
+                        update = True
                         old_version = match.group(0)
+        if update == True:
+            print(f"Driver Version update : {match.group(0)} \n")
+
 
 def update_new_gl_release(data, release_tag):
     for elements in data.get('os_versions', []):
@@ -39,6 +45,7 @@ def update_new_gl_release(data, release_tag):
         if(gl_version != release_tag):
             if(gl_version.split('.')[0] == release_tag.split('.')[0]):
                 elements['version'] = release_tag
+                print(f"GL Version update : {release_tag} \n")
 
 def main(release_tag):
     update_versions(release_tag)
