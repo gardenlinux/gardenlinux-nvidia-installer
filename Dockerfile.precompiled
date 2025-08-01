@@ -3,7 +3,7 @@ FROM debian:bookworm-slim AS packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
 
-COPY /in /out
+COPY in/* /out
 COPY resources/* /opt/nvidia-installer/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \

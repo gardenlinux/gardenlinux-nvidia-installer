@@ -47,14 +47,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: create in folder to download 
-        run:  |
-
       - name: Download driver artifact
         uses: actions/download-artifact@v4
         with:
           name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
           path: ${{ github.workspace }}/in
+
+      - name: Unzip downloaded driver artifact
+        run:  |
+          unzip -o ${{ github.workspace }}/in/driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}.zip -d ${{ github.workspace }}/in
 
       - name: Lowercase github.repository
         run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
