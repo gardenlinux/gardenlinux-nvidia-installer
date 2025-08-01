@@ -47,10 +47,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: create in folder to download 
+        run:  |
+
       - name: Download driver artifact
         uses: actions/download-artifact@v4
         with:
           name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
+          path: ${{ github.workspace }}/in
 
       - name: Lowercase github.repository
         run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
@@ -70,7 +74,7 @@ jobs:
             --build-arg KERNEL_TYPE=$KERNEL_TYPE \
             --build-arg DRIVER_VERSION=$DRIVER_VERSION \
             --build-arg TARGET_ARCH=$TARGET_ARCH \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} .
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} Dockerfile.precompiled
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}
 
   manifest:
