@@ -74,7 +74,8 @@ jobs:
             --build-arg KERNEL_TYPE=$KERNEL_TYPE \
             --build-arg DRIVER_VERSION=$DRIVER_VERSION \
             --build-arg TARGET_ARCH=$TARGET_ARCH \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} Dockerfile.precompiled
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} \
+            -f Dockerfile.precompiled .
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}
 
   manifest:
