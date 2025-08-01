@@ -99,7 +99,7 @@ jobs:
         run: |
           MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
           AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:amd64-${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
-          ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
+          # ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
