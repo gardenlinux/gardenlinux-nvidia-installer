@@ -55,7 +55,7 @@ jobs:
 
       - name: Unzip downloaded driver artifact
         run:  |
-          unzip -o ${{ github.workspace }}/in/driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}.zip -d ${{ github.workspace }}/in
+          ls ${{ github.workspace }}/in
 
       - name: Lowercase github.repository
         run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
