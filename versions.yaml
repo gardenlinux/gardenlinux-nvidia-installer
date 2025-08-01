@@ -6,7 +6,6 @@ os_versions:
       - "metal"
     cpu_arch:
       - "amd64"
-      - "arm64"
     nvidia_drivers:
       - "550.127.08"
 
@@ -17,7 +16,6 @@ os_versions:
       - "metal"
     cpu_arch:
       - "amd64"
-      - "arm64"
     nvidia_drivers:
       - "570.172.08"
 

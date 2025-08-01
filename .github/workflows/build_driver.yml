@@ -1,12 +1,7 @@
-name: Build Drivers
+name: Build Drivers (non-container artifacts)
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
-
+  workflow_call:
 
 jobs:
   generate-matrix:
@@ -23,8 +18,8 @@ jobs:
       - name: Generate matrix
         id: set-matrix
         run: |
-          MATRIX=$(./.ci/generate_matrix.py)
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          MATRIX_JSON="$(python3 .ci/generate_matrix.py)"
+          echo "matrix=$(echo "$MATRIX_JSON" | jq -c '.build')" >> $GITHUB_OUTPUT
 
   build:
     needs: generate-matrix

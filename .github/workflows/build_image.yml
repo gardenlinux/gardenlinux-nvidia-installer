@@ -1,0 +1,105 @@
+name: Build and Publish Docker Images (matrix)
+
+on:
+  workflow_call:
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  id-token: write
+  packages: write
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
+      manifest_matrix: ${{ steps.set-matrix.outputs.manifest_matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PyYAML and jq
+        run: |
+          pip install pyyaml
+          sudo apt-get install -y jq
+
+      - name: Generate build and manifest matrices
+        id: set-matrix
+        run: |
+          MATRIX_JSON=$(python3 .ci/generate_matrix.py)
+          echo "build_matrix=$(echo "$MATRIX_JSON" | jq -c '.build')" >> $GITHUB_OUTPUT
+          echo "manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.manifest')" >> $GITHUB_OUTPUT
+
+  build:
+    needs: generate-matrix
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.build_matrix) }}
+
+    env:
+      TARGET_ARCH: ${{ matrix.arch }}
+      GL_VERSION: ${{ matrix.os_version }}
+      DRIVER_VERSION: ${{ matrix.driver_version }}
+      KERNEL_TYPE: ${{ matrix.kernel_flavour }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download driver artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
+          path: ${{ github.workspace }}/in
+
+      - name: Unzip downloaded driver artifact
+        run:  |
+          ls ${{ github.workspace }}/in
+
+      - name: Lowercase github.repository
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          TAG="$TARGET_ARCH-$GL_VERSION-$KERNEL_TYPE-$DRIVER_VERSION"
+          docker build \
+            --build-arg DRIVER_VERSION=$DRIVER_VERSION \
+            --build-arg TARGET_ARCH=$TARGET_ARCH \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} \
+            -f Dockerfile.precompiled .
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG}
+
+  manifest:
+    needs: [build, generate-matrix]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.manifest_matrix) }}
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase github.repository
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
+      - name: Create and push multi-arch manifest
+        run: |
+          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
+          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:amd64-${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
+          # ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:arm64-${{ matrix.os_version }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}"
+
+          docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
+          docker manifest push $MANIFEST_TAG
+
