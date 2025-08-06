@@ -76,7 +76,7 @@ jobs:
             --build-arg TARGET_ARCH=$TARGET_ARCH \
             -t ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${TAG} \
             -f Dockerfile.precompiled .
-          docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.IMAGE_NAME }}:${TAG}
+          docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${TAG}
 
   manifest:
     needs: [build, generate-matrix]
