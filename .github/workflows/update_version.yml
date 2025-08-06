@@ -35,7 +35,7 @@ jobs:
             git config --global user.name "Garden Linux Builder"
             git config --global user.email "gardenlinux@users.noreply.github.com"
             git commit -am 'Update Version'
-            git pull --rebase origin main
+            git pull --rebase origin update-version || true
             git push --set-upstream origin update-version
             UPDATE_PR_LINK=$(gh pr create --head update-version --title 'Update version' --body "automated update")
           fi
