@@ -47,6 +47,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Extract kernel name
+        id: extract_kernel
+        run: |
+          echo "using ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION}"
+          KERNEL_NAME=$(docker run --rm \
+            -v "${PWD}:/workspace" \
+            -w /workspace \
+            -e KERNEL_TYPE="${KERNEL_TYPE}" \
+            ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
+            ./resources/extract_kernel_name.sh "$KERNEL_TYPE")
+          echo "kernel_name=$KERNEL_NAME"
+          echo "kernel_name=$KERNEL_NAME" >> $GITHUB_OUTPUT
+
       - name: Download driver artifact
         uses: actions/download-artifact@v4
         with:
@@ -66,11 +79,12 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and push Docker image
+        env:
+          KERNEL_NAME: ${{ steps.extract_kernel.outputs.kernel_name }}
         run: |
           IMAGE_NAME="driver"
-          TAG="$DRIVER_VERSION-$KERNEL_TYPE-$TARGET_ARCH-$GL_VERSION"
+          TAG="$DRIVER_VERSION-$KERNEL_NAME-$KERNEL_TYPE-$TARGET_ARCH-gardenlinux$GL_VERSION"
           docker build \
             --build-arg DRIVER_VERSION=$DRIVER_VERSION \
             --build-arg TARGET_ARCH=$TARGET_ARCH \
@@ -83,7 +97,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.manifest_matrix) }}
-
+    env:
+      KERNEL_NAME: ${{ needs.build.outputs.kernel_name }}
     steps:
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -98,9 +113,9 @@ jobs:
       - name: Create and push multi-arch manifest
         run: |
           IMAGE_NAME="driver"
-          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-${{ matrix.os_version }}"
-          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-amd64-${{ matrix.os_version }}"
-          # ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-arm64-${{ matrix.os_version }}"
+          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${KERNEL_NAME}-${{ matrix.kernel_flavour }}-gardenlinux${{ matrix.os_version }}"
+          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${KERNEL_NAME}-${{ matrix.kernel_flavour }}-amd64-gardenlinux${{ matrix.os_version }}
+          # ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${KERNEL_NAME}-${{ matrix.kernel_flavour }}-arm64-gardenlinux${{ matrix.os_version }}"
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
