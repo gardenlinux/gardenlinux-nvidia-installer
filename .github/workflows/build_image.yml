@@ -37,7 +37,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.build_matrix) }}
-
+    outputs:
+      kernel_version: ${{ steps.extract_kernel.outputs.kernel_name }}
     env:
       TARGET_ARCH: ${{ matrix.arch }}
       GL_VERSION: ${{ matrix.os_version }}
@@ -98,7 +99,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.manifest_matrix) }}
     env:
-      KERNEL_NAME: ${{ needs.build.outputs.kernel_name }}
+      KERNEL_NAME: ${{ needs.build.outputs.kernel_version }}
     steps:
       - name: Log in to GHCR
         uses: docker/login-action@v3
