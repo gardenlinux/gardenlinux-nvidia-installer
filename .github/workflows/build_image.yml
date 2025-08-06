@@ -76,7 +76,7 @@ jobs:
             --build-arg TARGET_ARCH=$TARGET_ARCH \
             -t ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${TAG} \
             -f Dockerfile.precompiled .
-          docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${TAG}
+          docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${TAG}
 
   manifest:
     needs: [build, generate-matrix]
@@ -98,9 +98,9 @@ jobs:
       - name: Create and push multi-arch manifest
         run: |
           IMAGE_NAME="driver"
-          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-${{ matrix.os_version }}"
-          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-amd64-${{ matrix.os_version }}"
-          # ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-arm64-${{ matrix.os_version }}"
+          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-${{ matrix.os_version }}"
+          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-amd64-${{ matrix.os_version }}"
+          # ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${{ matrix.driver_version }}-${{ matrix.kernel_flavour }}-arm64-${{ matrix.os_version }}"
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
