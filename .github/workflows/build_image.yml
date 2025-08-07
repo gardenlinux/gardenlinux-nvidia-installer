@@ -105,6 +105,8 @@ jobs:
       KERNEL_TYPE: ${{ matrix.kernel_flavour }}
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
