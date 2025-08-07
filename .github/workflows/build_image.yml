@@ -99,7 +99,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.manifest_matrix) }}
     env:
       IMAGE_NAME: "driver"
-      TARGET_ARCH: ${{ matrix.arch }}
+      TARGET_ARCH: "amd64"
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
       KERNEL_TYPE: ${{ matrix.kernel_flavour }}
