@@ -132,11 +132,11 @@ jobs:
       - name: Create and push multi-arch manifest
         env:
           KERNEL_NAME: ${{ steps.extract_kernel.outputs.kernel_name }}
+          KERNEL_VERSION: "${KERNEL_NAME%-*}"
         run: |
-          KERNEL_VERSION="${KERNEL_NAME%-*}"
-          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${KERNEL_VERSION}-${{ env.KERNEL_TYPE }}-gardenlinux${{ matrix.os_version }}"
-          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${KERNEL_VERSION}-${{ env.KERNEL_TYPE }}-amd64-gardenlinux${{ matrix.os_version }}"
-          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${KERNEL_VERSION}-${{ env.KERNEL_TYPE }}-arm64-gardenlinux${{ matrix.os_version }}"
+          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-${{ env.KERNEL_TYPE }}-gardenlinux${{ matrix.os_version }}"
+          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-${{ env.KERNEL_TYPE }}-amd64-gardenlinux${{ matrix.os_version }}"
+          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-${{ env.KERNEL_TYPE }}-arm64-gardenlinux${{ matrix.os_version }}"
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
