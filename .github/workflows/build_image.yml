@@ -81,10 +81,10 @@ jobs:
       - name: Build and push Docker image
         env:
           KERNEL_NAME: ${{ steps.extract_kernel.outputs.kernel_name }}
-          KERNEL_VERSION: "${KERNEL_NAME%-*}"
         run: |
           IMAGE_NAME="driver"
-          TAG="$DRIVER_VERSION-$KERNEL_VERSION-$KERNEL_TYPE-$TARGET_ARCH-gardenlinux$GL_VERSION"
+          echo $KERNEL_VERSION
+          TAG="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux$GL_VERSION"
           docker build \
             --build-arg DRIVER_VERSION=$DRIVER_VERSION \
             --build-arg TARGET_ARCH=$TARGET_ARCH \
