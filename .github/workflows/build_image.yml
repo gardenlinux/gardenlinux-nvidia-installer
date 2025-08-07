@@ -79,9 +79,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
-        env:
-          KERNEL_NAME: ${{ steps.extract_kernel.outputs.kernel_name }}
         run: |
+          KERNEL_NAME="${{ steps.extract_kernel.outputs.kernel_name }}"
+          KERNEL_VERSION="${KERNEL_NAME%-*}"
           IMAGE_NAME="driver"
           TAG="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux$GL_VERSION"
           docker build \
@@ -130,13 +130,12 @@ jobs:
           echo "kernel_name=$KERNEL_NAME" >> $GITHUB_OUTPUT
 
       - name: Create and push multi-arch manifest
-        env:
-          KERNEL_NAME: ${{ steps.extract_kernel.outputs.kernel_name }}
-          KERNEL_VERSION: "${KERNEL_NAME%-*}"
         run: |
-          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-${{ env.KERNEL_TYPE }}-gardenlinux${{ matrix.os_version }}"
-          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-${{ env.KERNEL_TYPE }}-amd64-gardenlinux${{ matrix.os_version }}"
-          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-${{ env.KERNEL_TYPE }}-arm64-gardenlinux${{ matrix.os_version }}"
+          KERNEL_NAME="${{ steps.extract_kernel.outputs.kernel_name }}"
+          KERNEL_VERSION="${KERNEL_NAME%-*}"
+          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-gardenlinux${{ matrix.os_version }}"
+          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-amd64-gardenlinux${{ matrix.os_version }}"
+          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${{ matrix.driver_version }}-${{ env.KERNEL_VERSION }}-arm64-gardenlinux${{ matrix.os_version }}"
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
