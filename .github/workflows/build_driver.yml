@@ -50,9 +50,6 @@ jobs:
             ./resources/extract_kernel_name.sh "$KERNEL_TYPE")
           echo "kernel_name=$KERNEL_NAME"
           echo "kernel_name=$KERNEL_NAME" >> $GITHUB_OUTPUT
-        env:
-          KERNEL_TYPE: ${{ env.KERNEL_FLAVOUR }}
-          TARGET_ARCH: ${{ env.TARGET_ARCH }}
 
       - name: Compile module
         env:
