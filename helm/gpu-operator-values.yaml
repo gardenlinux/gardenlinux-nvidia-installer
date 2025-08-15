@@ -4,9 +4,10 @@ cdi:
 toolkit:
   installDir: /opt/nvidia
 driver:
+  imagePullPolicy: Always
   usePrecompiled: true
-  version: 570
-  repository: $PUBLIC_REGISTRY_URI
+  version: 570.172.08
+  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer
 node-feature-discovery:
   worker:
     config:
