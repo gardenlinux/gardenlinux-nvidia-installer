@@ -1,12 +1,8 @@
 name: Update Versions
 
 on:
-  workflow_dispatch:
-    inputs:
-      gl_version:
-        description: "GL version"
-        default: "no_update"
-        required: true
+  repository_dispatch:
+    types: [release-published]
 
   schedule:
     - cron: '0 0 * * *'
@@ -23,10 +19,16 @@ jobs:
       - name: Update Version
         id: update-version
         run: |
-          OUTPUT=$(python ./.ci/update_versions.py "${{ github.event.inputs.gl_version }}")
+          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            OUTPUT=$(python ./.ci/update_versions.py "${{ github.event.client_payload.version }}")
+          else
+            OUTPUT=$(python ./.ci/update_versions.py "no_update")
+          fi
+          
           echo "has-update<<EOF" >> $GITHUB_OUTPUT
           echo "$OUTPUT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
       - name: create pull request
         run: |
           if [[ '${{ steps.update-version.outputs.has-update }}' ]]; then
