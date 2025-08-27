@@ -27,6 +27,8 @@ ARG TARGET_ARCH
 ARG DRIVER_VERSION
 
 COPY --from=builder /out /out
+# This binary is not in the /out location as part of the nvidia-installer
+COPY --from=builder /usr/bin/nvidia-modprobe /usr/bin/nvidia-modprobe
 COPY resources/* /opt/nvidia-installer/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
