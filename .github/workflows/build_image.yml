@@ -58,7 +58,6 @@ jobs:
             ./resources/extract_kernel_name.sh "$KERNEL_TYPE")
           echo "kernel_name=$KERNEL_NAME"
           echo "kernel_name=$KERNEL_NAME" >> $GITHUB_OUTPUT
-
       - name: Download driver artifact
         uses: actions/download-artifact@v4
         with:
@@ -82,7 +81,8 @@ jobs:
         run: |
           KERNEL_NAME="${{ steps.extract_kernel.outputs.kernel_name }}"
           IMAGE_NAME="driver"
-          TAG="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux$GL_VERSION"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
+          TAG="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux$GL_VERSION"
           docker build \
             --build-arg DRIVER_VERSION=$DRIVER_VERSION \
             --build-arg TARGET_ARCH=$TARGET_ARCH \
