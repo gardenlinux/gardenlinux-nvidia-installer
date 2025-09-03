@@ -133,7 +133,8 @@ jobs:
         run: |
           KERNEL_NAME="${{ steps.extract_kernel.outputs.kernel_name }}"
           KERNEL_VERSION="${KERNEL_NAME%-*}"
-          DRIVER_MAJOR_VERS="${{ matrix.driver_version%%.*}}"
+          DRIVER_MAJOR_VERS="${{ matrix.driver_version }}"
+          DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
           MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux${{ matrix.os_version }}"
           AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux${{ matrix.os_version }}"
           #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux${{ matrix.os_version }}"
