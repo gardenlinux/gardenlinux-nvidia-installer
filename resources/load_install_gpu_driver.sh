@@ -82,12 +82,33 @@ install() {
     local DRIVER_NAME=$1
     local NVIDIA_BIN=$2
 
-    if [ -d "${INSTALL_DIR}/${DRIVER_NAME}/lib" ] ; then
-        mkdir -p "${LD_ROOT}/etc/ld.so.conf.d"
-        echo "${INSTALL_DIR}/${DRIVER_NAME}/lib" \
-            > "${LD_ROOT}/etc/ld.so.conf.d/${DRIVER_NAME}.conf"
-        ldconfig -r "${LD_ROOT}" 2> /dev/null
-    fi
+    # The docker file sets the LD_LIBRARY_PATH to the nvidia LIBs
+    # so we need to run ldconfig on the host so we need to use nsenter for that.
+    # if [ -d "${INSTALL_DIR}/${DRIVER_NAME}/lib" ] ; then
+    #     mkdir -p "${LD_ROOT}/etc/ld.so.conf.d"
+    #     echo "${INSTALL_DIR}/${DRIVER_NAME}/lib" \
+    #         > "${LD_ROOT}/etc/ld.so.conf.d/${DRIVER_NAME}.conf"
+    #     ldconfig -r "${LD_ROOT}" 2> /dev/null
+    # fi
+    nsenter -t 1 -m -u -n -i /bin/sh -lc '
+      set -e
+      cat >/etc/ld.so.conf.d/nvidia-staged.conf <<EOF
+/run/nvidia/driver/lib
+/run/nvidia/driver/lib64
+/run/nvidia/driver/usr/lib/x86_64-linux-gnu
+EOF
+      # ldconfig may live in /sbin or /usr/sbin depending on the distro
+      if command -v ldconfig >/dev/null 2>&1; then
+        ldconfig
+      elif [ -x /sbin/ldconfig ]; then
+        /sbin/ldconfig
+      elif [ -x /usr/sbin/ldconfig ]; then
+        /usr/sbin/ldconfig
+      else
+        echo "[ERROR] ldconfig not found on host"; exit 1
+      fi
+    '
+    
     # shellcheck disable=SC1090
     source "${BIN_DIR}/install.sh"
 }

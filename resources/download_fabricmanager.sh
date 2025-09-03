@@ -22,8 +22,67 @@ pushd /tmp/nvidia
 
 # Download Fabric Manager tarball
 wget -O /tmp/keyring.deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb && dpkg -i /tmp/keyring.deb
-apt-get update
-#apt-get install -V nvidia-fabricmanager-"$DRIVER_BRANCH"="$DRIVER_VERSION"-1
+
+# In testing apt-get update failed.  This is because the Packages file was not updated to reflect the current size of the file.
+# A ticket was filed with the git repo as this is not the first time this has happened.  There was a comment that the flow had
+# changed and hopefully this is the last time we see this issue, but leaving this here for reference.
+#
+# Need to open a github issue about this here.
+# https://github.com/NVIDIA/cuda-repo-management/issues/27
+#
+# Get:6 https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64  Packages [1128 kB]
+# Err:6 https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64  Packages
+#   File has unexpected size (1157413 != 1127921). Mirror sync in progress? [IP: 23.217.201.113 443]
+#   Hashes of expected file:
+#    - Filesize:1127921 [weak]
+#    - SHA256:d4765ad6e9e2bd1d24a63ecbd8759054b33361c20426ea90406fc5624f29ba1a
+#    - SHA1:dde0211e2acfc9bbdc91c4657deef218298f5e39 [weak]
+#    - MD5Sum:4c6ea7dd7dd7de501e7907adc9b60e1e [weak]
+#   Release file created at: Thu, 28 Aug 2025 20:09:04 +0000
+#
+# Running the following command I could see the size of Packages.gz
+# 1127921 Packages.gz
+# curl -s https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/InRelease
+#
+# Use a bash script to hit all the IPs retured by the DNS entry for developer.download.nvidia.com
+#
+# URL="https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/Packages.gz"
+
+# for IP in 23.217.201.113 23.217.201.115; do
+#   echo "=== $IP ==="
+#   curl -sSI --http1.1 \
+#     --resolve developer.download.nvidia.com:443:$IP \
+#     "$URL" | awk '
+#       BEGIN{print "Status/Headers:"}
+#       /^HTTP/{print $0}
+#       tolower($1)=="content-length:"{print "Content-Length:", $2}
+#       tolower($1)=="etag:"{print "ETag:", $0}
+#       tolower($1)=="last-modified:"{print "Last-Modified:", $0}
+#     '
+#   echo
+# done
+# =====
+# Output 
+# === 23.217.201.113 ===
+# Status/Headers:
+# HTTP/1.1 200 OK
+# Content-Length: 1157413
+# ETag: ETag: "8948ace4176d58e5ac9e6caa3b5b3775:1756834806.016545"
+# Last-Modified: Last-Modified: Tue, 02 Sep 2025 17:01:53 GMT
+
+# === 23.217.201.115 ===
+# Status/Headers:
+# HTTP/1.1 200 OK
+# Content-Length: 1157413
+# ETag: ETag: "8948ace4176d58e5ac9e6caa3b5b3775:1756834806.016545"
+# Last-Modified: Last-Modified: Tue, 02 Sep 2025 17:01:53 GMT
+#
+# Based on the dates it looks like the file was udpated on  Tue, 02 Sep 2025
+# but the Packages.gz was not updated to reflect the new size.
+
+
+
+apt-get update 
 
 # As of Aug 27 2025 the 580 version of fabricmanager changed the nameing format
 # https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/
