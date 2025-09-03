@@ -4,14 +4,14 @@ import html2text
 import re
 import yaml
 import sys
+import requests
 
-def update_versions(release_tag):
-    with open("versions.yaml", 'r') as version_file:
+def update_versions():
+    with open("../versions.yaml", 'r') as version_file:
         data = yaml.safe_load(version_file)
-        if release_tag != "no_update":
-            update_new_gl_release(data, release_tag)
+        get_latest_gl_tag(data)
         update_driver_version(data)
-    with open("versions.yaml", 'w') as version_file:
+    with open("../versions.yaml", 'w') as version_file:
         yaml.dump(data, version_file, default_flow_style=False, sort_keys=False)
 
 def update_driver_version(data):
@@ -39,21 +39,30 @@ def update_driver_version(data):
             if update == True:
                 print(f"Driver Version update : {match.group(0)}")
 
+def get_latest_gl_tag(data):
+    url = f"https://api.github.com/repos/gardenlinux/gardenlinux/tags"
+    response = requests.get(url)
 
-def update_new_gl_release(data, release_tag):
+    if response.status_code != 200:
+        print("Failed to fetch tags:", response.status_code)
+        return []
+
+    tags = [tag['name'] for tag in response.json()]
+    number_tags = [tag for tag in tags if re.fullmatch(r'\d+\.\d+', tag)]
+
+    # Get major version from version.yml
     for elements in data.get('os_versions', []):
-        gl_version = elements.get('version', [])
-        if(gl_version != release_tag):
-            if(gl_version.split('.')[0] == release_tag.split('.')[0]):
-                elements['version'] = release_tag
-                print(f"GL Version update : {release_tag}")
+        gl_major, gl_minor = elements['version'].split('.')
+        for tag in number_tags:
+            gl_major, gl_minor = elements['version'].split('.')
+            major, minor = tag.split('.')
+            if(int(major) == int(gl_major)):
+                if(int(minor) > int(gl_minor)):
+                    elements['version'] = tag
+                    print(f"GL Version update : {tag}")
 
-def main(release_tag):
-    update_versions(release_tag)
+def main():
+    update_versions()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <GL Release Tag>")
-        sys.exit(1)
-
-    main(sys.argv[1])
+    main()
