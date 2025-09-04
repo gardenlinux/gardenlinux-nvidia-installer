@@ -7,11 +7,11 @@ import sys
 import requests
 
 def update_versions():
-    with open("../versions.yaml", 'r') as version_file:
+    with open("versions.yaml", 'r') as version_file:
         data = yaml.safe_load(version_file)
         get_latest_gl_tag(data)
         update_driver_version(data)
-    with open("../versions.yaml", 'w') as version_file:
+    with open("versions.yaml", 'w') as version_file:
         yaml.dump(data, version_file, default_flow_style=False, sort_keys=False)
 
 def update_driver_version(data):
