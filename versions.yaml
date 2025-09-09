@@ -1,6 +1,6 @@
 os_versions:
 - name: '1592'
-  version: '1592.12'
+  version: '1592.13'
   kernel_flavour:
   - cloud
   - metal
@@ -21,4 +21,3 @@ os_versions:
   - 570.172.08
   - 565.57.01
   - 550.163.01
-
