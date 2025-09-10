@@ -3,7 +3,7 @@ ARG GARDENLINUX_VERSION
 ARG REGISTRY_PATH=gardenlinux/kmodbuild
 FROM ghcr.io/gardenlinux/${REGISTRY_PATH}:${GARDENLINUX_VERSION} AS builder
 
-# Target NVIDIA Driver 
+# Target NVIDIA Driver
 ARG DRIVER_VERSION
 
 # Target architecture - WARNING: the fabric manager does currently not exist for arm64
@@ -15,8 +15,8 @@ ARG KERNEL_TYPE=cloud
 
 RUN \
     : "${TARGET_ARCH:?Build argument needs to be set and non-empty.}" \
-    : "${DRIVER_VERSION:?Build argument needs to be set and non-empty.}" 
-    
+    : "${DRIVER_VERSION:?Build argument needs to be set and non-empty.}"
+
 COPY resources/extract_kernel_name.sh .
 COPY resources/compile.sh .
 

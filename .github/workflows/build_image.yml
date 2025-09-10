@@ -61,7 +61,7 @@ jobs:
       - name: Download driver artifact
         uses: actions/download-artifact@v4
         with:
-          name: driver-${{ matrix.os_name }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
+          name: driver-${{ matrix.os_version }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
           path: ${{ github.workspace }}/in
 
       - name: Unzip downloaded driver artifact

@@ -107,8 +107,9 @@ esac
 echo "Archiving assets"
 
 # Archive library .so files
-mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
+mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$OUTDIR"/usr/bin
 cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
+cp -a /usr/bin/nvidia* "$OUTDIR"/usr/bin
 
 # We don't need the installer binaries, or the icons/desktop files in /share
 rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
