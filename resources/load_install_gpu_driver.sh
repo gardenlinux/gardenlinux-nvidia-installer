@@ -52,15 +52,16 @@ main() {
     # 1) Run install(): 
     #    We also pass NVIDIA_BIN so probes can find tools easily inside this pod.
     # ------------------------------------------------------------------------------
+    NVIDIA_USR_BIN="${NVIDIA_ROOT}/usr/bin" # For nvidia-modprobe
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
+    cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}"
     install "$DRIVER_NAME" "$NVIDIA_BIN"
 
     # ------------------------------------------------------------------------------
     # 4) Make the CLI tools available INSIDE THIS POD (not the host) for probes.
     #    We intentionally avoid host /usr/bin to prevent conflicts with the OS.
     # ------------------------------------------------------------------------------
-    NVIDIA_USR_BIN="${NVIDIA_ROOT}/usr/bin" # For nvidia-modprobe
-    cp "${NVIDIA_BIN}"/* "${NVIDIA_USR_BIN}"/* /usr/bin
+    cp "${NVIDIA_BIN}"/* /usr/bin
 
     # ------------------------------------------------------------------------------
     # 5) Final verification from the pod. This exercises host devices (/dev/nvidia*)
