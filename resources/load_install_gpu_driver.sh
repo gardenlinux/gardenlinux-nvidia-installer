@@ -55,7 +55,6 @@ main() {
     # ------------------------------------------------------------------------------
     NVIDIA_USR_BIN="${NVIDIA_ROOT}/usr/bin" # For nvidia-modprobe
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
-    echo "${NVIDIA_USR_BIN}" "${NVIDIA_BIN}"
     cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}"
     install "$DRIVER_NAME" "$NVIDIA_BIN"
 
