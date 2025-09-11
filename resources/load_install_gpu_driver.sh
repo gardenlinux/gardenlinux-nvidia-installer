@@ -6,6 +6,7 @@ BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
 # shellcheck disable=SC1090
 source "$BIN_DIR"/set_env_vars.sh
 LD_ROOT=${LD_ROOT:-/root}
+NVIDIA_ROOT=${NVIDIA_ROOT:-/run/nvidia/driver}
 
 main() {
     # Populate DRIVER_NAME, DRIVER_VERSION, NVIDIA_ROOT, etc.
@@ -47,13 +48,14 @@ main() {
     # shellcheck disable=SC2115
     rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
     cp -a /run/nvidia/.staging-driver/. /run/nvidia/driver/
-    cp /usr/bin/nvidia-modprobe /run/nvidia/driver/bin 
 
     # ------------------------------------------------------------------------------
     # 1) Run install(): 
     #    We also pass NVIDIA_BIN so probes can find tools easily inside this pod.
     # ------------------------------------------------------------------------------
+    NVIDIA_USR_BIN="${NVIDIA_ROOT}/usr/bin" # For nvidia-modprobe
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
+    cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}"
     install "$DRIVER_NAME" "$NVIDIA_BIN"
 
     # ------------------------------------------------------------------------------
