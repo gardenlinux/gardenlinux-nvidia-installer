@@ -16,7 +16,7 @@ main() {
     trap post_process EXIT
 
     # Safer shell defaults; optional tracing
-    set -euo pipefail
+    #set -euo pipefail
     [ "${DEBUG:-false}" = "true" ] && set -x
 
     # ------------------------------------------------------------------------------
@@ -56,6 +56,7 @@ main() {
     NVIDIA_USR_BIN="${NVIDIA_ROOT}/usr/bin" # For nvidia-modprobe
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
     cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}"
+
     install "$DRIVER_NAME" "$NVIDIA_BIN"
 
     # ------------------------------------------------------------------------------
@@ -111,8 +112,10 @@ EOF
       fi
     '
     
+    set +e
     # shellcheck disable=SC1090
     source "${BIN_DIR}/install.sh"
+    set -e 
 }
 
 print_menu() {
