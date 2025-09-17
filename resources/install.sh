@@ -17,7 +17,7 @@ modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm
 # -c=0: create /dev/nvidia0..N and /dev/nvidiactl
 # nvidia-modprobe was created in the location /usr/bin location it is 
 # not installed part of NVIDIA_BIN by default unless we copy it there.
-nsenter -t 1 -m -u -n -i ${NVIDIA_BIN}/nvidia-modprobe -u -c=0 || true
+nsenter -t 1 -m -u -n -i ${NVIDIA_BIN}/nvidia-modprobe -u -m -c 0 || true
 
 
 # A100 / NVSwitch extras — run in host namespaces as they affect host devices
