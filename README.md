@@ -9,6 +9,7 @@ Running the image in a cluster as part of a DaemonSet installs the GPU driver on
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
   https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml
 ```
+Built images are maintained at ghcr.io/gardenlinux/gardenlinux-nvidia-installer
 
 If you have built the images yourself, you can use the `--set` option to specify the image repository and tag:
 ```bash
