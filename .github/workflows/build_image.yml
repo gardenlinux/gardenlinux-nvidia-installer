@@ -1,4 +1,4 @@
-name: Build and Publish Docker Images (matrix)
+name: Build and Publish Container Images (matrix)
 
 on:
   workflow_call:
