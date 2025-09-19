@@ -65,10 +65,10 @@ jobs:
       - name: Build and push Docker image
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/driver"
-          tag = $(make build-image KERNEL_TYPE=${{ KERNEL_TYPE }} \
-          TARGET_ARCH=${{ TARGET_ARCH }} \
-          GL_VERSION=${{ GL_VERSION }} \
-          DRIVER_VERSION=${{ DRIVER_VERSION }} \
+          tag = $(make build-image KERNEL_TYPE=$KERNEL_TYPE \
+          TARGET_ARCH=$TARGET_ARCH \
+          GL_VERSION=$GL_VERSION \
+          DRIVER_VERSION=$DRIVER_VERSION \
           IMAGE_PATH=${IMAGE_PATH} \
           DOCKER_CONTEXT=${{ github.workspace }})
           
