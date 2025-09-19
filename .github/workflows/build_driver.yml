@@ -38,35 +38,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Extract kernel name
-        id: extract_kernel
-        run: |
-          echo "using ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION}"
-          KERNEL_NAME=$(docker run --rm \
-            -v "${PWD}:/workspace" \
-            -w /workspace \
-            -e KERNEL_TYPE="${KERNEL_TYPE}" \
-            ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
-            ./resources/extract_kernel_name.sh "$KERNEL_TYPE")
-          echo "kernel_name=$KERNEL_NAME"
-          echo "kernel_name=$KERNEL_NAME" >> $GITHUB_OUTPUT
-
       - name: Compile module
-        env:
-          KERNEL_NAME: ${{ steps.extract_kernel.outputs.kernel_name }}
         run: |
-          mkdir ${{ github.workspace }}/out
-          docker run --rm \
-            -v ${{ github.workspace }}:/workspace \
-            -v ${{ github.workspace }}/out:/out \
-            -w /workspace \
-            --env TARGET_ARCH \
-            --env GL_VERSION \
-            --env DRIVER_VERSION \
-            --env KERNEL_FLAVOUR \
-            --env KERNEL_NAME \
-            ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
-            bash ./resources/compile.sh
+          make build-driver WORKSPACE_DIR="${{ github.workspace }}" KERNEL_TYPE=${{ KERNEL_TYPE }} TARGET_ARCH=${{ TARGET_ARCH }} GL_VERSION=${{ GL_VERSION }} DRIVER_VERSION=${{ DRIVER_VERSION }}
 
       - name: Upload built driver
         uses: actions/upload-artifact@v4
