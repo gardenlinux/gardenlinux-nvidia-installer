@@ -3,9 +3,7 @@ WORKSPACE_DIR ?= $(shell pwd)
 KERNEL_TYPE ?= cloud
 TARGET_ARCH ?= amd64
 DOCKER_CONTEXT ?= $(shell pwd)
-DRIVER_MAJOR_VERS := $(firstword $(subst . , ,$(DRIVER_VERSION)))
-TAG := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0"
-
+DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
 build: build-driver build-image
 
 extract-kernel-name:
@@ -30,6 +28,7 @@ build-driver: extract-kernel-name
            bash ./resources/compile.sh
 
 build-image: extract-kernel-name
+	$(eval TAG = "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	docker build \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
            --build-arg TARGET_ARCH=$(TARGET_ARCH) \
