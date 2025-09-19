@@ -40,7 +40,11 @@ jobs:
 
       - name: Compile module
         run: |
-          make build-driver WORKSPACE_DIR="${{ github.workspace }}" KERNEL_TYPE=$KERNEL_TYPE TARGET_ARCH=$TARGET_ARCH GL_VERSION=$GL_VERSION DRIVER_VERSION=$DRIVER_VERSION
+          make build-driver WORKSPACE_DIR="${{ github.workspace }}" \
+             KERNEL_TYPE=$KERNEL_TYPE \
+             TARGET_ARCH=$TARGET_ARCH \
+             GL_VERSION=$GL_VERSION \
+             DRIVER_VERSION=$DRIVER_VERSION
 
       - name: Upload built driver
         uses: actions/upload-artifact@v4
