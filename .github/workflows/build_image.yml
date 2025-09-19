@@ -66,12 +66,12 @@ jobs:
       - name: Build and push Docker image
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/driver"
-          tag = $(make build-image KERNEL_TYPE=$KERNEL_TYPE \
+          TAG = $(make build-image KERNEL_TYPE=$KERNEL_TYPE \
           TARGET_ARCH=$TARGET_ARCH \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
           IMAGE_PATH=${IMAGE_PATH}) 
           
-          echo "TAG=$tag"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
           
           #docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${TAG1}
