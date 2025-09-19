@@ -70,7 +70,7 @@ jobs:
           TARGET_ARCH=$TARGET_ARCH \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
-          IMAGE_PATH=${IMAGE_PATH} 
+          IMAGE_PATH=${IMAGE_PATH}) 
           
           echo "TAG=$tag"
           
