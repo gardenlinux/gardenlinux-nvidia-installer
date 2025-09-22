@@ -64,14 +64,17 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build and push Docker image
+        id: build_image
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/driver"
           TAG = $(make build-image KERNEL_TYPE=$KERNEL_TYPE \
           TARGET_ARCH=$TARGET_ARCH \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
-          IMAGE_PATH=${IMAGE_PATH}) 
+          IMAGE_PATH=${IMAGE_PATH})
+
+          echo "Captured TAG: $TAG" 
           
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          #echo "tag=$TAG" >> $GITHUB_OUTPUT
           
           #docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${TAG1}
