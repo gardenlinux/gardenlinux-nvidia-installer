@@ -67,7 +67,7 @@ jobs:
         id: build_image
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/driver"
-          TAG = $(make build-image KERNEL_TYPE=$KERNEL_TYPE \
+          TAG=$(make build-image KERNEL_TYPE=$KERNEL_TYPE \
           TARGET_ARCH=$TARGET_ARCH \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
