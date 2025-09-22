@@ -76,6 +76,7 @@ jobs:
           TAG1=$(echo "$TAG" | sed -n 1p)
           TAG2=$(echo "$TAG" | sed -n 2p)
 
+          echo $(TAG)
           echo $(TAG1)
           echo $(TAG2)
 
