@@ -73,8 +73,7 @@ jobs:
           DRIVER_VERSION=$DRIVER_VERSION \
           IMAGE_PATH=${IMAGE_PATH})
 
-          echo "Captured TAG: $TAG" 
-          
-          #echo "tag=$TAG" >> $GITHUB_OUTPUT
-          
-          #docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${TAG1}
+          TAG1=$(echo "$TAG" | sed -n 1p)
+          TAG2=$(echo "$TAG" | sed -n 2p)
+
+          #docker push ${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/${IMAGE_NAME}:${TAG}
