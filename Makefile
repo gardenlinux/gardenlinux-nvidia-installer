@@ -7,6 +7,14 @@ IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
 DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
 build: build-driver build-image
 
+ifndef GL_VERSION
+$(error GL_VERSION is not set. Please set it before running make.)
+endif
+
+ifndef DRIVER_VERSION
+$(error DRIVER_VERSION is not set. Please set it before running make.)
+endif
+
 extract-kernel-name:
 	$(eval KERNEL_NAME := $(shell docker run --rm \
            -v "$(PWD):/workspace" \
