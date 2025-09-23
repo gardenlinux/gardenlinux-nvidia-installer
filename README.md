@@ -9,7 +9,7 @@ Running the image in a cluster as part of a DaemonSet installs the GPU driver on
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
   https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml
 ```
-Built images are maintained at ghcr.io/gardenlinux/gardenlinux-nvidia-installer
+Built images are maintained at ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:<driver-major-version>
 
 If you have built the images yourself, you can use the `--set` option to specify the image repository and tag:
 ```bash
@@ -21,26 +21,37 @@ helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values
 
 ## Building the Container image
 
-To build the image for NVIDIA driver version `560.35.03` on Garden Linux `1592.10` for `amd64`-based CPUs:
-```bash
-docker build . --platform=linux/amd64 --build-arg TARGET_ARCH=amd64 --build-arg DRIVER_VERSION=560.35.03 --build-arg GARDENLINUX_VERSION=1592.10 \
-    --tag $REGISTRY/$FOLDER/$IMAGE:560.35.03-gardenlinux-1592.10
-docker push $REGISTRY/$FOLDER/$IMAGE:560.35.03-gardenlinux-1592.10
-```
-If you need to build for a baremetal node (as opposed to a cloud VM) then add `--build-arg KERNEL_TYPE=baremetal` 
-to the above command.
+To build the image for NVIDIA driver version `570.172.08` on Garden Linux(GL) `1877.3` for `amd64`-based CPUs:
 
+```
+    export GL_VERSION=1877.3
+    export DRIVER_VERSION=570.172.08
+    make build
+```
+This build docker image with image name as __ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:<driver_major_version>-<kernel_version_in_GL>-<arch>-gardenlinux0__ and 
+__ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:<driver_major_version>-<kernel_version_in_GL>-<arch>-gardenlinux<GL_Version>__
+Note by default image is built for amd64, if arm64 architecturte needs to be built then __export TARGET_ARCH=arm64__
+and if baremetal needs to be built then __export KERNEL_TYPE=baremetal__
 # Further reading
 
-## High level structure of the Dockerfile
+## High level structure of the Makefile
 
-The first stage installs the needed compilers & kernel headers, then calls
-a script to download the NVIDIA driver files and compile the kernel modules, and finally creates a
-compressed tar archive of the required files.
+Makefile compiles driver and image in 2 stages
+if only driver needs to be built then this can be doone by
+```
+    export GL_VERSION=1877.3
+    export DRIVER_VERSION=570.172.08
+    make build-driver
+```
+This builts the driver and stored in current working directory under out folder
 
-The second (main) stage copies the tarball into the image along with the runtime scripts to
-extract the tarball and install
-the modules into the running kernel as part of a Daemonset.
+If image needs to be built separately then 
+```
+    export GL_VERSION=1877.3
+    export DRIVER_VERSION=570.172.08
+    make build-image
+```
+Note : Make sure driver is available under out folder before image build
 
 ### Background
 
