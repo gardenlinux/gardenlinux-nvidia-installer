@@ -28,6 +28,7 @@ build-driver: extract-kernel-name
 	docker run --rm \
            -v $(WORKSPACE_DIR):/workspace \
            -v $(WORKSPACE_DIR)/out:/out \
+	   --platform=linux/${TARGET_ARCH} \
            -w /workspace \
            --env TARGET_ARCH=$(TARGET_ARCH) \
            --env GL_VERSION=$(GL_VERSION) \
@@ -42,6 +43,7 @@ build-image: extract-kernel-name
 	@docker build \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
            --build-arg TARGET_ARCH=$(TARGET_ARCH) \
+	   --platform=linux/${TARGET_ARCH} \
 	   -t $(IMAGE_PATH):$(TAG1) \
 	   -t $(IMAGE_PATH):$(TAG2) \
            -f Dockerfile $(DOCKER_CONTEXT) > /dev/null
