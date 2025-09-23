@@ -3,7 +3,7 @@ WORKSPACE_DIR ?= $(shell pwd)
 KERNEL_TYPE ?= cloud
 TARGET_ARCH ?= amd64
 DOCKER_CONTEXT ?= $(shell pwd)
-IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
+IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer-peermem/driver
 DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
 build: build-driver build-image
 

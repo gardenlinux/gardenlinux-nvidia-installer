@@ -51,9 +51,7 @@ case $TARGET_ARCH in
           --no-libglx-indirect \
           --no-install-libglvnd \
           --kernel-name="$KERNEL_NAME" \
-          --no-drm \
           --no-install-compat32-libs \
-          --no-opengl-files \
           --ui=none --no-questions \
           --no-kernel-module-source \
           --no-systemd \
@@ -77,8 +75,6 @@ case $TARGET_ARCH in
           --no-libglx-indirect \
           --no-install-libglvnd \
           --kernel-name="$KERNEL_NAME" \
-          --no-drm \
-          --no-opengl-files \
           --no-kernel-module-source \
           --ui=none --no-questions \
           --no-systemd \
