@@ -21,7 +21,7 @@ extract-kernel-name:
            -w /workspace \
            -e KERNEL_TYPE="$(KERNEL_TYPE)" \
            ghcr.io/gardenlinux/gardenlinux/kmodbuild:$(TARGET_ARCH)-$(GL_VERSION) \
-           ./resources/extract_kernel_name.sh "$KERNEL_TYPE"))
+           ./resources/extract_kernel_name.sh "$(KERNEL_TYPE)"))
 
 build-driver: extract-kernel-name
 	mkdir $(WORKSPACE_DIR)/out
