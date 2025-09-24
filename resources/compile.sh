@@ -41,7 +41,6 @@ chmod +x nvidia.run
 # shellcheck disable=SC2164
 pushd "./NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION"
 export IGNORE_MISSING_MODULE_SYMVERS=1
-#OUTDIR="/out/nvidia/$DRIVER_VERSION"
 OUTDIR="/out/nvidia/driver"
 
 case $TARGET_ARCH in
@@ -115,4 +114,4 @@ cp -a /usr/bin/nvidia* "$OUTDIR"/usr/bin
 rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
 
 # shellcheck disable=SC2046
-tar czf "$OUTDIR".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
+tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"

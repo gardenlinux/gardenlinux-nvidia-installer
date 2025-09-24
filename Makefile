@@ -24,18 +24,20 @@ extract-kernel-name:
            ./resources/extract_kernel_name.sh "$(KERNEL_TYPE)"))
 
 build-driver: extract-kernel-name
-	mkdir $(WORKSPACE_DIR)/out
-	docker run --rm \
-           -v $(WORKSPACE_DIR):/workspace \
-           -v $(WORKSPACE_DIR)/out:/out \
-	   --platform=linux/${TARGET_ARCH} \
-           -w /workspace \
-           --env TARGET_ARCH=$(TARGET_ARCH) \
-           --env GL_VERSION=$(GL_VERSION) \
-	   --env DRIVER_VERSION=$(DRIVER_VERSION) \
-           --env KERNEL_NAME=$(KERNEL_NAME) \
-           ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
-           bash ./resources/compile.sh
+	mkdir -p $(WORKSPACE_DIR)/out ;\
+    if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz ]; then \
+		docker run --rm \
+			   -v $(WORKSPACE_DIR):/workspace \
+			   -v $(WORKSPACE_DIR)/out:/out \
+		   --platform=linux/${TARGET_ARCH} \
+			   -w /workspace \
+			   --env TARGET_ARCH=$(TARGET_ARCH) \
+			   --env GL_VERSION=$(GL_VERSION) \
+			   --env DRIVER_VERSION=$(DRIVER_VERSION) \
+			   --env KERNEL_NAME=$(KERNEL_NAME) \
+			   ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
+			   bash ./resources/compile.sh ;\
+	fi
 
 build-image: extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux$(GL_VERSION)")
@@ -43,6 +45,7 @@ build-image: extract-kernel-name
 	@docker build \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
            --build-arg TARGET_ARCH=$(TARGET_ARCH) \
+           --build-arg KERNEL_NAME=$(KERNEL_NAME) \
 	   --platform=linux/${TARGET_ARCH} \
 	   -t $(IMAGE_PATH):$(TAG1) \
 	   -t $(IMAGE_PATH):$(TAG2) \
@@ -50,5 +53,8 @@ build-image: extract-kernel-name
 	@echo $(TAG1)
 	@echo $(TAG2)
     
+clean:
+	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz
 
-
+clean-all:
+	rm -rf $(WORKSPACE_DIR)/out/

@@ -1,8 +1,9 @@
 FROM debian:bookworm-slim AS packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
+ARG KERNEL_NAME
 
-COPY out/ /out/
+COPY out/nvidia/driver-$DRIVER_VERSION-$KERNEL_NAME.tar.gz /out/nvidia/driver.tar.gz
 COPY resources/* /opt/nvidia-installer/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \

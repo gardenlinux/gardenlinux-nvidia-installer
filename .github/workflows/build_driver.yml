@@ -51,7 +51,7 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           name: driver-${{ matrix.os_version }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
-          path: ${{ github.workspace }}/out/nvidia/driver.tar.gz
+          path: ${{ github.workspace }}/out/nvidia/driver-*.tar.gz
 
   check-complete:
     name: Pull Request Check
