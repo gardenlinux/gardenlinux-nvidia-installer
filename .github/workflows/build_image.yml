@@ -62,11 +62,16 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
+      - name: Extract branch name as lower case
+        shell: bash
+        run: echo BRANCH_FOLDER=/$(echo "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | grep -v ^main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        id: extract_branch
+
       - name: Build and push Docker image
         id: build_image
         run: |
-          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}/driver"
+          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/driver"
           TAG=$(make build-image KERNEL_TYPE=$KERNEL_TYPE \
           TARGET_ARCH=$TARGET_ARCH \
           GL_VERSION=$GL_VERSION \
