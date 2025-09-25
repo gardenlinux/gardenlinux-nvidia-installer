@@ -1,34 +1,9 @@
-# syntax=docker/dockerfile:1
-ARG GARDENLINUX_VERSION
-ARG REGISTRY_PATH=gardenlinux/kmodbuild
-FROM ghcr.io/gardenlinux/${REGISTRY_PATH}:${GARDENLINUX_VERSION} AS builder
-
-# Target NVIDIA Driver
-ARG DRIVER_VERSION
-
-# Target architecture - WARNING: the fabric manager does currently not exist for arm64
-ARG TARGET_ARCH
-
-# kernel type = set to "cloud" for a cloud kernel (default), or empty value for a bare-metal kernel
-# Set to "linux-headers" if compiling for a baremetal (non-cloud) kernel version
-ARG KERNEL_TYPE=cloud
-
-RUN \
-    : "${TARGET_ARCH:?Build argument needs to be set and non-empty.}" \
-    : "${DRIVER_VERSION:?Build argument needs to be set and non-empty.}"
-
-COPY resources/extract_kernel_name.sh .
-COPY resources/compile.sh .
-
-RUN export KERNEL_NAME=$(./extract_kernel_name.sh ${KERNEL_TYPE} ${TARGET_ARCH}) && ./compile.sh
-
 FROM debian:bookworm-slim AS packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
+ARG KERNEL_NAME
 
-COPY --from=builder /out /out
-# This binary is not in the /out location as part of the nvidia-installer
-COPY --from=builder /usr/bin/nvidia-modprobe /usr/bin/nvidia-modprobe
+COPY out/nvidia/driver-$DRIVER_VERSION-$KERNEL_NAME.tar.gz /out/nvidia/driver.tar.gz
 COPY resources/* /opt/nvidia-installer/
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
