@@ -16,9 +16,9 @@ echo "$error_out" | grep -v 'depmod: WARNING:'
 # the gsp_tx10x.bin in our image
 # setting the parameter didn't seem to allow nvidia-modprobe to work correctly
 #modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia NVreg_EnableGpuFirmware=0
-modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-peermem
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm
+modprobe -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-peermem
 
 # Ensure device nodes exist on the host (idempotent, preferred over manual mknod)
 # -u: create /dev/nvidia-uvm
