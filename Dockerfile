@@ -1,4 +1,7 @@
-FROM debian:bookworm-slim AS packager
+# syntax=docker/dockerfile:1.4
+ARG GL_VERSION
+
+FROM ghcr.io/gardenlinux/gardenlinux:${GL_VERSION} AS packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
 ARG KERNEL_NAME
