@@ -1,6 +1,7 @@
 #!/bin/bash
 #set -euo pipefail
 
+echo "Change to check in pull request whether shell check works"
 echo "Installing NVIDIA modules for driver version $DRIVER_VERSION"
 echo "INSTALL_DIR: $INSTALL_DIR"
 echo "DRIVER_NAME: $DRIVER_NAME"
