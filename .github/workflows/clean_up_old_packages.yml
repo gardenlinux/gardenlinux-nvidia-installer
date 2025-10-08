@@ -1,6 +1,7 @@
 name: Clean up old installer packages
 
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: '0 3 * * 0'
