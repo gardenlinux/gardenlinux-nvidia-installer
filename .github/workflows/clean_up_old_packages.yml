@@ -17,6 +17,7 @@ jobs:
       - name: Delete old container images older than 30 days 
         env:
           EXPIRY-DAYS: 30
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           Cutoff_date=$(date -d "-${EXPIRY-DAYS} days" --iso-8601=seconds)
 
