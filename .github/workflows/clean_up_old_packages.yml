@@ -11,11 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install GitHub CLI
-        run: |
-            sudo apt-get update
-            sudo apt-get install gh -y
-
       - name: Authenticate with GitHub CLI
         run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token 
 
@@ -27,27 +22,27 @@ jobs:
 
           echo "Fetching images with name containing 'gardenlinux-nvidia-installer'..."
 
-          gh api "orgs/gardenlinux/packages?package_type=container" --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name' | while read -r PACKAGE_NAME; do
-            echo "Found package: $PACKAGE_NAME"
+          gh api "orgs/gardenlinux/packages?package_type=container" --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name' | while read -r PACKAGE_NAME; do echo "Found package: $PACKAGE_NAME"; done;
 
-            # Encode package name for URL (handles slashes)
-            PACKAGE_ENCODED=$(jq -rn --arg v "$PACKAGE_NAME" '$v|@uri')
+          # Encode package name for URL (handles slashes)
+          PACKAGE_ENCODED=$(jq -rn --arg v "$PACKAGE_NAME" '$v|@uri')
 
-            echo "🔎 Checking versions older than $CUTOFF_DATE..."
-            VERSION_IDS=$(gh api "orgs/${ORG}/packages/container/${PACKAGE_ENCODED}/versions" --paginate \
-              -q '.[] | select(.created_at < "'"$Cutoff_date"'") | .id')
+          echo "🔎 Checking versions older than $CUTOFF_DATE..."
+          VERSION_IDS=$(gh api "orgs/${ORG}/packages/container/${PACKAGE_ENCODED}/versions" --paginate -q '.[] | select(.created_at < "'"$Cutoff_date"'") | .id')
 
-            if [ -z "$VERSION_IDS" ]; then
-              echo "No old versions found for $PACKAGE_NAME"
-              continue
-            fi
+          echo $VERSION_IDS
 
-            #for VERSION_ID in $VERSION_IDS; do
-            #  echo "Deleting version $VERSION_ID of $PACKAGE_NAME"
-            #  gh api --method DELETE "orgs/${ORG}/packages/container/${PACKAGE_ENCODED}/versions/${VERSION_ID}"
-            #done
+          if [ -z "$VERSION_IDS" ]; then
+            echo "No old versions found for $PACKAGE_NAME"
+            continue
+          fi
 
-            echo "Finished processing $PACKAGE_NAME"
+          #for VERSION_ID in $VERSION_IDS; do
+          #  echo "Deleting version $VERSION_ID of $PACKAGE_NAME"
+          #  gh api --method DELETE "orgs/${ORG}/packages/container/${PACKAGE_ENCODED}/versions/${VERSION_ID}"
+          #done
+
+          echo "Finished processing $PACKAGE_NAME"
           done
 
           echo "Cleanup finished."
