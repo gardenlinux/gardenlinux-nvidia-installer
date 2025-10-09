@@ -20,6 +20,8 @@ jobs:
 
           echo "Fetching images with name containing 'gardenlinux-nvidia-installer'..."
 
+          gh auth status
+
           PACKAGE_NAME=$(gh api "orgs/gardenlinux/packages?package_type=container" --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name')
 
           for package in $PACKAGE_NAME; do
