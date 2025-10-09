@@ -26,7 +26,7 @@ jobs:
 
           gh auth status
 
-          PACKAGE_NAME=$(gh api "orgs/gardenlinux/packages?package_type=container" --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name')
+          PACKAGE_NAME=$(gh api orgs/gardenlinux/packages -f package_type=container --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name')
 
           for package in $PACKAGE_NAME; do
             PACKAGE_ENCODED=$(jq -rn --arg v "$package" '$v|@uri')
