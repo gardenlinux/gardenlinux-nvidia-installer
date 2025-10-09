@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Authenticate with GitHub CLI
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token 
-
+      - name: Install gh
+        run: |
+          apt-get update
+          apt-get install -y gh
       - name: Delete old container images older than 30 days 
         env:
           EXPIRY-DAYS: 30
@@ -23,28 +24,15 @@ jobs:
 
           echo "Fetching images with name containing 'gardenlinux-nvidia-installer'..."
 
-          gh api "orgs/gardenlinux/packages?package_type=container" --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name' | while read -r PACKAGE_NAME; do echo "Found package: $PACKAGE_NAME"; done;
+          PACKAGE_NAME=$(gh api "orgs/gardenlinux/packages?package_type=container" --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name')
 
-          # Encode package name for URL (handles slashes)
-          PACKAGE_ENCODED=$(jq -rn --arg v "$PACKAGE_NAME" '$v|@uri')
-
-          echo "🔎 Checking versions older than $CUTOFF_DATE..."
-          VERSION_IDS=$(gh api "orgs/${ORG}/packages/container/${PACKAGE_ENCODED}/versions" --paginate -q '.[] | select(.created_at < "'"$Cutoff_date"'") | .id')
-
-          echo $VERSION_IDS
-
-          if [ -z "$VERSION_IDS" ]; then
-            echo "No old versions found for $PACKAGE_NAME"
-            continue
-          fi
-
-          #for VERSION_ID in $VERSION_IDS; do
-          #  echo "Deleting version $VERSION_ID of $PACKAGE_NAME"
-          #  gh api --method DELETE "orgs/${ORG}/packages/container/${PACKAGE_ENCODED}/versions/${VERSION_ID}"
-          #done
-
-          echo "Finished processing $PACKAGE_NAME"
+          for package in $PACKAGE_NAME; do
+            PACKAGE_ENCODED=$(jq -rn --arg v "$package" '$v|@uri')
+            echo "🔎 Checking versions older than $Cutoff_date for $package..."
+            VERSION_IDS=$(gh api "orgs/gardenlinux/packages/container/${PACKAGE_ENCODED}/versions" --paginate -q '.[] | select(.created_at < "'"$Cutoff_date"'") | .id')
+            if [ -z "$VERSION_IDS" ]; then
+              echo "No old versions found for $package"
+              continue
+            fi
           done
-
-          echo "Cleanup finished."
 
