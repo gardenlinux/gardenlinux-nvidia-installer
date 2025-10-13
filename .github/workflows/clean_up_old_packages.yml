@@ -30,11 +30,11 @@ jobs:
 
           echo "Fetching images with name containing 'gardenlinux-nvidia-installer'..."
 
-          http_code=$(curl -s -o /dev/null -w "%{http_code}" \
+          response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\n" \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/orgs/gardenlinux/packages)
-          echo "Packages API returned: $http_code"
+            "https://api.github.com/orgs/gardenlinux/packages?package_type=container")
+          echo "$response"
 
           PACKAGE_NAME=$(gh api orgs/gardenlinux/packages --method GET -F package_type=container --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name')
 
