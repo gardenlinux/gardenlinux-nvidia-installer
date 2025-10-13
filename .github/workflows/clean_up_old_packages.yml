@@ -15,16 +15,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install -y gh
-      - name: Get GitHub App installation token
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
       - name: Delete old container images older than 30 days 
         env:
           EXPIRY-DAYS: 30
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           Cutoff_date=$(date -d "-${EXPIRY-DAYS} days" --iso-8601=seconds)
 
@@ -41,4 +35,3 @@ jobs:
               continue
             fi
           done
-
