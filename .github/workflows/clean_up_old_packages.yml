@@ -32,7 +32,7 @@ jobs:
 
           gh api \
             -H "Accept: application/vnd.github+json" \
-            "/orgs/gardenlinux/packages" \
+            "/orgs/gardenlinux/packages?package_type=container" \
             --paginate | jq .
 
           PACKAGE_NAME=$(gh api orgs/gardenlinux/packages --method GET -F package_type=container --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name')
