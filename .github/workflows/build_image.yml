@@ -41,7 +41,7 @@ jobs:
       TARGET_ARCH: ${{ matrix.arch }}
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
-      KERNEL_TYPE: ${{ matrix.kernel_flavour }}
+      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
 
     steps:
       - name: Checkout code
@@ -72,7 +72,7 @@ jobs:
         id: build_image
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/driver"
-          TAG=$(make build-image KERNEL_TYPE=$KERNEL_TYPE \
+          TAG=$(make build-image KERNEL_FLAVOR=$KERNEL_FLAVOR \
           TARGET_ARCH=$TARGET_ARCH \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
@@ -94,7 +94,7 @@ jobs:
       TARGET_ARCH: "amd64"
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
-      KERNEL_TYPE: ${{ matrix.kernel_flavour }}
+      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
 
     steps:
       - uses: actions/checkout@v4
@@ -116,9 +116,9 @@ jobs:
           KERNEL_NAME=$(docker run --rm \
             -v "${PWD}:/workspace" \
             -w /workspace \
-            -e KERNEL_TYPE="${KERNEL_TYPE}" \
+            -e KERNEL_FLAVOR="${KERNEL_FLAVOR}" \
             ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
-            ./resources/extract_kernel_name.sh "$KERNEL_TYPE")
+            ./resources/extract_kernel_name.sh "$KERNEL_FLAVOR")
           echo "kernel_name=$KERNEL_NAME"
           echo "kernel_name=$KERNEL_NAME" >> $GITHUB_OUTPUT
 

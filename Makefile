@@ -1,6 +1,6 @@
 .PHONY: extract-kernel-name build-driver build-image build
 WORKSPACE_DIR ?= $(shell pwd)
-KERNEL_TYPE ?= cloud
+KERNEL_FLAVOR ?= cloud
 TARGET_ARCH ?= amd64
 DOCKER_CONTEXT ?= $(shell pwd)
 IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
@@ -19,9 +19,8 @@ extract-kernel-name:
 	$(eval KERNEL_NAME := $(shell docker run --rm \
            -v "$(PWD):/workspace" \
            -w /workspace \
-           -e KERNEL_TYPE="$(KERNEL_TYPE)" \
            ghcr.io/gardenlinux/gardenlinux/kmodbuild:$(TARGET_ARCH)-$(GL_VERSION) \
-           ./resources/extract_kernel_name.sh "$(KERNEL_TYPE)"))
+           ./resources/extract_kernel_name.sh "$(KERNEL_FLAVOR)"))
 
 build-driver: extract-kernel-name
 	mkdir -p $(WORKSPACE_DIR)/out ;\

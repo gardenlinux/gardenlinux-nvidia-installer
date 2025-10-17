@@ -36,7 +36,7 @@ and
 Notes:
 1. The image is built by default for **amd64**. If **arm64** architecture needs to be built then `export TARGET_ARCH=arm64`
 
-2. If a bare-metal kernel module needs to be built then `export KERNEL_TYPE=baremetal`
+2. If a bare-metal kernel module needs to be built then `export KERNEL_FLAVOR=baremetal`
 
 # Further reading
 

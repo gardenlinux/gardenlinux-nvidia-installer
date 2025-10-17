@@ -32,7 +32,7 @@ jobs:
       TARGET_ARCH: ${{ matrix.arch }}
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
-      KERNEL_TYPE: ${{ matrix.kernel_flavour }}
+      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
 
     steps:
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
       - name: Compile module
         run: |
           make build-driver WORKSPACE_DIR="${{ github.workspace }}" \
-             KERNEL_TYPE=$KERNEL_TYPE \
+             KERNEL_FLAVOR=$KERNEL_FLAVOR \
              TARGET_ARCH=$TARGET_ARCH \
              GL_VERSION=$GL_VERSION \
              DRIVER_VERSION=$DRIVER_VERSION
