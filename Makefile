@@ -15,6 +15,10 @@ ifndef DRIVER_VERSION
 $(error DRIVER_VERSION is not set. Please set it before running make.)
 endif
 
+ifndef KERNEL_TYPE
+$(error KERNEL_TYPE is not set. Please set it before running make.)
+endif
+
 extract-kernel-name:
 	$(eval KERNEL_NAME := $(shell docker run --rm \
            -v "$(PWD):/workspace" \
@@ -34,6 +38,7 @@ build-driver: extract-kernel-name
 			   --env GL_VERSION=$(GL_VERSION) \
 			   --env DRIVER_VERSION=$(DRIVER_VERSION) \
 			   --env KERNEL_NAME=$(KERNEL_NAME) \
+			   --env KERNEL_TYPE=$(KERNEL_TYPE) \
 			   ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
 			   bash ./resources/compile.sh ;\
 	fi
@@ -46,6 +51,7 @@ build-image: extract-kernel-name
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
            --build-arg TARGET_ARCH=$(TARGET_ARCH) \
            --build-arg KERNEL_NAME=$(KERNEL_NAME) \
+	   --build-arg KERNEL_TYPE=$(KERNEL_TYPE) \
 	   --platform=linux/${TARGET_ARCH} \
 	   -t $(IMAGE_PATH):$(TAG1) \
 	   -t $(IMAGE_PATH):$(TAG2) \
@@ -54,7 +60,7 @@ build-image: extract-kernel-name
 	@echo $(TAG2)
     
 clean:
-	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz
+	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_TYPE)-$(KERNEL_NAME).tar.gz
 
 clean-all:
 	rm -rf $(WORKSPACE_DIR)/out/

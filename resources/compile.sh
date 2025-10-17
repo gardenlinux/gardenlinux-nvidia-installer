@@ -8,7 +8,12 @@ if [ -z "$KERNEL_NAME" ]; then
     exit 1
 fi
 
-echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_NAME"
+if [ -z "$KERNEL_TYPE" ]; then
+    echo "Error: KERNEL_TYPE is not set."
+    exit 1
+fi
+
+echo "Compiling NVIDIA modules for $KERNEL_TYPE driver version $DRIVER_VERSION on kernel $KERNEL_NAME"
 
 set -x
 mkdir -p /tmp/nvidia
@@ -46,10 +51,10 @@ OUTDIR="/out/nvidia/driver"
 case $TARGET_ARCH in
     amd64)
       if ./nvidia-installer \
-          --no-opengl-files \
           --no-libglx-indirect \
           --no-install-libglvnd \
           --kernel-name="$KERNEL_NAME" \
+	  --kernel-module-type="$KERNEL_TYPE" \
           --no-drm \
           --no-install-compat32-libs \
           --no-opengl-files \
@@ -72,10 +77,10 @@ case $TARGET_ARCH in
         ;;
     arm64)
       if ./nvidia-installer \
-          --no-opengl-files \
           --no-libglx-indirect \
           --no-install-libglvnd \
           --kernel-name="$KERNEL_NAME" \
+	  --kernel-module-type="$KERNEL_TYPE" \
           --no-drm \
           --no-opengl-files \
           --no-kernel-module-source \
@@ -114,4 +119,4 @@ cp -a /usr/bin/nvidia* "$OUTDIR"/usr/bin
 rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
 
 # shellcheck disable=SC2046
-tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
+tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_TYPE-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
