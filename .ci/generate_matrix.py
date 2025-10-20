@@ -10,17 +10,19 @@ manifest_set = set()
 for os in data["os_versions"]:
     for arch in os["cpu_arch"]:
         for flavour in os["kernel_flavour"]:
-            for driver in os["nvidia_drivers"]:
-                build_matrix.append(
-                    {
-                        "os_name": os["name"],
-                        "os_version": os["version"],
-                        "driver_version": driver,
-                        "arch": arch,
-                        "kernel_flavour": flavour,
-                    }
-                )
-                manifest_set.add((os["version"], flavour, driver))
+            for kernel in os["kernel_type"]:
+                for driver in os["nvidia_drivers"]:
+                    build_matrix.append(
+                        {
+                            "os_name": os["name"],
+                            "os_version": os["version"],
+                            "driver_version": driver,
+                            "arch": arch,
+                            "kernel_flavour": flavour,
+                            "kernel_type": kernel,
+                        }
+                    )
+                    manifest_set.add((os["version"], flavour, driver))
 
 manifest_matrix = [
     {"os_version": v, "kernel_flavour": k, "driver_version": d}
