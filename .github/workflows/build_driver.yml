@@ -45,7 +45,7 @@ jobs:
              KERNEL_FLAVOR=$KERNEL_FLAVOR \
              TARGET_ARCH=$TARGET_ARCH \
              GL_VERSION=$GL_VERSION \
-             DRIVER_VERSION=$DRIVER_VERSION
+             DRIVER_VERSION=$DRIVER_VERSION \
              KERNEL_TYPE=$KERNEL_TYPE
 
       - name: Upload built driver
