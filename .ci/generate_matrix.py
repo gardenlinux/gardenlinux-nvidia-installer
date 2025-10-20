@@ -22,11 +22,11 @@ for os in data["os_versions"]:
                             "kernel_type": kernel,
                         }
                     )
-                    manifest_set.add((os["version"], flavour, driver))
+                    manifest_set.add((os["version"], flavour, kernel, driver))
 
 manifest_matrix = [
-    {"os_version": v, "kernel_flavour": k, "driver_version": d}
-    for v, k, d in sorted(manifest_set)
+        {"os_version": v, "kernel_flavour": k, "kernel_type":t, "driver_version": d}
+    for v, k, t, d in sorted(manifest_set)
 ]
 
 print(
