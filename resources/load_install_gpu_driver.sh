@@ -97,6 +97,7 @@ install() {
       set -e
       cat >/etc/ld.so.conf.d/nvidia-staged.conf <<EOF
 /run/nvidia/driver/lib
+/run/nvidia/driver/lib/firmware
 /run/nvidia/driver/lib64
 /run/nvidia/driver/usr/lib/x86_64-linux-gnu
 EOF
