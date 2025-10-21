@@ -108,13 +108,16 @@ case $TARGET_ARCH in
         ;;
 esac
 
+echo "Fetching GSP Firmware"
+mkdir -p "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
+gsp-firmware = cp -a $(find /tmp/nvidia -type f -name '*gsp*.bin') "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
+
 echo "Archiving assets"
 
 # Archive library .so files
 mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$OUTDIR"/usr/bin
 cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
 cp -a /usr/bin/nvidia* "$OUTDIR"/usr/bin
-cp -a /tmp/nvidia/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION/*  "$OUTDIR"/nvidia-installer-fol
 # We don't need the installer binaries, or the icons/desktop files in /share
 rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
 
