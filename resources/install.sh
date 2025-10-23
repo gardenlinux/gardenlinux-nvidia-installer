@@ -16,6 +16,7 @@ echo "$error_out" | grep -v 'depmod: WARNING:'
 # the gsp_tx10x.bin in our image
 # setting the parameter didn't seem to allow nvidia-modprobe to work correctly
 #modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia NVreg_EnableGpuFirmware=0
+echo -n "/run/nvidia/driver/lib/firmware" > /sys/module/firmware_class/parameters/path
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm
 
