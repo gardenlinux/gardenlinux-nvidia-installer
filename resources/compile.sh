@@ -112,6 +112,28 @@ echo "Fetching GSP Firmware"
 mkdir -p "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
 cp -a $(find /tmp/nvidia -type f -name '*gsp*.bin') "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
 
+echo "Generate Key for firmware file"
+cd /tmp
+
+openssl req -new -x509 -newkey rsa:2048 \
+  -keyout ima_fw_key.pem -out ima_fw_cert.pem \
+  -days 3650 -nodes -subj "/CN=IMA Firmware Key/"
+
+cat ima_fw_key.pem ima_fw_cert.pem > ima_fw_keypair.pem
+
+for f in "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/*.bin; do
+    # Sign
+    openssl dgst -sha256 -sign ima_fw_key.pem -out /tmp/fw.sig "$f"
+
+    # Convert to hex for setfattr
+    xxd -p /tmp/fw.sig | tr -d '\n' > /tmp/fw.sig.hex
+
+    # Attach to file
+    sudo setfattr -n security.ima -v "$(cat /tmp/fw.sig.hex)" "$f"
+done
+
+cp -a ima_fw_cert.pem "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
+
 echo "Archiving assets"
 
 # Archive library .so files
