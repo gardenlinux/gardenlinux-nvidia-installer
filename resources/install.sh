@@ -19,9 +19,9 @@ echo "$error_out" | grep -v 'depmod: WARNING:'
 mkdir -p /etc/ima
 cp -a /run/nvidia/driver/*.pem /etc/ima
 
-keyctl padd asymmetric "" %keyring:.ima "$INSTALL_DIR/$DRIVER_NAME"/lib/firmware/nvidia/$DRIVER_VERSION/ima_fw_key.pub @s
+#keyctl padd asymmetric "" %keyring:.ima "$INSTALL_DIR/$DRIVER_NAME"/lib/firmware/nvidia/$DRIVER_VERSION/ima_fw_key.pub @s
 
-request-key create _ima "$INSTALL_DIR/$DRIVER_NAME/lib/firmware/nvidia/$DRIVER_VERSION/ima_fw_key.pub" @s
+#request-key create _ima "$INSTALL_DIR/$DRIVER_NAME/lib/firmware/nvidia/$DRIVER_VERSION/ima_fw_key.pub" @s
 
 echo -n "/run/nvidia/driver/lib/firmware" > /sys/module/firmware_class/parameters/path
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia NVreg_EnableGpuFirmware=1

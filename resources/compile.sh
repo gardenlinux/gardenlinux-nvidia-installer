@@ -112,20 +112,20 @@ echo "Fetching GSP Firmware"
 mkdir -p "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
 cp -a $(find /tmp/nvidia -type f -name '*gsp*.bin') "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
 
-echo "Generate Key for firmware file"
-cd /tmp
+#echo "Generate Key for firmware file"
+#cd /tmp
 
-openssl genrsa -out /tmp/ima_fw_key.pem 2048
+#openssl genrsa -out /tmp/ima_fw_key.pem 2048
 
-openssl rsa -in /tmp/ima_fw_key.pem -pubout -out /tmp/ima_fw_key.pub
+#openssl rsa -in /tmp/ima_fw_key.pem -pubout -out /tmp/ima_fw_key.pub
 
-openssl rsa -in /tmp/ima_fw_key.pem -pubout -outform DER -out /tmp/ima_fw_key.der
+#openssl rsa -in /tmp/ima_fw_key.pem -pubout -outform DER -out /tmp/ima_fw_key.der
 
-for f in "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/*.bin; do
-	openssl dgst -sha256 -sign /tmp/ima_fw_key.pem -out "$f.sig" "$f"
-done
+#for f in "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/*.bin; do
+#	openssl dgst -sha256 -sign /tmp/ima_fw_key.pem -out "$f.sig" "$f"
+#done
 
-cp -a /tmp/ima_fw_key.pub "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
+#cp -a /tmp/ima_fw_key.pub "$OUTDIR"/lib/firmware/nvidia/$DRIVER_VERSION/
 
 echo "Archiving assets"
 
