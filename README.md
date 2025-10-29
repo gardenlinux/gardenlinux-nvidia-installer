@@ -38,6 +38,22 @@ Notes:
 
 2. If a bare-metal kernel module needs to be built then `export KERNEL_TYPE=baremetal`
 
+## List the compatible versions
+
+We can list supported driver version for Garden Linux versions with 
+
+```
+    python3 list_versions.py
+```
+
+### Example output
+
+```
+Supported OS ↔ Driver Versions
+---------------------------------------------
+OS 1592.14: 570.195.03, 565.57.01, 550.163.01
+OS 1877.5: 570.195.03, 565.57.01, 550.163.01
+```
 # Further reading
 
 ## High level structure of the Makefile
