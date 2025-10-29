@@ -1,0 +1,35 @@
+name: Release
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "versions.yml"
+jobs:
+  update-history:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Pip packages
+        run: pip install pyyaml
+
+      - name: Update History
+        id: update-history
+        run: |
+          OUTPUT=$(python ./.ci/update_history.py)
+
+      - name: create pull request
+        run: |
+          git checkout -b update-history
+          git add history.yaml
+          git config --global user.name "Garden Linux Builder"
+          git config --global user.email "gardenlinux@users.noreply.github.com"
+          git commit -am 'Update History'
+          git pull --rebase origin update-history || true
+          git push --set-upstream origin update-history
+          UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update History' --body "automated update")
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
