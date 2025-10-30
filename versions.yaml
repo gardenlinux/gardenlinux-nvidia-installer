@@ -1,4 +1,14 @@
 os_versions:
+- name: '1592'
+  version: '1592.14'
+  kernel_flavour:
+  - cloud
+  - metal
+  cpu_arch:
+  - amd64
+  nvidia_drivers:
+  - 580.95.05
+  - 570.195.03
 - name: '1877'
   version: '1877.5'
   kernel_flavour:
