@@ -30,6 +30,6 @@ jobs:
           git commit -am 'Update History'
           git pull --rebase origin update-history || true
           git push --set-upstream origin update-history
-          UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update History' --body "automated update")
+          UPDATE_PR_LINK=$(gh pr create --base main --head update-history --title 'Update History' --body "automated update")
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
