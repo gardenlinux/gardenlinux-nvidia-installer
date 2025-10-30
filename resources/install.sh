@@ -11,20 +11,8 @@ error_out=$(depmod -b "$INSTALL_DIR/$DRIVER_NAME" 2>&1 )
 # filter harmless depmod warnings
 echo "$error_out" | grep -v 'depmod: WARNING:' 
 
-# Load modules into the host kernel from our alt rootfs
-# set parameter to not load the GSP gpu system processor since we don't have
-# the gsp_tx10x.bin in our image
-# setting the parameter didn't seem to allow nvidia-modprobe to work correctly
-#modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia NVreg_EnableGpuFirmware=0
-mkdir -p /etc/ima
-cp -a /run/nvidia/driver/*.pem /etc/ima
-
-#keyctl padd asymmetric "" %keyring:.ima "$INSTALL_DIR/$DRIVER_NAME"/lib/firmware/nvidia/$DRIVER_VERSION/ima_fw_key.pub @s
-
-#request-key create _ima "$INSTALL_DIR/$DRIVER_NAME/lib/firmware/nvidia/$DRIVER_VERSION/ima_fw_key.pub" @s
-
 echo -n "/run/nvidia/driver/lib/firmware" > /sys/module/firmware_class/parameters/path
-modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia NVreg_EnableGpuFirmware=1
+modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm
 
 # Ensure device nodes exist on the host (idempotent, preferred over manual mknod)
