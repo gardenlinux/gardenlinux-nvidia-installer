@@ -1,11 +1,15 @@
 name: Release
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
     paths:
       - "versions.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   update-history:
     runs-on: ubuntu-latest
