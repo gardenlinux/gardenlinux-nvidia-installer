@@ -15,7 +15,7 @@ helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
   https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml \
-  --set driver.repositorySuffix=open
+  --set driver.repository=ghcr.io/gardenlinux/gardenlinux-nvidia-installer/open
 ```
 
 Built images are maintained at ghcr.io registry

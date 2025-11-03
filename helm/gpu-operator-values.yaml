@@ -7,8 +7,7 @@ driver:
   imagePullPolicy: Always
   usePrecompiled: true
   version: 570
-  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer
-  repositorySuffix: proprietary 
+  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/proprietary
 node-feature-discovery:
   worker:
     config:
