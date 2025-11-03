@@ -5,11 +5,20 @@ Running the image in a cluster via the NVIDIA GPU Operator installs the GPU driv
 
 ## Deploying NVIDIA GPU Operator with Helm
 
+### Propreitary Kernel Module
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
-  https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml
+  https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml 
 ```
-Built images are maintained at ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:<driver-major-version>
+
+### Open Kernel Module
+```bash
+helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
+  https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml \
+  --set driver.repositorySuffix=open
+```
+
+Built images are maintained at ghcr.io registry
 
 If you have built the images yourself, you can use the `--set` option to specify the image repository and tag:
 ```bash
@@ -26,12 +35,13 @@ To build the image for NVIDIA driver version `570.172.08` on Garden Linux (GL) `
 ```
     export DRIVER_VERSION=570.172.08
     export GL_VERSION=1877.3
+    export KERNEL_TYPE=propreitary
     make build
 ```
 This builds a container image with an image name like 
-`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux0`
+`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/propreitary/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux0`
 and 
-`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux<GL_version>`
+`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/propreitary/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux<GL_version>`
 
 Notes:
 1. The image is built by default for **amd64**. If **arm64** architecture needs to be built then `export TARGET_ARCH=arm64`
@@ -47,6 +57,7 @@ To build only the driver modules:
 ```
     export GL_VERSION=1877.3
     export DRIVER_VERSION=570.172.08
+    export KERNEL_TYPE=propreitary
     make build-driver
 ```
 This builds the driver modules and stores them in current working directory under the `out` folder
@@ -55,6 +66,7 @@ To build only the container image:
 ```
     export GL_VERSION=1877.3
     export DRIVER_VERSION=570.172.08
+    export KERNEL_TYPE=propreitary
     make build-image
 ```
 Note: Make sure driver modules are first available under the `out` folder before building the image.
