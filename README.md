@@ -83,3 +83,5 @@ into a container image from which they can be installed at runtime.
 
 Drivers built with this project are only supported on Garden Linux, the open source operating system. 
 Furthermore, only drivers for data center (i.e. non-consumer) graphics cards are supported.
+
+**Open Kernel Module is supported only with (1877.6 / 1592.15) or later.**
