@@ -109,7 +109,7 @@ esac
 
 echo "Fetching GSP Firmware"
 mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
-cp -a $(find /tmp/nvidia -type f -name "*gsp*.bin") "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
+cp -a "$(find /tmp/nvidia -type f -name '*gsp*.bin')" "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
 
 echo "Archiving assets"
 
