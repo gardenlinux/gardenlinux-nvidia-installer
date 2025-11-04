@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Chart.Name }}-driver-version
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}  
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: driver-version-test
+      image: "{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+      imagePullPolicy: {{ .Values.test.image.pullPolicy }}
+      command: 
+        - /bin/bash
+        - -c
+        - |
+          echo "Checking GPU driver version..."
+          DRIVER_VERSION=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader)
+          echo "Driver Version: $DRIVER_VERSION"
+
+          # Check minimum driver version
+          MIN_VERSION="525.60.13"
+          if [ "$(printf '%s\n' "$MIN_VERSION" "$DRIVER_VERSION" | sort -V | head -n1)" = "$MIN_VERSION" ]; then
+            echo "Driver version $DRIVER_VERSION meets minimum requirement ($MIN_VERSION)"
+            exit 0
+          else
+            echo "Driver version $DRIVER_VERSION is below minimum requirement ($MIN_VERSION)"
+            exit 1
+          fi
+      resources:
+        limits:
+          nvidia.com/gpu: 1  # Request 1 GPU
+  restartPolicy: Never
+  nodeSelector: {{ .Values.nodeSelector }}
+         
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
