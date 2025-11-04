@@ -79,7 +79,8 @@ main() {
 }
 
 uninstall() {
-   if [[ source "${BIN_DIR}/uninstall.sh" ]]; then
+   source "${BIN_DIR}/uninstall.sh"
+   if [[ $? -ne 0 ]]; then
        echo "Uninstall fail, exit..."
        exit 1
    fi
