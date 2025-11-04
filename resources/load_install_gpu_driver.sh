@@ -19,16 +19,14 @@ main() {
     #set -euo pipefail
     [ "${DEBUG:-false}" = "true" ] && set -x
 
-    # ------------------------------------------------------------------------------
-    # 0) Guard: refuse to proceed if host NVIDIA modules are still loaded.
-    #    The GPU Operator's k8s-driver-manager should have evicted GPU users and
-    #    unloaded modules before we restage the driver. If modules are still loaded,
-    #    we bail out to avoid racing a live driver or mixing userlands.
-    # ------------------------------------------------------------------------------
     if nsenter -t 1 -m -u -n -i lsmod | grep -qE '^(nvidia|nvidia_uvm|nvidia_modeset) '; then
-        echo "[ERROR] Host NVIDIA kernel modules are still loaded; refusing to restage."
-        echo "        Ensure driver-manager eviction/unload completed (or drain the node) and retry."
-        exit 1
+	if [[ "$(nsenter -t 1 -m -u -i -- /run/nvidia/driver/bin/nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -n1)" == "$DRIVER_VERSION" ]]; then
+	    echo "No update in driver version. Skip update" 
+            exit 1
+        else
+	    echo "Installing New Version"
+	    uninstall 
+	fi
     fi
 
     # Stage new contents into a temporary directory
@@ -80,6 +78,12 @@ main() {
     echo "[INFO] NVIDIA driver install/refresh OK for ${DRIVER_NAME}:${DRIVER_VERSION}"
 }
 
+uninstall() {
+   if [[ source "${BIN_DIR}/uninstall.sh" ]]; then
+       echo "Uninstall fail, exit..."
+       exit 1
+   fi
+}
 
 install() {
     local DRIVER_NAME=$1
