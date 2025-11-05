@@ -11,7 +11,7 @@ os_versions:
   - 565.57.01
   - 550.163.01
 - name: '1877'
-  version: '1877.5'
+  version: '1877.6'
   kernel_flavour:
   - cloud
   - metal
