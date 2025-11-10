@@ -47,14 +47,14 @@ build-image: extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux$(GL_VERSION)")
 	$(eval TAG2 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
-	   --build-arg GL_VERSION=$(GL_VERSION) \
+           --build-arg GL_VERSION=$(GL_VERSION) \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
            --build-arg TARGET_ARCH=$(TARGET_ARCH) \
            --build-arg KERNEL_NAME=$(KERNEL_NAME) \
-	   --build-arg KERNEL_TYPE=$(KERNEL_TYPE) \
-	   --platform=linux/${TARGET_ARCH} \
-	   -t $(IMAGE_PATH):$(TAG1) \
-	   -t $(IMAGE_PATH):$(TAG2) \
+           --build-arg KERNEL_TYPE=$(KERNEL_TYPE) \
+           --platform=linux/${TARGET_ARCH} \
+           -t $(IMAGE_PATH):$(TAG1) \
+           -t $(IMAGE_PATH):$(TAG2) \
            -f Dockerfile $(DOCKER_CONTEXT) > /dev/null
 	@echo $(TAG1)
 	@echo $(TAG2)
