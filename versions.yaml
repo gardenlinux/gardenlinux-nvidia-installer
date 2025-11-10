@@ -13,7 +13,7 @@ os_versions:
   - 580.95.05
   - 570.195.03
 - name: '1877'
-  version: '1877.5'
+  version: '1877.6'
   kernel_flavour:
   - cloud
   kernel_type:
