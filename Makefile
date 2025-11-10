@@ -16,7 +16,7 @@ $(error DRIVER_VERSION is not set. Please set it before running make.)
 endif
 
 ifndef KERNEL_TYPE
-$(error KERNEL_TYPE is not set. Please set it before running make.)
+$(error KERNEL_TYPE is not set. Please set it to open or proprietary before running make.)
 endif
 
 extract-kernel-name:

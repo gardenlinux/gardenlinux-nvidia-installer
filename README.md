@@ -5,7 +5,7 @@ Running the image in a cluster via the NVIDIA GPU Operator installs the GPU driv
 
 ## Deploying NVIDIA GPU Operator with Helm
 
-### Propreitary Kernel Module
+### Proprietary Kernel Module
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
   https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml 
@@ -18,7 +18,7 @@ helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values
   --set driver.repository=ghcr.io/gardenlinux/gardenlinux-nvidia-installer/open
 ```
 
-Built images are maintained at ghcr.io registry
+Built images are maintained at ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<kernel_type>/driver:<driver_major_version>-<kernel_version>-gardenlinux0
 
 If you have built the images yourself, you can use the `--set` option to specify the image repository and tag:
 ```bash
@@ -35,13 +35,13 @@ To build the image for NVIDIA driver version `570.172.08` on Garden Linux (GL) `
 ```
     export DRIVER_VERSION=570.172.08
     export GL_VERSION=1877.3
-    export KERNEL_TYPE=propreitary
+    export KERNEL_TYPE=proprietary
     make build
 ```
 This builds a container image with an image name like 
-`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/propreitary/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux0`
+`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/proprietary/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux0`
 and 
-`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/propreitary/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux<GL_version>`
+`ghcr.io/gardenlinux/gardenlinux-nvidia-installer/proprietary/driver:<driver_major_version>-<GL_kernel_version>-<arch>-gardenlinux<GL_version>`
 
 Notes:
 1. The image is built by default for **amd64**. If **arm64** architecture needs to be built then `export TARGET_ARCH=arm64`
@@ -57,7 +57,7 @@ To build only the driver modules:
 ```
     export GL_VERSION=1877.3
     export DRIVER_VERSION=570.172.08
-    export KERNEL_TYPE=propreitary
+    export KERNEL_TYPE=proprietary
     make build-driver
 ```
 This builds the driver modules and stores them in current working directory under the `out` folder
@@ -66,7 +66,7 @@ To build only the container image:
 ```
     export GL_VERSION=1877.3
     export DRIVER_VERSION=570.172.08
-    export KERNEL_TYPE=propreitary
+    export KERNEL_TYPE=proprietary
     make build-image
 ```
 Note: Make sure driver modules are first available under the `out` folder before building the image.
@@ -84,4 +84,4 @@ into a container image from which they can be installed at runtime.
 Drivers built with this project are only supported on Garden Linux, the open source operating system. 
 Furthermore, only drivers for data center (i.e. non-consumer) graphics cards are supported.
 
-**Open Kernel Module is supported only with (1877.6 / 1592.15) or later.**
+**The Open Kernel Module is supported only with Garden Linux versions 1877.6 and 1592.15 (or later patch versions).**

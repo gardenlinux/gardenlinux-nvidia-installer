@@ -53,7 +53,7 @@ case $TARGET_ARCH in
           --no-libglx-indirect \
           --no-install-libglvnd \
           --kernel-name="$KERNEL_NAME" \
-	  --kernel-module-type="$KERNEL_TYPE" \
+          --kernel-module-type="$KERNEL_TYPE" \
           --no-drm \
           --no-install-compat32-libs \
           --no-opengl-files \
