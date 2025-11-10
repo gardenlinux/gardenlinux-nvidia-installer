@@ -16,6 +16,7 @@ os_versions:
   version: '1877.6'
   kernel_flavour:
   - cloud
+  - metal
   kernel_type:
   - open
   - proprietary
