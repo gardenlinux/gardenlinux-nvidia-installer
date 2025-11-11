@@ -4,20 +4,24 @@ os_versions:
   kernel_flavour:
   - cloud
   - metal
+  kernel_type:
+  - open
+  - proprietary
   cpu_arch:
   - amd64
   nvidia_drivers:
+  - 580.95.05
   - 570.195.03
-  - 565.57.01
-  - 550.163.01
 - name: '1877'
   version: '1877.6'
   kernel_flavour:
   - cloud
   - metal
+  kernel_type:
+  - open
+  - proprietary
   cpu_arch:
   - amd64
   nvidia_drivers:
+  - 580.95.05
   - 570.195.03
-  - 565.57.01
-  - 550.163.01

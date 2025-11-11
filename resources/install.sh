@@ -11,11 +11,7 @@ error_out=$(depmod -b "$INSTALL_DIR/$DRIVER_NAME" 2>&1 )
 # filter harmless depmod warnings
 echo "$error_out" | grep -v 'depmod: WARNING:' 
 
-# Load modules into the host kernel from our alt rootfs
-# set parameter to not load the GSP gpu system processor since we don't have
-# the gsp_tx10x.bin in our image
-# setting the parameter didn't seem to allow nvidia-modprobe to work correctly
-#modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia NVreg_EnableGpuFirmware=0
+echo -n "/run/nvidia/driver/lib/firmware" > /sys/module/firmware_class/parameters/path
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm
 

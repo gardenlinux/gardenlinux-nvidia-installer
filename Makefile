@@ -1,6 +1,6 @@
 .PHONY: extract-kernel-name build-driver build-image build
 WORKSPACE_DIR ?= $(shell pwd)
-KERNEL_TYPE ?= cloud
+KERNEL_FLAVOR ?= cloud
 TARGET_ARCH ?= amd64
 DOCKER_CONTEXT ?= $(shell pwd)
 IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
@@ -15,13 +15,16 @@ ifndef DRIVER_VERSION
 $(error DRIVER_VERSION is not set. Please set it before running make.)
 endif
 
+ifndef KERNEL_TYPE
+$(error KERNEL_TYPE is not set. Please set it to open or proprietary before running make.)
+endif
+
 extract-kernel-name:
 	$(eval KERNEL_NAME := $(shell docker run --rm \
            -v "$(PWD):/workspace" \
            -w /workspace \
-           -e KERNEL_TYPE="$(KERNEL_TYPE)" \
            ghcr.io/gardenlinux/gardenlinux/kmodbuild:$(TARGET_ARCH)-$(GL_VERSION) \
-           ./resources/extract_kernel_name.sh "$(KERNEL_TYPE)"))
+           ./resources/extract_kernel_name.sh "$(KERNEL_FLAVOR)"))
 
 build-driver: extract-kernel-name
 	mkdir -p $(WORKSPACE_DIR)/out ;\
@@ -35,6 +38,7 @@ build-driver: extract-kernel-name
 			   --env GL_VERSION=$(GL_VERSION) \
 			   --env DRIVER_VERSION=$(DRIVER_VERSION) \
 			   --env KERNEL_NAME=$(KERNEL_NAME) \
+			   --env KERNEL_TYPE=$(KERNEL_TYPE) \
 			   ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
 			   bash ./resources/compile.sh ;\
 	fi
@@ -43,19 +47,20 @@ build-image: extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux$(GL_VERSION)")
 	$(eval TAG2 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
-	   --build-arg GL_VERSION=$(GL_VERSION) \
+           --build-arg GL_VERSION=$(GL_VERSION) \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
            --build-arg TARGET_ARCH=$(TARGET_ARCH) \
            --build-arg KERNEL_NAME=$(KERNEL_NAME) \
-	   --platform=linux/${TARGET_ARCH} \
-	   -t $(IMAGE_PATH):$(TAG1) \
-	   -t $(IMAGE_PATH):$(TAG2) \
+           --build-arg KERNEL_TYPE=$(KERNEL_TYPE) \
+           --platform=linux/${TARGET_ARCH} \
+           -t $(IMAGE_PATH):$(TAG1) \
+           -t $(IMAGE_PATH):$(TAG2) \
            -f Dockerfile $(DOCKER_CONTEXT) > /dev/null
 	@echo $(TAG1)
 	@echo $(TAG2)
     
 clean:
-	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz
+	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_TYPE)-$(KERNEL_NAME).tar.gz
 
 clean-all:
 	rm -rf $(WORKSPACE_DIR)/out/

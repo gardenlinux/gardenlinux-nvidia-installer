@@ -32,26 +32,28 @@ jobs:
       TARGET_ARCH: ${{ matrix.arch }}
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
-      KERNEL_TYPE: ${{ matrix.kernel_flavour }}
+      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
+      KERNEL_TYPE: ${{ matrix.kernel_type }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Compile module
+      - name: Compile module 
         run: |
           make build-driver WORKSPACE_DIR="${{ github.workspace }}" \
-             KERNEL_TYPE=$KERNEL_TYPE \
+             KERNEL_FLAVOR=$KERNEL_FLAVOR \
              TARGET_ARCH=$TARGET_ARCH \
              GL_VERSION=$GL_VERSION \
-             DRIVER_VERSION=$DRIVER_VERSION
+             DRIVER_VERSION=$DRIVER_VERSION \
+             KERNEL_TYPE=$KERNEL_TYPE
 
       - name: Upload built driver
         uses: actions/upload-artifact@v4
         if: github.event_name != 'pull_request'
         with:
-          name: driver-${{ matrix.os_version }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.driver_version }}
-          path: ${{ github.workspace }}/out/nvidia/driver-*.tar.gz
+          name: driver-${{ matrix.os_version }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.kernel_type }}-${{ matrix.driver_version }}
+          path: ${{ github.workspace }}/out/nvidia/driver-${{ matrix.driver_version }}-${{ matrix.kernel_type }}-*.tar.gz
 
   check-complete:
     name: Pull Request Check

@@ -8,7 +8,12 @@ if [ -z "$KERNEL_NAME" ]; then
     exit 1
 fi
 
-echo "Compiling NVIDIA modules for driver version $DRIVER_VERSION on kernel $KERNEL_NAME"
+if [ -z "$KERNEL_TYPE" ]; then
+    echo "Error: KERNEL_TYPE is not set."
+    exit 1
+fi
+
+echo "Compiling NVIDIA modules for $KERNEL_TYPE driver version $DRIVER_VERSION on kernel $KERNEL_NAME"
 
 set -x
 mkdir -p /tmp/nvidia
@@ -26,7 +31,6 @@ if [[ ! ${arch_translation[$TARGET_ARCH]+_} ]]; then
     exit 2
 fi
 ARCH_TYPE=${arch_translation[$TARGET_ARCH]}
-
 
 # shellcheck disable=SC2164
 pushd /tmp/nvidia
@@ -46,10 +50,10 @@ OUTDIR="/out/nvidia/driver"
 case $TARGET_ARCH in
     amd64)
       if ./nvidia-installer \
-          --no-opengl-files \
           --no-libglx-indirect \
           --no-install-libglvnd \
           --kernel-name="$KERNEL_NAME" \
+          --kernel-module-type="$KERNEL_TYPE" \
           --no-drm \
           --no-install-compat32-libs \
           --no-opengl-files \
@@ -72,10 +76,10 @@ case $TARGET_ARCH in
         ;;
     arm64)
       if ./nvidia-installer \
-          --no-opengl-files \
           --no-libglx-indirect \
           --no-install-libglvnd \
           --kernel-name="$KERNEL_NAME" \
+          --kernel-module-type="$KERNEL_TYPE" \
           --no-drm \
           --no-opengl-files \
           --no-kernel-module-source \
@@ -103,15 +107,18 @@ case $TARGET_ARCH in
         ;;
 esac
 
+echo "Fetching GSP Firmware"
+mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
+find /tmp/nvidia -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
+
 echo "Archiving assets"
 
 # Archive library .so files
 mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$OUTDIR"/usr/bin
 cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
 cp -a /usr/bin/nvidia* "$OUTDIR"/usr/bin
-
 # We don't need the installer binaries, or the icons/desktop files in /share
 rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
 
 # shellcheck disable=SC2046
-tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
+tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_TYPE-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
