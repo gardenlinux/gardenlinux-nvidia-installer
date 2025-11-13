@@ -87,6 +87,22 @@ To build only the container image:
 ```
 Note: Make sure driver modules are first available under the `out` folder before building the image.
 
+### Driver Lifecycle
+
+This project builds and maintains the latest NVIDIA driver releases, continuously supporting the **two** most recent major versions.
+
+Driver and Garden Linux version is update automatically based on the available version
+
+**Garden Linux** version gets automatically updated from 
+
+https://github.com/gardenlinux/gardenlinux/releases when there is a latest release available
+
+**Driver Version** is updated if there is a minor version release from. 
+
+https://www.nvidia.com/en-us/drivers/
+
+Note: Major version for driver is updated manually
+
 ### Background
 
 Compiling drivers for Garden Linux is typically non-trivial because the OS ships

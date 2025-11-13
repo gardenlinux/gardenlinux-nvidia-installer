@@ -16,6 +16,11 @@ def display(history):
         else:
             print(f"OS {os_ver}: (no drivers listed yet)")
     print()
+    print("\nLifecycle for Driver and supported GL version depends on Garden Linux Release and Driver Release")
+    print("\nRefer below links for Garden Linux and driver releases")
+    print("\nGarden Linux Release: https://github.com/gardenlinux/gardenlinux/releases")
+    print("\nDriver Release: https://www.nvidia.com/en-us/drivers/ --> Select Data Center/Tesla")
+
 
 def main():
     history = load_yaml()
