@@ -77,6 +77,8 @@ Note: Make sure driver modules are first available under the `out` folder before
 
 ### Driver Lifecycle
 
+This project builds and maintains the latest NVIDIA driver releases, continuously supporting the **two** most recent major versions.
+
 Driver and Garden Linux version is update automatically based on the available version
 
 **Garden Linux** version gets automatically updated from 
