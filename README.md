@@ -83,10 +83,11 @@ Driver and Garden Linux version is update automatically based on the available v
 
 https://github.com/gardenlinux/gardenlinux/releases when there is a latest release available
 
-**Driver Version** is updated if there is a minor version release from 
+**Driver Version** is updated if there is a minor version release from. 
 
 https://www.nvidia.com/en-us/drivers/
 
+Note: Major version for driver is updated manually
 
 ### Background
 
