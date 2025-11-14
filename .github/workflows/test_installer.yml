@@ -1,6 +1,7 @@
 name: Complete Helm CI/CD
 
 on:
+  pull_request:
   workflow_dispatch:
   push:
     branches: [ main ]
