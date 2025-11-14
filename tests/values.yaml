@@ -1,0 +1,37 @@
+# Test configuration
+test:
+  enabled: true
+  image:
+    repository: nvidia/cuda
+    tag: 11.8.0-base-ubuntu22.04
+    pullPolicy: IfNotPresent
+  
+  # Minimum required NVIDIA driver version
+  minDriverVersion: "525.60.13"
+  
+  # GPU resource limits
+  gpu:
+    limit: 1
+  
+  # Pod resources
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+      nvidia.com/gpu: 1
+  
+  # Node selection
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  
+  # Tolerations for GPU nodes
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+  
+  # Additional annotations
+  annotations: {}
