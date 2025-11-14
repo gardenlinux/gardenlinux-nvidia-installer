@@ -22,11 +22,11 @@ jobs:
   test:
     needs: lint
     runs-on: ubuntu-latest
+    permissions:
+      # This is required for requesting the JWT
+      id-token: write
     steps:
       - uses: actions/checkout@v3
-      permissions:
-      # This is required for requesting the JWT
-        id-token: write
 
       - name: Authenticate to cluster
         id: kube_auth
