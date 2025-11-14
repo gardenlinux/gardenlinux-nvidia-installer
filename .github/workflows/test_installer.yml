@@ -37,6 +37,8 @@ jobs:
           audience: gpu-ci-test
       
       - name: Wait for cluster
+        env:
+          KUBECONFIG: kubeconfig.yaml
         run: |
           kubectl wait --for=condition=Ready nodes --all --timeout=300s
           kubectl get nodes
