@@ -1,0 +1,73 @@
+name: Complete Helm CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  CHART_PATH: ./tests
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Helm lint
+        run: |
+          helm lint ${{ env.CHART_PATH }}
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Authenticate to cluster
+        id: kube_auth
+        uses: gardener/cc-utils/.github/actions/kubernetes-auth@b7e4d874f30171964c5262a0bc20d644f4bcedba
+        with:
+          server: https://api.canary.gardener.cloud.sap 
+          server-ca-discovery-url: https://discovery.ingress.garden.example.com/projects/garden-gl-ai/shoots/8b446787-d656-48c1-813b-d2e3867e65a6/cluster-ca
+          audience: gpu-ci-test
+      
+      - name: Wait for cluster
+        run: |
+          kubectl wait --for=condition=Ready nodes --all --timeout=300s
+          kubectl get nodes
+
+      - name: Install nvidia installer
+        run: |
+          helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+          helm repo update
+          helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values helm/gpu-operator-values.yaml --set driver.repository=ghcr.io/gardenlinux/gardenlinux-nvidia-installer/open
+
+      - name: Wait until all the pods are up and running
+        run: |
+          sleep 5m
+
+      - name: Install chart
+        run: |
+          helm install test-release ${{ env.CHART_PATH }} \
+            --wait \
+            --timeout 10m \
+            --values ${{ env.CHART_PATH }}/values.yaml
+
+      - name: Run Helm tests
+        id: helm-test
+        run: |
+          helm test test-release --logs 2>&1 | tee test-output.log
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Debug on failure
+        if: failure()
+        run: |
+          echo "=== Helm Test Failed ==="
+          kubectl get pods -A
+          kubectl describe pods -l "app.kubernetes.io/instance=test-release"
+          helm status test-release
+
+      - name: Cleanup
+        if: always()
+        run: |
+          helm uninstall test-release || true
