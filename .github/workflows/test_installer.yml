@@ -53,6 +53,8 @@ jobs:
           sleep 5m
 
       - name: Install chart
+        env:
+          KUBECONFIG: kubeconfig.yaml
         run: |
           helm install test-release ${{ env.CHART_PATH }} \
             --wait \
@@ -60,12 +62,16 @@ jobs:
             --values ${{ env.CHART_PATH }}/values.yaml
 
       - name: Run Helm tests
+        env:
+          KUBECONFIG: kubeconfig.yaml
         id: helm-test
         run: |
           helm test test-release --logs 2>&1 | tee test-output.log
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
       - name: Debug on failure
+        env:
+          KUBECONFIG: kubeconfig.yaml
         if: failure()
         run: |
           echo "=== Helm Test Failed ==="
@@ -74,6 +80,8 @@ jobs:
           helm status test-release
 
       - name: Cleanup
+        env:
+          KUBECONFIG: kubeconfig.yaml
         if: always()
         run: |
           helm uninstall test-release || true
