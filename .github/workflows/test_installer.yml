@@ -33,12 +33,12 @@ jobs:
           server-ca-discovery-url: https://discovery.ingress.garden.canary.k8s.ondemand.com/projects/gl-ai/shoots/8b446787-d656-48c1-813b-d2e3867e65a6/cluster-ca
           audience: gpu-ci-test
       
-      #- name: Wait for cluster
-      #  env:
-      #    KUBECONFIG: kubeconfig.yaml
-      #  run: |
-      #    kubectl wait --for=condition=Ready nodes --all --timeout=300s
-      #    kubectl get pods -A
+      - name: Wait for cluster
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        run: |
+          #kubectl wait --for=condition=Ready nodes --all --timeout=300s
+          kubectl get nodes
 
       - name: Install nvidia installer
         env:
