@@ -41,7 +41,7 @@ jobs:
           KUBECONFIG: kubeconfig.yaml
         run: |
           kubectl wait --for=condition=Ready nodes --all --timeout=300s
-          kubectl get nodes
+          kubectl get pods -A
 
       - name: Install nvidia installer
         run: |
