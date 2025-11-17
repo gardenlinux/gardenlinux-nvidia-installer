@@ -68,6 +68,7 @@ jobs:
           KUBECONFIG: kubeconfig.yaml
         run: |
           helm install test-release ${{ env.CHART_PATH }} \
+            -n gpu-operator
             --wait \
             --timeout 10m \
             --values ${{ env.CHART_PATH }}/values.yaml
@@ -77,7 +78,7 @@ jobs:
           KUBECONFIG: kubeconfig.yaml
         id: helm-test
         run: |
-          helm test test-release --logs 2>&1 | tee test-output.log
+          helm test test-release -n gpu-operator --logs 2>&1 | tee test-output.log
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
       - name: Debug on failure
@@ -86,13 +87,13 @@ jobs:
         if: failure()
         run: |
           echo "=== Helm Test Failed ==="
-          kubectl get pods -A
+          kubectl get pods -n gpu-operator
           kubectl describe pods -l "app.kubernetes.io/instance=test-release"
-          helm status test-release
+          helm status test-release -n test-gpu-operator
 
       - name: Cleanup
         env:
           KUBECONFIG: kubeconfig.yaml
         if: always()
         run: |
-          helm uninstall test-release || true
+          helm uninstall test-release -n gpu-operator || true
