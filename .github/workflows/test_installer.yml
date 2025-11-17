@@ -1,6 +1,7 @@
 name: Complete Helm CI/CD
 on:
   workflow_dispatch:
+  pull_request:
 
 env:
   CHART_PATH: ./tests
