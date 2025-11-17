@@ -3,7 +3,7 @@
 This component compiles NVIDIA kernel modules for Garden Linux in a Container image at build time.
 Running the image in a cluster via the NVIDIA GPU Operator installs the GPU driver on the required nodes.
 
-## Deploying NVIDIA GPU Operator with Helm(For GL version 1877.6 or later and 1592.15 or later)
+## Deploying NVIDIA GPU Operator with Helm (Garden Linux versions >=1877.6 and >=1592.15)
 
 ### Proprietary Kernel Module
 ```bash
@@ -118,7 +118,7 @@ Furthermore, only drivers for data center (i.e. non-consumer) graphics cards are
 
 **The Open Kernel Module is supported only with Garden Linux versions 1877.6 and 1592.15 (or later patch versions).**
 
-**For suporting older GL version Ex: 1877.5 or below and 1592.14 or below, nvidia-installer command should be modifies as follows:** 
+**For Garden Linux versions <=1877.5 or <=1592.14 the installation command should be modified as follows:** 
 ```
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
   https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml \
