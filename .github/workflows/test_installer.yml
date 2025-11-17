@@ -1,10 +1,6 @@
 name: Complete Helm CI/CD
-
 on:
   workflow_dispatch:
-  pull_request:
-  push:
-    branches: [ main ]
 
 env:
   CHART_PATH: ./tests
