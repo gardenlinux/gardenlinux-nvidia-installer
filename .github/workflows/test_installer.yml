@@ -89,3 +89,4 @@ jobs:
         if: always()
         run: |
           helm uninstall test-release -n gpu-operator || true
+          helm uninstall gpu-operator -n gpu-operator || true
