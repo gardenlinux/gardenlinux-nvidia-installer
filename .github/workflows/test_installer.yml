@@ -72,6 +72,29 @@ jobs:
         continue-on-error: true
         run: |
           helm test test-release -n gpu-operator --logs 2>&1 | tee test-output.log
+          
+          # Store the helm test exit code
+          HELM_EXIT_CODE=${PIPESTATUS[0]}
+    
+          # Check if the output contains failure indicators
+          if grep -q "FAILED" test-output.log || grep -q "Error" test-output.log; then
+            echo "Test output indicates failure"
+            exit 1
+          fi
+    
+          if [ $HELM_EXIT_CODE -ne 0 ]; then
+            echo "Helm test command failed with exit code: $HELM_EXIT_CODE"
+            exit 1
+          fi
+    
+          TEST_PODS=$(kubectl get pods -n gpu-operator -l "app.kubernetes.io/instance=test-release,test=true" -o jsonpath='{.items[*].metadata.name}')
+          for pod in $TEST_PODS; do
+            POD_STATUS=$(kubectl get pod $pod -n gpu-operator -o jsonpath='{.status.phase}')
+            if [ "$POD_STATUS" != "Succeeded" ]; then
+              echo "Test pod $pod failed with status: $POD_STATUS"
+              exit 1
+            fi
+          done
 
       - name: Debug on failure
         env:
@@ -81,7 +104,7 @@ jobs:
           echo "=== Helm Test Failed ==="
           kubectl get pods -n gpu-operator
           kubectl describe pods -l "app.kubernetes.io/instance=test-release"
-          helm status test-release -n test-gpu-operator
+          helm status test-release -n gpu-operator
 
       - name: Cleanup
         env:
