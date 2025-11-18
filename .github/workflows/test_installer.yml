@@ -59,7 +59,7 @@ jobs:
 
       - name: Wait until all the pods are up and running
         run: |
-          sleep 5m
+          sleep 3m
 
       - name: Install chart
         env:
