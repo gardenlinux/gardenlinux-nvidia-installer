@@ -36,6 +36,12 @@ jobs:
           service-account-namespace: gpu-operator
           service-account-token-expiration: 600
       
+      - name: Wake up cluster
+	env:
+	  KUBECONFIG: kubeconfig.yaml
+        run: |
+          kubectl patch shoot gpu-ci-test -n garden-gl-ai -p '{"spec":{"hibernation":{"enabled":false}}}'
+      
       - name: Wait for cluster
         env:
           KUBECONFIG: kubeconfig.yaml
@@ -113,6 +119,13 @@ jobs:
         run: |
           helm uninstall test-release -n gpu-operator || true
           helm uninstall gpu-operator -n gpu-operator || true
+
+      - name: Hibernate  cluster
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        if: always()
+        run: |
+          kubectl patch shoot gpu-ci-test -n garden-gl-ai -p '{"spec":{"hibernation":{"enabled":true}}}'
 
       - name: Fail workflow if tests failed
         if: steps.helm-test.outcome == 'failure'
