@@ -21,7 +21,7 @@ spec:
           echo "Driver Version: $DRIVER_VERSION"
 
           # Check minimum driver version
-          MIN_VERSION="525.60.13"
+          MIN_VERSION="580.200.03"
           if [ "$(printf '%s\n' "$MIN_VERSION" "$DRIVER_VERSION" | sort -V | head -n1)" = "$MIN_VERSION" ]; then
             echo "Driver version $DRIVER_VERSION meets minimum requirement ($MIN_VERSION)"
             exit 0
