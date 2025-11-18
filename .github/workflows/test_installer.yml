@@ -69,14 +69,14 @@ jobs:
         env:
           KUBECONFIG: kubeconfig.yaml
         id: helm-test
+        continue-on-error: true
         run: |
           helm test test-release -n gpu-operator --logs 2>&1 | tee test-output.log
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
       - name: Debug on failure
         env:
           KUBECONFIG: kubeconfig.yaml
-        if: failure() || steps.helm-test.outputs.exit_code == '1'
+        if: steps.helm-test.outcome == 'failure'
         run: |
           echo "=== Helm Test Failed ==="
           kubectl get pods -n gpu-operator
@@ -90,3 +90,7 @@ jobs:
         run: |
           helm uninstall test-release -n gpu-operator || true
           helm uninstall gpu-operator -n gpu-operator || true
+
+      - name: Fail workflow if tests failed
+        if: steps.helm-test.outcome == 'failure'
+        run: exit 1
