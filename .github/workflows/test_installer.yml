@@ -35,10 +35,10 @@ jobs:
           service-account-name: ci-gpu-test-sa
           service-account-namespace: gpu-operator
           service-account-token-expiration: 600
-      
+          
       - name: Wake up cluster
-	env:
-	  KUBECONFIG: kubeconfig.yaml
+        env:
+          KUBECONFIG: kubeconfig.yaml
         run: |
           kubectl patch shoot gpu-ci-test -n garden-gl-ai -p '{"spec":{"hibernation":{"enabled":false}}}'
       
