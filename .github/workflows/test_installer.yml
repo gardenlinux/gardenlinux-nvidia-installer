@@ -76,7 +76,7 @@ jobs:
       - name: Debug on failure
         env:
           KUBECONFIG: kubeconfig.yaml
-        if: failure()
+        if: failure() || steps.helm-test.outputs.exit_code == '1'
         run: |
           echo "=== Helm Test Failed ==="
           kubectl get pods -n gpu-operator
