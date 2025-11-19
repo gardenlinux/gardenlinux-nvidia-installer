@@ -1,5 +1,7 @@
 name: Complete Helm CI/CD
 on:
+  schedule:
+    - cron: '0 18 * * *'
   workflow_dispatch:
   pull_request:
 
