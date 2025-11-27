@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - "versions.yml"
+      - "versions.yaml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
