@@ -1,6 +1,6 @@
 os_versions:
 - name: '1592'
-  version: '1592.14'
+  version: '1592.15'
   kernel_flavour:
   - cloud
   - metal
