@@ -1,0 +1,134 @@
+name: Complete Helm CI/CD
+on:
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+  pull_request:
+
+env:
+  CHART_PATH: ./tests
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Helm lint
+        run: |
+          helm lint ${{ env.CHART_PATH }}
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions:
+      # This is required for requesting the JWT
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Authenticate to cluster
+        id: kube_auth
+        uses: gardener/cc-utils/.github/actions/kubernetes-auth@b7e4d874f30171964c5262a0bc20d644f4bcedba
+        with:
+          server:  ${{ secrets.CLUSTER_SERVER }}
+          server-ca-discovery-url: ${{ secrets.CLUSTER_CA_DISCOVERY_URL }}
+          audience: gpu-ci-test
+          service-account-name: ci-gpu-test-sa
+          service-account-namespace: gpu-operator
+          service-account-token-expiration: 600
+          
+#      - name: Wake up cluster
+#        env:
+#          KUBECONFIG: kubeconfig.yaml
+#        run: |
+#          kubectl patch shoot gpu-ci-test -n garden-gl-ai -p '{"spec":{"hibernation":{"enabled":false}}}'
+      
+      - name: Wait for cluster
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        run: |
+          kubectl wait --for=condition=Ready nodes --all --timeout=300s
+          kubectl get nodes
+
+      - name: Install nvidia installer
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        run: |
+          helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+          helm repo update
+          helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values helm/gpu-operator-values.yaml --set driver.repository=ghcr.io/gardenlinux/gardenlinux-nvidia-installer/open
+
+      - name: Wait until all the pods are up and running
+        run: |
+          sleep 3m
+
+      - name: Install chart
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        run: |
+          helm install test-release ${{ env.CHART_PATH }} \
+            -n gpu-operator \
+            --wait \
+            --timeout 10m \
+            --values ${{ env.CHART_PATH }}/values.yaml
+
+      - name: Run Helm tests
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        id: helm-test
+        continue-on-error: true
+        run: |
+          helm test test-release -n gpu-operator --logs 2>&1 | tee test-output.log
+          
+          # Store the helm test exit code
+          HELM_EXIT_CODE=${PIPESTATUS[0]}
+    
+          # Check if the output contains failure indicators
+          if grep -q "FAILED" test-output.log || grep -q "Error" test-output.log; then
+            echo "Test output indicates failure"
+            exit 1
+          fi
+    
+          if [ $HELM_EXIT_CODE -ne 0 ]; then
+            echo "Helm test command failed with exit code: $HELM_EXIT_CODE"
+            exit 1
+          fi
+    
+          TEST_PODS=$(kubectl get pods -n gpu-operator -l "app.kubernetes.io/instance=test-release,test=true" -o jsonpath='{.items[*].metadata.name}')
+          for pod in $TEST_PODS; do
+            POD_STATUS=$(kubectl get pod $pod -n gpu-operator -o jsonpath='{.status.phase}')
+            if [ "$POD_STATUS" != "Succeeded" ]; then
+              echo "Test pod $pod failed with status: $POD_STATUS"
+              exit 1
+            fi
+          done
+
+      - name: Debug on failure
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        if: steps.helm-test.outcome == 'failure'
+        run: |
+          echo "=== Helm Test Failed ==="
+          kubectl get pods -n gpu-operator
+          kubectl describe pods -l "app.kubernetes.io/instance=test-release"
+          helm status test-release -n gpu-operator
+
+      - name: Cleanup
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        if: always()
+        run: |
+          helm uninstall test-release -n gpu-operator || true
+          helm uninstall gpu-operator -n gpu-operator || true
+
+#     - name: Hibernate  cluster
+#        env:
+#          KUBECONFIG: kubeconfig.yaml
+#        if: always()
+#        run: |
+#          kubectl patch shoot gpu-ci-test -n garden-gl-ai -p '{"spec":{"hibernation":{"enabled":true}}}'
+
+      - name: Fail workflow if tests failed
+        if: steps.helm-test.outcome == 'failure'
+        run: exit 1
