@@ -32,7 +32,7 @@ jobs:
         uses: gardener/cc-utils/.github/actions/kubernetes-auth@b7e4d874f30171964c5262a0bc20d644f4bcedba
         with:
           server:  ${{ secrets.CLUSTER_SERVER }}
-          server-ca-discovery-url: https://discovery.ingress.garden.canary.k8s.ondemand.com/projects/gl-ai/shoots/8b446787-d656-48c1-813b-d2e3867e65a6/cluster-ca
+          server-ca-discovery-url: ${{ secrets.CLUSTER_CA_DISCOVERY_URL }}
           audience: gpu-ci-test
           service-account-name: ci-gpu-test-sa
           service-account-namespace: gpu-operator
