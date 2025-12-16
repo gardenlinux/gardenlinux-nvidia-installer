@@ -56,6 +56,7 @@ build-image: extract-kernel-name
            --platform=linux/${TARGET_ARCH} \
            -t $(IMAGE_PATH):$(TAG1) \
            -t $(IMAGE_PATH):$(TAG2) \
+           -t $(IMAGE_PATH):$(TAG3) \
            -f Dockerfile $(DOCKER_CONTEXT) > /dev/null
 	@echo $(TAG1)
 	@echo $(TAG2)
