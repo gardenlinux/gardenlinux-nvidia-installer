@@ -82,9 +82,11 @@ jobs:
 
           TAG1=$(echo "$TAG" | sed -n 1p)
           TAG2=$(echo "$TAG" | sed -n 2p)
+          TAG3=$(echo "$TAG" | sed -n 3p)
 
           docker push $IMAGE_PATH:$TAG1
           docker push $IMAGE_PATH:$TAG2
+          docker push $IMAGE_PATH:$TAG3
 
   manifest:
     needs: [build, generate-matrix]
