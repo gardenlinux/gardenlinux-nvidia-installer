@@ -46,6 +46,7 @@ build-driver: extract-kernel-name
 build-image: extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux$(GL_VERSION)")
 	$(eval TAG2 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
+	$(eval TAG3 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
            --build-arg GL_VERSION=$(GL_VERSION) \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
@@ -55,9 +56,11 @@ build-image: extract-kernel-name
            --platform=linux/${TARGET_ARCH} \
            -t $(IMAGE_PATH):$(TAG1) \
            -t $(IMAGE_PATH):$(TAG2) \
+           -t $(IMAGE_PATH):$(TAG3) \
            -f Dockerfile $(DOCKER_CONTEXT) > /dev/null
 	@echo $(TAG1)
 	@echo $(TAG2)
+	@echo $(TAG3)
     
 clean:
 	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_TYPE)-$(KERNEL_NAME).tar.gz
