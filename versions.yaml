@@ -10,8 +10,8 @@ os_versions:
   cpu_arch:
   - amd64
   nvidia_drivers:
-  - 580.105.08
-  - 570.195.03
+  - 580.126.09
+  - 570.211.01
 - name: '1877'
   version: '1877.9'
   kernel_flavour:
@@ -23,5 +23,5 @@ os_versions:
   cpu_arch:
   - amd64
   nvidia_drivers:
-  - 580.105.08
-  - 570.195.03
+  - 580.126.09
+  - 570.211.01
