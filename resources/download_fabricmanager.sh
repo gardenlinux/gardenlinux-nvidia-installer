@@ -23,6 +23,15 @@ pushd /tmp/nvidia
 # Download Fabric Manager tarball
 wget -O /tmp/keyring.deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb && dpkg -i /tmp/keyring.deb
 
+#Allow sha1 to avoid error 
+
+# W: OpenPGP signature verification failed: https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64  InRelease: Sub-process /usr/bin/sqv returned an error code (1), error message is: Signing key on EB693B3035CD5710E231E123A4B469963BF863CC is not bound:            No binding signature at time 2026-01-29T20:38:07Z   because: Policy rejected non-revocation signature (PositiveCertification) requiring second pre-image resistance   because: SHA1 is not considered secure since 2026-02-01T00:00:00Z
+# TBD: Move to debian13 when latest 2 major version is available in that and remove the workaround
+
+mkdir -p /etc/crypto-policies/back-ends
+echo '[hash_algorithms]
+sha1 = "always"' | tee /etc/crypto-policies/back-ends/apt-sequoia.config
+
 # In testing apt-get update failed.  This is because the Packages file was not updated to reflect the current size of the file.
 # A ticket was filed with the git repo as this is not the first time this has happened.  There was a comment that the flow had
 # changed and hopefully this is the last time we see this issue, but leaving this here for reference.
