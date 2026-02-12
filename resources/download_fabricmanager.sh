@@ -109,6 +109,7 @@ apt-get update
 #
 PKG1="nvidia-fabricmanager-${DRIVER_BRANCH}"
 PKG2="nvidia-fabricmanager"
+PKG3="nvidia-fabricmanager-$(echo "${DRIVER_BRANCH}" | cut -d. -f1)"
 VER="${DRIVER_VERSION}-1"
 
 has_exact_ver() { apt-cache madison "$1" 2>/dev/null | awk '{print $3}' | grep -Fx "$2" >/dev/null 2>&1; }
@@ -118,14 +119,18 @@ if has_exact_ver "$PKG1" "$VER"; then
   PKG="$PKG1"
 elif has_exact_ver "$PKG2" "$VER"; then
   PKG="$PKG2"
+elif has_exact_ver "$PKG3" "$VER"; then
+  PKG="$PKG3"
 fi
 
 if [ -z "$PKG" ]; then
   echo "Not found via APT:"
   echo "  ${PKG1} version ${VER}"
   echo "  ${PKG2} version ${VER}"
+  echo "  ${PKG3} version ${VER}"
   echo "Available for ${PKG1}:"; apt-cache madison "$PKG1" | awk '{print "  " $3}' || true
   echo "Available for ${PKG2}:"; apt-cache madison "$PKG2" | awk '{print "  " $3}' || true
+  echo "Available for ${PKG3}:"; apt-cache madison "$PKG3" | awk '{print "  " $3}' || true
   exit 1
 fi
 
