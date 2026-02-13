@@ -1,0 +1,37 @@
+name: Clean up old installer packages
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 0'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install gh
+        run: |
+          sudo apt-get update
+          sudo apt install -y gh
+      - name: Delete old container images older than 30 days 
+        env:
+          EXPIRY-DAYS: 30
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          Cutoff_date=$(date -d "-${EXPIRY-DAYS} days" --iso-8601=seconds)
+
+          echo "Fetching images with name containing 'gardenlinux-nvidia-installer'..."
+
+          PACKAGE_NAME=$(gh api orgs/gardenlinux/packages --method GET -F package_type=container --paginate -q '.[] | select(.name | contains("gardenlinux-nvidia-installer")) | .name')
+
+          for package in $PACKAGE_NAME; do
+            PACKAGE_ENCODED=$(jq -rn --arg v "$package" '$v|@uri')
+            echo "🔎 Checking versions older than $Cutoff_date for $package..."
+            VERSION_IDS=$(gh api "orgs/gardenlinux/packages/container/${PACKAGE_ENCODED}/versions" --paginate -q '.[] | select(.created_at < "'"$Cutoff_date"'") | .id')
+            if [ -z "$VERSION_IDS" ]; then
+              echo "No old versions found for $package"
+              continue
+            fi
+          done
