@@ -133,4 +133,11 @@ fi
 
 echo "Installing via APT: ${PKG}=${VER}"
 apt-get install -y -V "${PKG}=${VER}"
+
+echo "Installing nvlink
+
+dpkg -i /run/nvidia/driver/ucx/ucx_1.21.e5d9887_amd64.deb
+echo 'deb http://deb.debian.org/debian bookworm testing' > /etc/apt/sources.list.d/sources.list
+apt-get update
+
 apt-get install -y -V "${NVLINK_PKG}"
