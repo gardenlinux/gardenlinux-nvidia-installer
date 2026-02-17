@@ -21,7 +21,7 @@ mkdir -p /tmp/nvidia
 pushd /tmp/nvidia
 
 # Download Fabric Manager tarball
-wget -O /tmp/keyring.deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb && dpkg -i /tmp/keyring.deb
+wget -O /tmp/keyring.deb https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb && dpkg -i /tmp/keyring.deb
 
 #Allow sha1 to avoid error 
 
@@ -111,6 +111,8 @@ PKG1="nvidia-fabricmanager-${DRIVER_BRANCH}"
 PKG2="nvidia-fabricmanager"
 VER="${DRIVER_VERSION}-1"
 
+NVLINK_PKG="nvlink5_590"
+
 has_exact_ver() { apt-cache madison "$1" 2>/dev/null | awk '{print $3}' | grep -Fx "$2" >/dev/null 2>&1; }
 
 PKG=""
@@ -131,3 +133,4 @@ fi
 
 echo "Installing via APT: ${PKG}=${VER}"
 apt-get install -y -V "${PKG}=${VER}"
+apt-get install -y -V "${NVLINK_PKG}"
