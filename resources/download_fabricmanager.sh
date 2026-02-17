@@ -111,7 +111,7 @@ PKG1="nvidia-fabricmanager-${DRIVER_BRANCH}"
 PKG2="nvidia-fabricmanager"
 VER="${DRIVER_VERSION}-1"
 
-NVLINK_PKG="nvlink5_590"
+NVLINK_PKG="nvlink5-590"
 
 has_exact_ver() { apt-cache madison "$1" 2>/dev/null | awk '{print $3}' | grep -Fx "$2" >/dev/null 2>&1; }
 
