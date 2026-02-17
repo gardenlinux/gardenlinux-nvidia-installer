@@ -134,10 +134,19 @@ fi
 echo "Installing via APT: ${PKG}=${VER}"
 apt-get install -y -V "${PKG}=${VER}"
 
-echo "Installing nvlink
+echo "Installing nvlink"
 
 dpkg -i /run/nvidia/driver/ucx/ucx_1.21.e5d9887_amd64.deb
 echo 'deb http://deb.debian.org/debian bookworm testing' > /etc/apt/sources.list.d/sources.list
 apt-get update
+
+mkdir -p /usr/lib/python3/dist-packages/
+ln -sf /usr/lib/python3.13/venv /usr/lib/python3/dist-packages/venv
+
+ln -sf /usr/bin/python3.13 /usr/bin/python3
+
+# Create a fake package entry
+mkdir -p /var/lib/dpkg/info
+echo "python3.13-venv" | tee /var/lib/dpkg/info/python3-venv.list
 
 apt-get install -y -V "${NVLINK_PKG}"
