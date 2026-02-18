@@ -134,7 +134,7 @@ pushd /tmp/nvidia/ucx
 ./autogen.sh
 
 # Configure to generate all necessary files including version info
-./configure --prefix="$OUTDIR"/ucx/usr
+./configure --prefix="$OUTDIR"/usr
 
 dpkg-buildpackage -us -uc
 

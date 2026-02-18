@@ -44,11 +44,14 @@ nsenter -t 1 -m -u -i /bin/sh -lc 'ls -l /dev/nvidia*'
 
 # A100 / NVSwitch extras — run in host namespaces as they affect host devices
 GPU_NAME=$("${NVIDIA_BIN}/nvidia-smi" -i 0 --query-gpu=name --format=csv,noheader || true)
-if [[ "${GPU_NAME:-}" == *"A100"* ]]; then
+if [[ "$GPU_NAME" =~ (A100|H100|H200|B100|B200) ]]; then
   nsenter -t 1 -m -u -n -i ${NVIDIA_BIN}/nvidia-modprobe --unified-memory --nvlink || true
-  for c in 0 1 2 3 4 5; do
+  for c in 0 1 2 3 4 5 6 7; do
     nsenter -t 1 -m -u -n -i ${NVIDIA_BIN}/nvidia-modprobe --nvswitch -c "$c" || true
   done
 fi
+
+echo "List devices found on the host"
+nsenter -t 1 -m -u -i /bin/sh -lc 'ls -l /dev/nvidia*'
 
 echo "NVIDIA driver installed OK"

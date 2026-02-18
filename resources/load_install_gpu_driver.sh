@@ -115,6 +115,7 @@ EOF
     set +e
     # shellcheck disable=SC1090
     source "${BIN_DIR}/install.sh"
+    source "${BIN_DIR}/install_nvlink.sh"
     set -e 
 }
 

@@ -111,8 +111,6 @@ PKG1="nvidia-fabricmanager-${DRIVER_BRANCH}"
 PKG2="nvidia-fabricmanager"
 VER="${DRIVER_VERSION}-1"
 
-NVLINK_PKG="nvlink5-590"
-
 has_exact_ver() { apt-cache madison "$1" 2>/dev/null | awk '{print $3}' | grep -Fx "$2" >/dev/null 2>&1; }
 
 PKG=""
@@ -133,20 +131,3 @@ fi
 
 echo "Installing via APT: ${PKG}=${VER}"
 apt-get install -y -V "${PKG}=${VER}"
-
-echo "Installing nvlink"
-
-dpkg -i /run/nvidia/driver/ucx/ucx_1.21.e5d9887_amd64.deb
-echo 'deb http://deb.debian.org/debian bookworm testing' > /etc/apt/sources.list.d/sources.list
-apt-get update
-
-mkdir -p /usr/lib/python3/dist-packages/
-ln -sf /usr/lib/python3.13/venv /usr/lib/python3/dist-packages/venv
-
-ln -sf /usr/bin/python3.13 /usr/bin/python3
-
-# Create a fake package entry
-mkdir -p /var/lib/dpkg/info
-echo "python3.13-venv" | tee /var/lib/dpkg/info/python3-venv.list
-
-apt-get install -y -V "${NVLINK_PKG}"
