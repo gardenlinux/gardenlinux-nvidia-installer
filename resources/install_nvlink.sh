@@ -9,7 +9,7 @@ NVLINK_PKG="nvlink5-590"
 
 echo "Installing nvlink"
 
-dpkg -i /run/nvidia/driver/ucx/ucx_1.21.e5d9887_amd64.deb
+dpkg -i /run/nvidia/driver/ucx/ucx*.deb
 echo 'deb http://deb.debian.org/debian bookworm testing' > /etc/apt/sources.list.d/sources.list
 apt-get update
 

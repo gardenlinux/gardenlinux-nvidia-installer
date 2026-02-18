@@ -139,7 +139,7 @@ pushd /tmp/nvidia/ucx
 dpkg-buildpackage -us -uc
 
 pushd /tmp/nvidia
-mv ucx_1.21.e5d9887_amd64.deb "$OUTDIR"/ucx/
+mv ucx*.deb "$OUTDIR"/ucx/
 
 # shellcheck disable=SC2046
 tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_TYPE-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
