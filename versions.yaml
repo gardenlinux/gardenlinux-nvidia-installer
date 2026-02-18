@@ -1,27 +1,12 @@
 os_versions:
-- name: '1592'
-  version: '1592.16'
-  kernel_flavour:
-  - cloud
-  - metal
-  kernel_type:
-  - open
-  - proprietary
-  cpu_arch:
-  - amd64
-  nvidia_drivers:
-  - 590.48.01
-  - 580.126.16
 - name: '1877'
-  version: '1877.11'
+  version: '1877.10'
   kernel_flavour:
   - cloud
   - metal
   kernel_type:
   - open
-  - proprietary
   cpu_arch:
   - amd64
   nvidia_drivers:
   - 590.48.01
-  - 580.126.16
