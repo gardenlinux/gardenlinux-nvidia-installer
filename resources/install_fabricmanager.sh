@@ -14,7 +14,7 @@ GPU_NAME=$("${NVIDIA_ROOT}"/bin/nvidia-smi -i 0 --query-gpu=name --format=csv,no
 
 # Typical GPU name is something like "NVIDIA H100 80GB HBM3"
 # Fabric manager is required by the newer, bigger GPUs like A100, H100, etc. so we match those GPU types here
-if [[ "$GPU_NAME" =~ (A100|H100|H200|B100|B200) ]]; then
+if [[ "$GPU_NAME" =~ A100|H100|H200|B100|B200 ]]; then
   sed 's/DAEMONIZE=1/DAEMONIZE=0/g' "/usr/share/nvidia/nvswitch/fabricmanager.cfg" > /etc/fabricmanager.cfg
   sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
 
