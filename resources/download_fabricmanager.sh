@@ -132,4 +132,6 @@ fi
 echo "Installing via APT: ${PKG}=${VER}"
 apt-get install -y -V "${PKG}=${VER}"
 apt-get install -y -V nvlsm
+#TODO add GL apt source here
+echo 'deb http://deb.debian.org/debian trixie main' > /etc/apt/sources.list.d/sources.list
 apt-get install -y -V infiniband-diags
