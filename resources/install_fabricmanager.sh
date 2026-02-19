@@ -18,7 +18,7 @@ sed 's/DAEMONIZE=1/DAEMONIZE=0/g' "/usr/share/nvidia/nvswitch/fabricmanager.cfg"
 sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
 
 # Run Fabric Manager
-nv-fabricmanager -c /etc/fabricmanager.cfg
+/usr/bin/nvidia-fabricmanager-start.sh --mode start --fm-config-file /etc/fabricmanager.cfg
 echo "Fabric manager running"
 echo "Sleep infinity"
 sleep infinity

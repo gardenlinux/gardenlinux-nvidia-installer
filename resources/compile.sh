@@ -120,26 +120,5 @@ cp -a /usr/bin/nvidia* "$OUTDIR"/usr/bin
 # We don't need the installer binaries, or the icons/desktop files in /share
 rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
 
-#Install ucx
-mkdir -p "$OUTDIR"/ucx
-mkdir -p "$OUTDIR"/ucx/usr
-
-apt install -y libibverbs-dev librdmacm-dev pkg-config
-
-pushd /tmp/nvidia
-git clone https://github.com/openucx/ucx.git
-pushd /tmp/nvidia/ucx
-
-# Run autogen to process templates
-./autogen.sh
-
-# Configure to generate all necessary files including version info
-./configure --prefix="$OUTDIR"/usr
-
-dpkg-buildpackage -us -uc
-
-pushd /tmp/nvidia
-mv ucx*.deb "$OUTDIR"/ucx/
-
 # shellcheck disable=SC2046
 tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_TYPE-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
