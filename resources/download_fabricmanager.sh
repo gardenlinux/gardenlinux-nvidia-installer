@@ -91,6 +91,9 @@ sha1 = "always"' | tee /etc/crypto-policies/back-ends/apt-sequoia.config
 
 
 
+#TODO add GL apt source here . this is required for infiniband-diags
+echo 'deb http://deb.debian.org/debian trixie main' > /etc/apt/sources.list.d/sources.list
+
 apt-get update 
 
 # As of Aug 27 2025 the 580 version of fabricmanager changed the nameing format
@@ -132,6 +135,4 @@ fi
 echo "Installing via APT: ${PKG}=${VER}"
 apt-get install -y -V "${PKG}=${VER}"
 apt-get install -y -V nvlsm
-#TODO add GL apt source here
-echo 'deb http://deb.debian.org/debian trixie main' > /etc/apt/sources.list.d/sources.list
 apt-get install -y -V infiniband-diags
