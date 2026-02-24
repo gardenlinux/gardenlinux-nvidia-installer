@@ -14,6 +14,7 @@ echo "$error_out" | grep -v 'depmod: WARNING:'
 echo -n "/run/nvidia/driver/lib/firmware" > /sys/module/firmware_class/parameters/path
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia
 modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm
+modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-peermem
 
 # Ensure device nodes exist on the host (idempotent, preferred over manual mknod)
 # -u: create /dev/nvidia-uvm

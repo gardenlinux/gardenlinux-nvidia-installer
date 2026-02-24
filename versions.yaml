@@ -5,7 +5,7 @@ os_versions:
   - cloud
   - metal
   kernel_type:
-  - open
+  - proprietary
   cpu_arch:
   - amd64
   nvidia_drivers:
