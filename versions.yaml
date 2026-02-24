@@ -11,7 +11,7 @@ os_versions:
   - amd64
   nvidia_drivers:
   - 590.48.01
-  - 580.126.16
+  - 580.126.20
 - name: '1877'
   version: '1877.13'
   kernel_flavour:
@@ -24,4 +24,4 @@ os_versions:
   - amd64
   nvidia_drivers:
   - 590.48.01
-  - 580.126.16
+  - 580.126.20
