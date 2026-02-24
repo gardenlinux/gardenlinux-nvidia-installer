@@ -1,6 +1,6 @@
 os_versions:
 - name: '1877'
-  version: '1877.10'
+  version: '1877.13'
   kernel_flavour:
   - cloud
   - metal
