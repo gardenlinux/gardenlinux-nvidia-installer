@@ -5,17 +5,16 @@ Running the image in a cluster via the NVIDIA GPU Operator installs the GPU driv
 
 ## Deploying NVIDIA GPU Operator with Helm (Garden Linux versions >=1877.6 and >=1592.15)
 
-### Proprietary Kernel Module
-```bash
-helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
-  https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml 
-```
-
 ### Open Kernel Module
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
-  https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml \
-  --set driver.repository=ghcr.io/gardenlinux/gardenlinux-nvidia-installer/open
+  https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml
+```
+
+### Proprietary Kernel Module
+```bash
+helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values \
+  https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml --set driver.repository=ghcr.io/gardenlinux/gardenlinux-nvidia-installer/proprietary
 ```
 
 Built images are maintained at ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<kernel_type>/driver:<driver_major_version>-<kernel_version>-gardenlinux0

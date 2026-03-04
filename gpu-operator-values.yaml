@@ -1,0 +1,23 @@
+cdi:
+  enabled: true
+  default: true
+toolkit:
+  installDir: /opt/nvidia
+driver:
+  imagePullPolicy: Always
+  usePrecompiled: true
+  version: 590
+  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/open
+node-feature-discovery:
+  worker:
+    config:
+      sources:
+        custom:
+          - name: "gardenlinux-version"
+            labelsTemplate: |
+              {{ range .system.osrelease }}feature.node.kubernetes.io/system-os_release.VERSION_ID=0
+              {{ end }}
+            matchFeatures:
+              - feature: system.osrelease
+                matchExpressions:
+                  GARDENLINUX_VERSION: {op: Exists}
