@@ -132,4 +132,3 @@ fi
 echo "Installing via APT: ${PKG}=${VER}"
 apt-get install -y -V "${PKG}=${VER}"
 apt-get install -y -V nvlsm
-apt-get install -y -V infiniband-diags
