@@ -48,18 +48,21 @@ def get_latest_gl_tag(data):
         return []
 
     tags = [tag['name'] for tag in response.json()]
-    number_tags = [tag for tag in tags if re.fullmatch(r'\d+\.\d+', tag)]
+    number_tags = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
 
     # Get major version from version.yml
     for elements in data.get('os_versions', []):
-        gl_major, gl_minor = elements['version'].split('.')
         for tag in number_tags:
-            gl_major, gl_minor = elements['version'].split('.')
-            major, minor = tag.split('.')
+            gl_major, gl_minor, *gl_patch = elements['version'].split('.')
+            major, minor, *patch = tag.split('.')
             if(int(major) == int(gl_major)):
                 if(int(minor) > int(gl_minor)):
                     elements['version'] = tag
                     print(f"GL Version update : {tag}")
+                elif(gl_patch and patch):
+                    if((int(minor) == int(gl_minor)) & (int(patch[0]) > int(gl_patch[0]))): 
+                        elements['version'] = tag
+                        print(f"GL Version update : {tag}")
 
 def main():
     update_versions()

@@ -25,3 +25,16 @@ os_versions:
   nvidia_drivers:
   - 590.48.01
   - 580.126.20
+- name: '2150'
+  version: 2150.0.0
+  kernel_flavour:
+  - cloud
+  - metal
+  kernel_type:
+  - open
+  - proprietary
+  cpu_arch:
+  - amd64
+  nvidia_drivers:
+  - 590.48.01
+  - 580.126.20
