@@ -21,6 +21,7 @@ if [[ "$GPU_NAME" =~ (A100|H100|H200|B100) ]]; then
   # Run Fabric Manager
   nv-fabricmanager -c /etc/fabricmanager.cfg
   echo "Fabric manager running"
+# For Blackwell architecture NVlink needs to be activated. nvidia-fabricmanager-start.sh starts NVLink 
 elif [[ "$GPU_NAME" =~ B200 ]]; then
   sed 's/DAEMONIZE=1/DAEMONIZE=0/g' "/usr/share/nvidia/nvswitch/fabricmanager.cfg" > /etc/fabricmanager.cfg
   sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
