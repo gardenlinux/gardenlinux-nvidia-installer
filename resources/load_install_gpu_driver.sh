@@ -135,8 +135,7 @@ download_driver_tarball() {
     local kernel_name="${kernel_release}"
 
     local tarball_name="driver-${DRIVER_VERSION}-${KERNEL_MODULE_TYPE}-${kernel_name}.tar.gz"
-    local release_tag="driver-${DRIVER_VERSION}"
-    local url="${TARBALL_BASE_URL}/${release_tag}/${tarball_name}"
+    local url="${TARBALL_BASE_URL}/${RELEASE_TAG}/${tarball_name}"
 
     local tmp_dir
     tmp_dir=$(mktemp -d)
@@ -145,7 +144,7 @@ download_driver_tarball() {
     echo "[INFO] Downloading driver tarball: ${url}"
     if ! wget -q --show-progress -O "${DRIVER_TARBALL_PATH}" "${url}"; then
         echo "[ERROR] Failed to download driver tarball from: ${url}"
-        echo "        Ensure a GitHub Release named '${release_tag}' exists with asset '${tarball_name}'."
+        echo "        Ensure a GitHub Release named '${RELEASE_TAG}' exists with asset '${tarball_name}'."
         exit 1
     fi
 

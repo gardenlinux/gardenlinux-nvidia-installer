@@ -68,6 +68,7 @@ jobs:
           TAG=$(make build-image \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
+          RELEASE_TAG=${{ github.ref_name }} \
           IMAGE_PATH=${IMAGE_PATH})
 
           TAG1=$(echo "$TAG" | sed -n 1p)

@@ -15,6 +15,10 @@ ifndef DRIVER_VERSION
 $(error DRIVER_VERSION is not set. Please set it before running make.)
 endif
 
+ifndef RELEASE_TAG
+$(error RELEASE_TAG is not set. Please set it before running make.)
+endif
+
 extract-kernel-name:
 	$(eval KERNEL_NAME := $(shell docker run --rm \
            -v "$(PWD):/workspace" \
@@ -56,6 +60,7 @@ build-image:
 	@DOCKER_BUILDKIT=1 docker build \
            --build-arg GL_VERSION=$(GL_VERSION) \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
+           --build-arg RELEASE_TAG=$(RELEASE_TAG) \
            --build-arg TARGET_ARCH=$(TARGET_ARCH) \
            --platform=linux/${TARGET_ARCH} \
            -t $(IMAGE_PATH):$(TAG1) \

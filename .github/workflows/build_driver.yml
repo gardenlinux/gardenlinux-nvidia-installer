@@ -50,17 +50,20 @@ jobs:
              TARGET_ARCH=$TARGET_ARCH \
              GL_VERSION=$GL_VERSION \
              DRIVER_VERSION=$DRIVER_VERSION \
-             KERNEL_TYPE=$KERNEL_TYPE
+             KERNEL_TYPE=$KERNEL_TYPE \
+             RELEASE_TAG=${{ github.ref_name }}
 
       - name: Publish tarball to GitHub Release
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # On a tag build github.ref_name is the tag (e.g. "v1.2.3").
+          # On a branch build it is the branch name (e.g. "main").
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          RELEASE_TAG="driver-${DRIVER_VERSION}"
           # Create the release if it does not yet exist; ignore error if it already does.
           gh release create "${RELEASE_TAG}" \
-            --title "Driver ${DRIVER_VERSION}" \
+            --title "${RELEASE_TAG}" \
             --notes "Pre-compiled kernel module tarballs for NVIDIA driver ${DRIVER_VERSION}" \
             --repo "${{ github.repository }}" \
             2>/dev/null || true

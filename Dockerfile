@@ -4,6 +4,7 @@ ARG GL_VERSION
 FROM ghcr.io/gardenlinux/gardenlinux:${GL_VERSION} AS packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
+ARG RELEASE_TAG
 
 COPY resources/* /opt/nvidia-installer/
 
@@ -26,6 +27,7 @@ RUN rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x
          /usr/bin/chfn /usr/bin/gpasswd
 
 RUN echo "${DRIVER_VERSION}" > /tmp/driver-version
+RUN echo "${RELEASE_TAG}" > /tmp/release-tag
 
 RUN mkdir -p /rootfs \
         && cp -ar /bin /boot /etc /home /lib /lib64 /media /mnt /opt /root /run /sbin /srv /tmp /usr /var /rootfs \

@@ -5,6 +5,7 @@ export DRIVER_NAME=driver
 # Look for a file <driver version>.tar.gz and remove the .tar.gz to get the driver version
 # shellcheck disable=SC2155,SC2012
 export DRIVER_VERSION=$(cat /tmp/driver-version)
+export RELEASE_TAG=$(cat /tmp/release-tag)
 export NVIDIA_ROOT="${INSTALL_DIR}/${DRIVER_NAME}"
 export LD_LIBRARY_PATH="${NVIDIA_ROOT}/lib:${NVIDIA_ROOT}/usr/lib/x86_64-linux-gnu"
 
