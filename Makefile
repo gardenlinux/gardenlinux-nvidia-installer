@@ -57,11 +57,13 @@ endif
 # build-image produces one image per (GL_VERSION, DRIVER_VERSION, KERNEL_FLAVOR, TARGET_ARCH).
 # KERNEL_NAME is extracted at build time via extract-kernel-name so that the image tag
 # encodes the exact kernel version the installer targets.
+# KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
+# append KERNEL_FLAVOR or TARGET_ARCH separately.
 # The correct tarball is downloaded at container runtime based on uname -r and KERNEL_MODULE_TYPE.
 build-image: extract-kernel-name
-	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-$(KERNEL_FLAVOR)-$(TARGET_ARCH)-gardenlinux0")
-	$(eval TAG2 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-$(KERNEL_FLAVOR)-gardenlinux0")
-	$(eval TAG3 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-$(KERNEL_FLAVOR)-gardenlinux0")
+	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
+	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
+	$(eval TAG3 := "$(DRIVER_MAJOR_VERS)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
            --build-arg GL_VERSION=$(GL_VERSION) \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
