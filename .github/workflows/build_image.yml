@@ -2,6 +2,7 @@ name: Build and Publish Container Images (matrix)
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
