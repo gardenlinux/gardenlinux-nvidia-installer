@@ -7,6 +7,10 @@ export DRIVER_NAME=driver
 export DRIVER_VERSION=$(cat /tmp/driver-version)
 # shellcheck disable=SC2155,SC2012
 export RELEASE_TAG=$(cat /tmp/release-tag)
+if [[ -z "$RELEASE_TAG" ]]; then
+  echo "ERROR: RELEASE_TAG not set (check /tmp/release-tag was written during image build)" >&2
+  exit 1
+fi
 export NVIDIA_ROOT="${INSTALL_DIR}/${DRIVER_NAME}"
 export LD_LIBRARY_PATH="${NVIDIA_ROOT}/lib:${NVIDIA_ROOT}/usr/lib/x86_64-linux-gnu"
 
