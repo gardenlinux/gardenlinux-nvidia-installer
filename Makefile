@@ -15,9 +15,7 @@ ifndef DRIVER_VERSION
 $(error DRIVER_VERSION is not set. Please set it before running make.)
 endif
 
-ifndef RELEASE_TAG
-$(error RELEASE_TAG is not set. Please set it before running make.)
-endif
+RELEASE_TAG ?= development
 
 # If KERNEL_NAME is already set (e.g. passed by CI after a separate extract step),
 # extract-kernel-name is a no-op. Otherwise it runs the kmodbuild container to determine it.
