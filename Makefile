@@ -19,12 +19,16 @@ ifndef RELEASE_TAG
 $(error RELEASE_TAG is not set. Please set it before running make.)
 endif
 
+# If KERNEL_NAME is already set (e.g. passed by CI after a separate extract step),
+# extract-kernel-name is a no-op. Otherwise it runs the kmodbuild container to determine it.
 extract-kernel-name:
+ifeq ($(KERNEL_NAME),)
 	$(eval KERNEL_NAME := $(shell docker run --rm \
            -v "$(PWD):/workspace" \
            -w /workspace \
            ghcr.io/gardenlinux/gardenlinux/kmodbuild:$(TARGET_ARCH)-$(GL_VERSION) \
            ./resources/extract_kernel_name.sh "$(KERNEL_FLAVOR)"))
+endif
 
 # build-driver compiles both open and proprietary kernel module tarballs.
 # KERNEL_TYPE is required by compile.sh and must be supplied per-invocation.
@@ -50,13 +54,14 @@ endif
 			   bash ./resources/compile.sh ;\
 	fi
 
-# build-image produces a single image per (GL_VERSION, DRIVER_VERSION).
-# No KERNEL_NAME or KERNEL_TYPE is needed — the correct tarball is downloaded
-# at container runtime based on uname -r and KERNEL_MODULE_TYPE.
-build-image:
-	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(TARGET_ARCH)-gardenlinux$(GL_VERSION)")
-	$(eval TAG2 := "$(DRIVER_MAJOR_VERS)-gardenlinux0")
-	$(eval TAG3 := "$(DRIVER_VERSION)-gardenlinux0")
+# build-image produces one image per (GL_VERSION, DRIVER_VERSION, KERNEL_FLAVOR, TARGET_ARCH).
+# KERNEL_NAME is extracted at build time via extract-kernel-name so that the image tag
+# encodes the exact kernel version the installer targets.
+# The correct tarball is downloaded at container runtime based on uname -r and KERNEL_MODULE_TYPE.
+build-image: extract-kernel-name
+	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-$(KERNEL_FLAVOR)-$(TARGET_ARCH)-gardenlinux0")
+	$(eval TAG2 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-$(KERNEL_FLAVOR)-gardenlinux0")
+	$(eval TAG3 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-$(KERNEL_FLAVOR)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
            --build-arg GL_VERSION=$(GL_VERSION) \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
