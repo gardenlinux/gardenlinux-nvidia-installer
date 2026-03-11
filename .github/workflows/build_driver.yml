@@ -64,7 +64,7 @@ jobs:
           # Create the release if it does not yet exist; ignore error if it already does.
           gh release create "${RELEASE_TAG}" \
             --title "${RELEASE_TAG}" \
-            --notes "Pre-compiled kernel module tarballs for NVIDIA driver ${DRIVER_VERSION}" \
+            --notes "Pre-compiled kernel module tarballs and container images for NVIDIA drivers on Garden Linux" \
             --repo "${{ github.repository }}" \
             2>/dev/null || true
           # Upload every tarball produced for this matrix cell (may be one file).
