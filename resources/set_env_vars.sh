@@ -16,3 +16,8 @@ else
   ARCH_TYPE=${arch_translation[$TARGET_ARCH]}
 fi
 export ARCH_TYPE
+
+# Base URL for downloading pre-compiled driver tarballs from GitHub Releases.
+# Tarballs are named: driver-<DRIVER_VERSION>-<KERNEL_TYPE>-<KERNEL_NAME>.tar.gz
+# Override this variable to point at an alternative mirror or internal cache.
+export TARBALL_BASE_URL=${TARBALL_BASE_URL:-https://github.com/gardenlinux/gardenlinux-nvidia-installer/releases/download}

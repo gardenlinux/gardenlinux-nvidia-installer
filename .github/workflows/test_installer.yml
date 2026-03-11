@@ -54,7 +54,7 @@ jobs:
         run: |
           helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
           helm repo update
-          helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values helm/gpu-operator-values.yaml --set driver.repository=ghcr.io/gardenlinux/gardenlinux-nvidia-installer/open
+          helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator --values helm/gpu-operator-values.yaml
 
       - name: Wait until all the pods are up and running
         run: |
