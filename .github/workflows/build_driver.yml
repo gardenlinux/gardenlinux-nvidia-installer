@@ -2,6 +2,10 @@ name: Build Drivers (non-container artifacts)
 
 on:
   workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   generate-matrix:
@@ -46,14 +50,29 @@ jobs:
              TARGET_ARCH=$TARGET_ARCH \
              GL_VERSION=$GL_VERSION \
              DRIVER_VERSION=$DRIVER_VERSION \
-             KERNEL_TYPE=$KERNEL_TYPE
+             KERNEL_TYPE=$KERNEL_TYPE \
+             RELEASE_TAG=${{ github.ref_name }}
 
-      - name: Upload built driver
-        uses: actions/upload-artifact@v4
+      - name: Publish tarball to GitHub Release
         if: github.event_name != 'pull_request'
-        with:
-          name: driver-${{ matrix.os_version }}-${{ matrix.arch }}-${{ matrix.kernel_flavour }}-${{ matrix.kernel_type }}-${{ matrix.driver_version }}
-          path: ${{ github.workspace }}/out/nvidia/driver-${{ matrix.driver_version }}-${{ matrix.kernel_type }}-*.tar.gz
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # On a tag build github.ref_name is the tag (e.g. "v1.2.3").
+          # On a branch build it is the branch name (e.g. "main").
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          # Create the release if it does not yet exist; ignore error if it already does.
+          gh release create "${RELEASE_TAG}" \
+            --title "${RELEASE_TAG}" \
+            --notes "Pre-compiled kernel module tarballs and container images for NVIDIA drivers on Garden Linux" \
+            --repo "${{ github.repository }}" \
+            2>/dev/null || true
+          # Upload every tarball produced for this matrix cell (may be one file).
+          for tarball in ${{ github.workspace }}/out/nvidia/driver-${DRIVER_VERSION}-${KERNEL_TYPE}-*.tar.gz; do
+            gh release upload "${RELEASE_TAG}" "${tarball}" \
+              --clobber \
+              --repo "${{ github.repository }}"
+          done
 
   check-complete:
     name: Pull Request Check

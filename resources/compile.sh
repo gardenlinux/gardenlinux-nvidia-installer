@@ -35,8 +35,10 @@ ARCH_TYPE=${arch_translation[$TARGET_ARCH]}
 # shellcheck disable=SC2164
 pushd /tmp/nvidia
 DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
-if ! curl -Ls "${DRIVER_URL}" -o nvidia.run ; then
-  echo "Failed to download ${DRIVER_URL}"
+curl -Ls "${DRIVER_URL}" -o nvidia.run
+CURL_EXIT=$?
+if [ $CURL_EXIT -ne 0 ]; then
+  echo "Failed to download ${DRIVER_URL} (curl exit code: ${CURL_EXIT})"
   exit 1
 fi
 chmod +x nvidia.run
