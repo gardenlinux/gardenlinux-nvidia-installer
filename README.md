@@ -1,6 +1,8 @@
 # nvidia-installer
 
-This component installs NVIDIA kernel modules on Garden Linux nodes at runtime via the NVIDIA GPU Operator. Pre-compiled kernel module tarballs are downloaded from GitHub Releases when the container starts — nothing is baked into the image at build time.
+This component installs NVIDIA kernel modules on Garden Linux nodes at runtime via the NVIDIA GPU Operator. Pre-compiled
+kernel module tarballs are downloaded from GitHub Releases when the container starts — nothing is baked into the image
+at build time.
 
 ## Deploying NVIDIA GPU Operator with Helm
 
@@ -30,20 +32,22 @@ helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
 
 Two artifacts are produced independently:
 
-1. **Driver tarballs** — pre-compiled kernel module archives, one per `(driver version, kernel type, kernel version)`. Published to GitHub Releases and downloaded by the container at runtime.
-2. **Container image** — a thin installer image that downloads the appropriate tarball at startup and installs it on the host.
+1. **Driver tarballs** — pre-compiled kernel module archives, one per `(driver version, kernel type, kernel version)`.
+   Published to GitHub Releases and downloaded by the container at runtime.
+2. **Container image** — a thin installer image that downloads the appropriate tarball at startup and installs it on the
+   host.
 
 Both are built with `make`. The required variables are:
 
-| Variable | Description | Default |
-|---|---|---|
-| `GL_VERSION` | Garden Linux version (e.g. `1877.13`) | *(required)* |
-| `DRIVER_VERSION` | Full NVIDIA driver version (e.g. `590.48.01`) | *(required)* |
-| `KERNEL_FLAVOR` | Kernel flavour: `cloud` or `metal` | `cloud` |
-| `TARGET_ARCH` | CPU architecture: `amd64` or `arm64` | `amd64` |
-| `KERNEL_TYPE` | Module type: `open` or `proprietary` | *(required for `build-driver`)* |
-| `RELEASE_TAG` | GitHub Release tag tarballs are fetched from at runtime | `development` |
-| `IMAGE_PATH` | Registry path for the container image | `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver` |
+| Variable         | Description                                             | Default                                                   |
+|------------------|---------------------------------------------------------|-----------------------------------------------------------|
+| `GL_VERSION`     | Garden Linux version (e.g. `1877.13`)                   | *(required)*                                              |
+| `DRIVER_VERSION` | Full NVIDIA driver version (e.g. `590.48.01`)           | *(required)*                                              |
+| `KERNEL_FLAVOR`  | Kernel flavour: `cloud` or `metal`                      | `cloud`                                                   |
+| `TARGET_ARCH`    | CPU architecture: `amd64` or `arm64`                    | `amd64`                                                   |
+| `KERNEL_TYPE`    | Module type: `open` or `proprietary`                    | *(required for `build-driver`)*                           |
+| `RELEASE_TAG`    | GitHub Release tag tarballs are fetched from at runtime | `development`                                             |
+| `IMAGE_PATH`     | Registry path for the container image                   | `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver` |
 
 ### Build a driver tarball
 
@@ -92,7 +96,8 @@ To push the image, `docker push` each tag printed by `make build-image`.
 
 #### Runtime tarball download
 
-The `RELEASE_TAG` build argument is baked into the image at build time. At runtime, the container uses it to download the matching tarball from:
+The `RELEASE_TAG` build argument is baked into the image at build time. At runtime, the container uses it to download
+the matching tarball from:
 
 ```
 https://github.com/gardenlinux/gardenlinux-nvidia-installer/releases/download/<RELEASE_TAG>/driver-<DRIVER_VERSION>-<KERNEL_TYPE>-<KERNEL_NAME>.tar.gz
@@ -104,7 +109,8 @@ When building locally, `RELEASE_TAG` defaults to `development`. To test against 
 make build-image GL_VERSION=1877.13 DRIVER_VERSION=590.48.01 RELEASE_TAG=v1.2.3
 ```
 
-To point the container at an alternative tarball mirror at runtime, set the `TARBALL_BASE_URL` environment variable when deploying.
+To point the container at an alternative tarball mirror at runtime, set the `TARBALL_BASE_URL` environment variable when
+deploying.
 
 ### Build both tarball and image in one step
 
@@ -119,13 +125,21 @@ make build
 
 The `KERNEL_MODULE_TYPE` environment variable controls which pre-compiled tarball the container downloads:
 
-| Value | Behaviour |
-|---|---|
-| `auto` *(default)* | Open modules for driver >= 560, proprietary for older |
-| `open` | Always use open kernel modules |
-| `proprietary` | Always use proprietary kernel modules |
+| Value              | Behaviour                                       |
+|--------------------|-------------------------------------------------|
+| `auto` *(default)* | Detects the correct type at runtime (see below) |
+| `open`             | Always use open kernel modules                  |
+| `proprietary`      | Always use proprietary kernel modules           |
 
-Set it as a container environment variable when deploying via the GPU Operator.
+In `auto` mode the container picks the module type based on two checks:
+
+1. **Driver version** — driver branches older than 560 ship proprietary modules only.
+2. **GPU architecture** — NVIDIA open kernel modules require Turing (2018) or newer. GPUs from the Maxwell (e.g. M40),
+   Pascal (e.g. P100), or Volta (e.g. V100) architectures are only supported by the proprietary modules. The container
+   detects this at runtime by reading PCI device IDs from the host.
+
+Set `KERNEL_MODULE_TYPE` explicitly as a container environment variable when deploying via the GPU Operator to override
+the auto-detection.
 
 ## Supported versions
 
@@ -145,15 +159,20 @@ OS 2150.0.0: 590.48.01, 580.126.20
 
 ## Driver lifecycle
 
-This project tracks the **two** most recent NVIDIA driver major versions. Minor driver releases and Garden Linux version updates are applied automatically via CI; major driver version bumps are handled manually.
+This project tracks the **two** most recent NVIDIA driver major versions. Minor driver releases and Garden Linux version
+updates are applied automatically via CI; major driver version bumps are handled manually.
 
 - **Garden Linux versions** are tracked from https://github.com/gardenlinux/gardenlinux/releases
 - **NVIDIA driver versions** are tracked from https://www.nvidia.com/en-us/drivers/
 
 ## Background
 
-Garden Linux ships without build tools and without accessible kernel sources on the running node. This project solves that by compiling kernel modules at image-build time inside the Garden Linux `kmodbuild` developer container (which contains the correct kernel headers and compiler toolchain). The compiled modules are packaged into tarballs, published to GitHub Releases, and downloaded by the installer container at runtime immediately before installation.
+Garden Linux ships without build tools and without accessible kernel sources on the running node. This project solves
+that by compiling kernel modules at image-build time inside the Garden Linux `kmodbuild` developer container (which
+contains the correct kernel headers and compiler toolchain). The compiled modules are packaged into tarballs, published
+to GitHub Releases, and downloaded by the installer container at runtime immediately before installation.
 
 ## Disclaimer
 
-Drivers built with this project are only supported on Garden Linux. Only data center (non-consumer) graphics cards are supported.
+Drivers built with this project are only supported on Garden Linux. Only data center (non-consumer) graphics cards are
+supported.

@@ -102,16 +102,30 @@ resolve_kernel_module_type() {
             KERNEL_MODULE_TYPE="${requested}"
             ;;
         auto)
-            # Derive the recommended type from the driver version major number.
-            # NVIDIA recommends open modules for driver branches >= 560.
+            # Derive the recommended type from the driver version major number and the
+            # GPU architecture present on the host.
+            #
+            # NVIDIA open kernel modules require Turing (2018) or newer GPU architecture.
+            # Pre-Turing architectures — Maxwell (M40), Pascal (P100), Volta (V100) — are
+            # only supported by the proprietary modules, regardless of driver version.
+            #
+            # GPU architecture is identified by PCI device ID: Turing and later GPUs have
+            # device IDs >= 0x1E00; Maxwell/Pascal/Volta have device IDs < 0x1E00.
             local driver_major
             driver_major=$(echo "${DRIVER_VERSION}" | cut -d. -f1)
-            if [ "${driver_major}" -ge 560 ]; then
-                KERNEL_MODULE_TYPE="open"
-            else
+
+            if [ "${driver_major}" -lt 560 ]; then
+                # Driver branches older than 560 ship proprietary modules only.
                 KERNEL_MODULE_TYPE="proprietary"
+                echo "[INFO] KERNEL_MODULE_TYPE=auto resolved to 'proprietary' (driver branch ${driver_major} predates open-module support)"
+            elif _has_pre_turing_gpu; then
+                # Open modules do not support Maxwell, Pascal, or Volta GPUs.
+                KERNEL_MODULE_TYPE="proprietary"
+                echo "[INFO] KERNEL_MODULE_TYPE=auto resolved to 'proprietary' (pre-Turing GPU detected)"
+            else
+                KERNEL_MODULE_TYPE="open"
+                echo "[INFO] KERNEL_MODULE_TYPE=auto resolved to 'open' (driver branch ${driver_major}, Turing or newer GPU)"
             fi
-            echo "[INFO] KERNEL_MODULE_TYPE=auto resolved to '${KERNEL_MODULE_TYPE}' (driver branch ${driver_major})"
             ;;
         *)
             echo "[ERROR] KERNEL_MODULE_TYPE has invalid value '${requested}'. Must be 'open', 'proprietary', or 'auto'."
@@ -121,6 +135,27 @@ resolve_kernel_module_type() {
 
     echo "[INFO] Kernel module type: ${KERNEL_MODULE_TYPE}"
     export KERNEL_MODULE_TYPE
+}
+
+
+# Returns 0 (true) if any NVIDIA GPU on the host has a PCI device ID below 0x1E00,
+# which indicates a pre-Turing architecture (Maxwell, Pascal, or Volta).
+# Turing (TU102+) and all newer architectures start at device ID 0x1E00.
+# lspci is called via nsenter so it reads the host PCI bus, not the container's view.
+_has_pre_turing_gpu() {
+    local dev_id
+    # List NVIDIA GPUs (vendor 10de, PCI class 0300 VGA or 0302 3D controller).
+    # -d 10de: selects NVIDIA vendor; -n prints numeric IDs; awk extracts the device ID field.
+    while IFS= read -r dev_id; do
+        # dev_id is a 4-digit hex string, e.g. "1db1". Compare numerically against 0x1E00.
+        if [ $(( 16#${dev_id} )) -lt $(( 16#1E00 )) ]; then
+            return 0
+        fi
+    done < <(nsenter -t 1 -m -u -n -i -- \
+        lspci -d 10de: -n 2>/dev/null \
+        | awk '{ print $3 }' \
+        | cut -d: -f2)
+    return 1
 }
 
 
