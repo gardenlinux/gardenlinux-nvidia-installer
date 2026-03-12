@@ -121,12 +121,13 @@ jobs:
 
       - name: Create and push multi-arch manifest
         run: |
+          KERNEL_NAME="${{ env.KERNEL_NAME }}"
+          KERNEL_VERSION="${KERNEL_NAME%-*}"
           DRIVER_MAJOR_VERS="${{ matrix.driver_version }}"
           DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
-          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${{ env.KERNEL_NAME }}-gardenlinux0"
-          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${{ env.KERNEL_NAME }}-gardenlinux0"
-          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-<arm64-kernel-name>-gardenlinux0"
+          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
+          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
+          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux0"
 
-          docker manifest create $MANIFEST_TAG $AMD64_IMAGE
-          #docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
+          docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
