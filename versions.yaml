@@ -1,19 +1,15 @@
 os_versions:
-  - '1592.18'
-  - '1877.13'
-  - '2150.0.0'
-
+- '1592.18'
+- '1877.13'
+- 2150.0.0
 kernel_flavour:
-  - cloud
-  - metal
-
+- cloud
+- metal
 kernel_type:
-  - open
-  - proprietary
-
+- open
+- proprietary
 cpu_arch:
-  - amd64
-
+- amd64
 nvidia_drivers:
-  - '590.48.01'
-  - '580.126.20'
+- 590.48.01
+- 580.126.20

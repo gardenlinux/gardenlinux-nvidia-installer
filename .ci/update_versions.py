@@ -3,7 +3,6 @@ from urllib.request import urlopen
 import html2text
 import re
 import yaml
-import sys
 import requests
 
 def update_versions():
