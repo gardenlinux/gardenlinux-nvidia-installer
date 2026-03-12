@@ -3,7 +3,6 @@ from urllib.request import urlopen
 import html2text
 import re
 import yaml
-import sys
 import requests
 
 def update_versions():
@@ -19,25 +18,21 @@ def update_driver_version(data):
         html_data = html2text.html2text(response.read().decode('utf-8', errors='ignore'))
         lines = html_data.splitlines()
         version_pattern = re.compile(r"\b\d{3,}\.\d+\.\d+\b")
-    for elements in data.get('os_versions', []):
-        update = False
-        for i, driver in enumerate(elements['nvidia_drivers']):
-            old_version = driver
-            for line in lines:
-                if old_version.split('.')[0] in line:
-                    match = version_pattern.search(line)
-                    if match:
-                        if (int(old_version.split('.')[1]) < int(match.group(0).split('.')[1])):
-                            elements['nvidia_drivers'][i] = match.group(0)
-                            update = True 
-                            old_version = match.group(0)
-                        elif ((int(old_version.split('.')[1]) == int(match.group(0).split('.')[1])) &
-                              (int(old_version.split('.')[2]) < int(match.group(0).split('.')[2]))):
-                            elements['nvidia_drivers'][i] = match.group(0)
-                            update = True
-                            old_version = match.group(0)
-            if update == True:
-                print(f"Driver Version update : {match.group(0)}")
+    for i, driver in enumerate(data.get('nvidia_drivers', [])):
+        old_version = driver
+        for line in lines:
+            if old_version.split('.')[0] in line:
+                match = version_pattern.search(line)
+                if match:
+                    if (int(old_version.split('.')[1]) < int(match.group(0).split('.')[1])):
+                        data['nvidia_drivers'][i] = match.group(0)
+                        old_version = match.group(0)
+                        print(f"Driver Version update : {match.group(0)}")
+                    elif ((int(old_version.split('.')[1]) == int(match.group(0).split('.')[1])) &
+                          (int(old_version.split('.')[2]) < int(match.group(0).split('.')[2]))):
+                        data['nvidia_drivers'][i] = match.group(0)
+                        old_version = match.group(0)
+                        print(f"Driver Version update : {match.group(0)}")
 
 def get_latest_gl_tag(data):
     url = f"https://api.github.com/repos/gardenlinux/gardenlinux/tags"
@@ -50,18 +45,19 @@ def get_latest_gl_tag(data):
     tags = [tag['name'] for tag in response.json()]
     number_tags = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
 
-    # Get major version from version.yml
-    for elements in data.get('os_versions', []):
+    for i, version in enumerate(data.get('os_versions', [])):
         for tag in number_tags:
-            gl_major, gl_minor, *gl_patch = elements['version'].split('.')
+            gl_major, gl_minor, *gl_patch = version.split('.')
             major, minor, *patch = tag.split('.')
             if(int(major) == int(gl_major)):
                 if(int(minor) > int(gl_minor)):
-                    elements['version'] = tag
+                    data['os_versions'][i] = tag
+                    version = tag
                     print(f"GL Version update : {tag}")
                 elif(gl_patch and patch):
-                    if((int(minor) == int(gl_minor)) & (int(patch[0]) > int(gl_patch[0]))): 
-                        elements['version'] = tag
+                    if((int(minor) == int(gl_minor)) & (int(patch[0]) > int(gl_patch[0]))):
+                        data['os_versions'][i] = tag
+                        version = tag
                         print(f"GL Version update : {tag}")
 
 def main():

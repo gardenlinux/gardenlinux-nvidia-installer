@@ -14,11 +14,10 @@ def save_history(history):
         yaml.safe_dump(history, f, sort_keys=True)
 
 def update_history(versions, history):
-    for entry in versions.get("os_versions", []):
-        os_ver = str(entry["version"])
-        drivers = entry.get("nvidia_drivers", [])
+    for os_ver in versions.get("os_versions", []):
+        os_ver = str(os_ver)
         history.setdefault(os_ver, [])
-        for drv in drivers:
+        for drv in versions.get("nvidia_drivers", []):
             if drv not in history[os_ver]:
                 history[os_ver].append(drv)
     return history
