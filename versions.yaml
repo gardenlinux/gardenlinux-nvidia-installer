@@ -1,40 +1,19 @@
 os_versions:
-- name: '1592'
-  version: '1592.18'
-  kernel_flavour:
+  - '1592.18'
+  - '1877.13'
+  - '2150.0.0'
+
+kernel_flavour:
   - cloud
   - metal
-  kernel_type:
+
+kernel_type:
   - open
   - proprietary
-  cpu_arch:
+
+cpu_arch:
   - amd64
-  nvidia_drivers:
-  - 590.48.01
-  - 580.126.20
-- name: '1877'
-  version: '1877.13'
-  kernel_flavour:
-  - cloud
-  - metal
-  kernel_type:
-  - open
-  - proprietary
-  cpu_arch:
-  - amd64
-  nvidia_drivers:
-  - 590.48.01
-  - 580.126.20
-- name: '2150'
-  version: 2150.0.0
-  kernel_flavour:
-  - cloud
-  - metal
-  kernel_type:
-  - open
-  - proprietary
-  cpu_arch:
-  - amd64
-  nvidia_drivers:
-  - 590.48.01
-  - 580.126.20
+
+nvidia_drivers:
+  - '590.48.01'
+  - '580.126.20'
