@@ -9,7 +9,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       
       - name: Helm lint
         run: |
@@ -22,7 +22,7 @@ jobs:
       # This is required for requesting the JWT
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Authenticate to cluster
         id: kube_auth
