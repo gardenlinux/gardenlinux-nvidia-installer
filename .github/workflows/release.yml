@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build-driver:
     uses: ./.github/workflows/build_driver.yml
@@ -15,3 +18,41 @@ jobs:
   build-image:
     needs: build-driver
     uses: ./.github/workflows/build_image.yml
+
+  update-helm-values:
+    needs: build-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Resolve release tag
+        id: resolve-tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+              --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
+            echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update driver.repository in gpu-operator-values.yaml
+        run: |
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
+          sed -i "s|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/.*|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/${TAG}|" \
+            helm/gpu-operator-values.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "Garden Linux Builder"
+          git config user.email "gardenlinux@users.noreply.github.com"
+          git add helm/gpu-operator-values.yaml
+          git diff --cached --quiet || git commit -m "Update Helm values for release ${{ steps.resolve-tag.outputs.tag }}"
+          git push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
