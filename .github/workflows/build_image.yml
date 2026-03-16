@@ -67,12 +67,22 @@ jobs:
         id: build_image
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/driver"
+          # On main, use the latest release tag matching [0-9].[0-9].[0-9].
+          # On a tag build github.ref_name is the tag itself (e.g. "1.2.3").
+          # On any other branch it falls back to the branch name.
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            RELEASE_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+              --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
+          else
+            RELEASE_TAG="${{ github.ref_name }}"
+          fi
+
           TAG=$(make build-image \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
           KERNEL_FLAVOR=$KERNEL_FLAVOR \
           TARGET_ARCH=$TARGET_ARCH \
-          RELEASE_TAG=${{ github.ref_name }} \
+          RELEASE_TAG=${RELEASE_TAG} \
           IMAGE_PATH=${IMAGE_PATH})
 
           TAG1=$(echo "$TAG" | sed -n 1p)

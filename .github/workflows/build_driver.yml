@@ -50,8 +50,7 @@ jobs:
              TARGET_ARCH=$TARGET_ARCH \
              GL_VERSION=$GL_VERSION \
              DRIVER_VERSION=$DRIVER_VERSION \
-             KERNEL_TYPE=$KERNEL_TYPE \
-             RELEASE_TAG=${{ github.ref_name }}
+             KERNEL_TYPE=$KERNEL_TYPE
 
       - name: Publish tarball to GitHub Release
         if: github.event_name != 'pull_request'
