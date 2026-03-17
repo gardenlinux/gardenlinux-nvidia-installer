@@ -68,7 +68,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/driver"
           # On main, use the latest release tag matching [0-9].[0-9].[0-9].
           # On a tag build github.ref_name is the tag itself (e.g. "1.2.3").
           # On any other branch it falls back to the branch name.
@@ -78,6 +77,8 @@ jobs:
           else
             RELEASE_TAG="${{ github.ref_name }}"
           fi
+
+          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/driver"
 
           TAG=$(make build-image \
           GL_VERSION=$GL_VERSION \
@@ -132,14 +133,23 @@ jobs:
           echo "KERNEL_NAME=${KERNEL_NAME}" >> $GITHUB_ENV
 
       - name: Create and push multi-arch manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            RELEASE_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+              --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
+          else
+            RELEASE_TAG="${{ github.ref_name }}"
+          fi
+
           KERNEL_NAME="${{ env.KERNEL_NAME }}"
           KERNEL_VERSION="${KERNEL_NAME%-*}"
           DRIVER_MAJOR_VERS="${{ matrix.driver_version }}"
           DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
-          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
-          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
-          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux0"
+          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
+          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
+          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux0"
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
