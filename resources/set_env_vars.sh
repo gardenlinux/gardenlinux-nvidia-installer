@@ -17,7 +17,3 @@ else
   ARCH_TYPE=${arch_translation[$TARGET_ARCH]}
 fi
 export ARCH_TYPE
-
-# Directory where both driver tarballs are embedded in the image.
-# Tarballs are named: driver-<DRIVER_VERSION>-<KERNEL_TYPE>-<KERNEL_NAME>.tar.gz
-export DRIVERS_DIR=${DRIVERS_DIR:-/opt/nvidia-installer/drivers}

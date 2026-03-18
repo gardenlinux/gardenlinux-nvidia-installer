@@ -161,7 +161,7 @@ _has_pre_turing_gpu() {
 
 locate_driver_tarball() {
     local tarball_name="driver-${DRIVER_VERSION}-${KERNEL_MODULE_TYPE}-${KERNEL_NAME}.tar.gz"
-    local tarball_path="${DRIVERS_DIR}/${tarball_name}"
+    local tarball_path="/opt/nvidia-installer/drivers/${tarball_name}"
 
     if [ ! -f "${tarball_path}" ]; then
         echo "[ERROR] Driver tarball not found in image: ${tarball_path}"
