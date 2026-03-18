@@ -62,9 +62,9 @@ build-image: extract-kernel-name
            --platform=linux/${TARGET_ARCH} \
            -t $(IMAGE_PATH):$(TAG1) \
            -t $(IMAGE_PATH):$(TAG2) \
-           -f Dockerfile $(DOCKER_CONTEXT) > /dev/null
-	@echo $(TAG1)
-	@echo $(TAG2)
+           -f Dockerfile $(DOCKER_CONTEXT)
+	@echo $(TAG1) > $(WORKSPACE_DIR)/tag1
+	@echo $(TAG2) > $(WORKSPACE_DIR)/tag2
 
 clean:
 	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-*.tar.gz

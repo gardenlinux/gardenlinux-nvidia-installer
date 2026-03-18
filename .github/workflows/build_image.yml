@@ -90,8 +90,8 @@ jobs:
           TARGET_ARCH=$TARGET_ARCH \
           IMAGE_PATH=${IMAGE_PATH})
 
-          TAG1=$(echo "$TAG" | sed -n 1p)
-          TAG2=$(echo "$TAG" | sed -n 2p)
+          TAG1=$(cat "${{ github.workspace }}/tag1")
+          TAG1=$(cat "${{ github.workspace }}/tag2")
 
           docker push $IMAGE_PATH:$TAG1
           docker push $IMAGE_PATH:$TAG2
