@@ -8,7 +8,7 @@ ARG KERNEL_NAME
 
 COPY resources/* /opt/nvidia-installer/
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     kmod \
     pciutils \
     ca-certificates \

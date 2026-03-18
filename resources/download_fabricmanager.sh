@@ -91,7 +91,7 @@ sha1 = "always"' | tee /etc/crypto-policies/back-ends/apt-sequoia.config
 
 
 
-apt-get update 
+apt-get update -qq
 
 # As of Aug 27 2025 the 580 version of fabricmanager changed the nameing format
 # https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/
@@ -130,5 +130,5 @@ if [ -z "$PKG" ]; then
 fi
 
 echo "Installing via APT: ${PKG}=${VER}"
-apt-get install -y -V "${PKG}=${VER}"
-apt-get install -y -V nvlsm
+apt-get install -qq -y -V "${PKG}=${VER}"
+apt-get install -qq -y -V nvlsm

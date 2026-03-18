@@ -42,7 +42,7 @@ export IGNORE_MISSING_MODULE_SYMVERS=1
 
 compile_kernel_type() {
     local KERNEL_TYPE=$1
-    local OUTDIR="/out/nvidia/driver"
+    local OUTDIR="/out/nvidia/driver/$KERNEL_TYPE"
 
     echo "Compiling NVIDIA modules for $KERNEL_TYPE driver version $DRIVER_VERSION on kernel $KERNEL_NAME"
 
