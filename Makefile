@@ -32,8 +32,8 @@ endif
 # single kmodbuild container invocation via compile.sh.
 build-driver: extract-kernel-name
 	mkdir -p $(WORKSPACE_DIR)/out ;\
-    if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-$(KERNEL_NAME).tar.gz ] || \
-       [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-$(KERNEL_NAME).tar.gz ]; then \
+    if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-open-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz ] || \
+       [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-proprietary-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz ]; then \
 		docker run --rm \
 			   -v $(WORKSPACE_DIR):/workspace \
 			   -v $(WORKSPACE_DIR)/out:/out \
@@ -71,8 +71,8 @@ build-image: extract-kernel-name
 	@echo $(TAG2)
 
 clean:
-	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-*.tar.gz
-	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-*.tar.gz
+	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-open-$(DRIVER_VERSION)-*.tar.gz
+	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-proprietary-$(DRIVER_VERSION)-*.tar.gz
 
 clean-all:
 	rm -rf $(WORKSPACE_DIR)/out/

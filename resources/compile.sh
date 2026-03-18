@@ -119,7 +119,7 @@ compile_kernel_type() {
     rm -rf "$OUTDIR"/bin/*install* "$OUTDIR"/share
 
     # shellcheck disable=SC2046
-    tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_TYPE-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
+    tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
 }
 
 compile_kernel_type open
