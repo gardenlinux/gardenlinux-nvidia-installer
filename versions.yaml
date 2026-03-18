@@ -1,12 +1,13 @@
 os_versions:
-#- '1592.18'
+- '1592.18'
 - '1877.13'
-#- 2150.0.0
+- 2150.0.0
 kernel_flavour:
 - cloud
-#- metal
+- metal
 cpu_arch:
 - amd64
 nvidia_drivers:
 - 590.48.01
-#- 580.126.20
+- 580.126.20
+- 570.211.01
