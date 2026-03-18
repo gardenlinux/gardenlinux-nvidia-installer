@@ -105,11 +105,13 @@ compile_kernel_type() {
             ;;
     esac
 
-    echo "Fetching GSP Firmware"
+    echo "Copy GSP Firmware binary"
     mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
     find /tmp/nvidia -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
 
     echo "Archiving assets"
+
+    set -x
 
     # Archive library .so files
     mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$OUTDIR"/usr/bin
@@ -120,6 +122,8 @@ compile_kernel_type() {
 
     # shellcheck disable=SC2046
     tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
+
+    set +x
 }
 
 compile_kernel_type open
