@@ -71,25 +71,19 @@ jobs:
           # On main, use the latest release tag matching [0-9].[0-9].[0-9].
           # On a tag build github.ref_name is the tag itself (e.g. "1.2.3").
           # On any other branch it falls back to the branch name.
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            RELEASE_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
-              --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
-          else
-            RELEASE_TAG="${{ github.ref_name }}"
-          fi
-
+          RELEASE_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+            --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/driver"
-
-          TAG=$(make build-image \
+          TAG=$(make build \
+          WORKSPACE_DIR="${{ github.workspace }}" \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
           KERNEL_FLAVOR=$KERNEL_FLAVOR \
           TARGET_ARCH=$TARGET_ARCH \
-          RELEASE_TAG=${RELEASE_TAG} \
           IMAGE_PATH=${IMAGE_PATH})
 
-          TAG1=$(echo "$TAG" | sed -n 1p)
-          TAG2=$(echo "$TAG" | sed -n 2p)
+          TAG1=$(cat "${{ github.workspace }}/tag1")
+          TAG2=$(cat "${{ github.workspace }}/tag2")
 
           docker push $IMAGE_PATH:$TAG1
           docker push $IMAGE_PATH:$TAG2
@@ -136,13 +130,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            RELEASE_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
-              --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
-          else
-            RELEASE_TAG="${{ github.ref_name }}"
-          fi
-
+          RELEASE_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+            --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
           KERNEL_NAME="${{ env.KERNEL_NAME }}"
           KERNEL_VERSION="${KERNEL_NAME%-*}"
           DRIVER_MAJOR_VERS="${{ matrix.driver_version }}"

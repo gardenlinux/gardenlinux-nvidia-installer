@@ -32,8 +32,8 @@ main() {
     fi
 
     # ------------------------------------------------------------------------------
-    # 1) Resolve KERNEL_MODULE_TYPE and download the pre-compiled driver tarball
-    #    from GitHub Releases at runtime (not baked into the image).
+    # 1) Resolve KERNEL_MODULE_TYPE and locate the pre-compiled driver tarball
+    #    embedded in the image under /opt/nvidia-installer/drivers/.
     #    KERNEL_MODULE_TYPE selects which tarball to deploy. Valid values:
     #      "open"        – use open kernel modules
     #      "proprietary" – use proprietary kernel modules
@@ -42,7 +42,7 @@ main() {
     #    proprietary. Set explicitly to override.
     # ------------------------------------------------------------------------------
     resolve_kernel_module_type
-    download_driver_tarball
+    locate_driver_tarball
 
     # Stage new contents into a temporary directory
     rm -rf /run/nvidia/.staging-driver || true
@@ -90,7 +90,7 @@ main() {
         exit 1
     fi
 
-    echo "[INFO] NVIDIA driver install/refresh OK for ${DRIVER_NAME}:${DRIVER_VERSION} (${KERNEL_MODULE_TYPE} modules)"
+    echo "[INFO] NVIDIA driver install/refresh OK for ${DRIVER_NAME}:${DRIVER_VERSION} (${KERNEL_MODULE_TYPE} modules, kernel ${KERNEL_NAME})"
 }
 
 
@@ -159,30 +159,18 @@ _has_pre_turing_gpu() {
 }
 
 
-download_driver_tarball() {
-    # Detect the running kernel's name from uname -r (works in containers —
-    # there is no kernel namespace, so uname -r returns the host kernel).
-    local kernel_release
-    kernel_release=$(uname -r)
-    # KERNEL_NAME is the kernel release without the trailing distro suffix portion
-    # that is already encoded in the tarball name.  For Garden Linux the release
-    # string *is* the kernel name used in the tarball, e.g. "6.6.101-cloud-amd64".
-    local kernel_name="${kernel_release}"
+locate_driver_tarball() {
+    local tarball_name="driver-${DRIVER_VERSION}-${KERNEL_MODULE_TYPE}-${KERNEL_NAME}.tar.gz"
+    local tarball_path="/opt/nvidia-installer/drivers/${tarball_name}"
 
-    local tarball_name="driver-${DRIVER_VERSION}-${KERNEL_MODULE_TYPE}-${kernel_name}.tar.gz"
-    local url="${TARBALL_BASE_URL}/${RELEASE_TAG}/${tarball_name}"
-
-    local tmp_dir
-    tmp_dir=$(mktemp -d)
-    DRIVER_TARBALL_PATH="${tmp_dir}/${tarball_name}"
-
-    echo "[INFO] Downloading driver tarball: ${url}"
-    if ! wget -q --show-progress -O "${DRIVER_TARBALL_PATH}" "${url}"; then
-        echo "[ERROR] Failed to download driver tarball from: ${url}"
-        echo "        Ensure a GitHub Release named '${RELEASE_TAG}' exists with asset '${tarball_name}'."
+    if [ ! -f "${tarball_path}" ]; then
+        echo "[ERROR] Driver tarball not found in image: ${tarball_path}"
+        echo "        Expected a tarball for driver ${DRIVER_VERSION} (${KERNEL_MODULE_TYPE}) on kernel ${KERNEL_NAME}."
         exit 1
     fi
 
+    DRIVER_TARBALL_PATH="${tarball_path}"
+    echo "[INFO] Using embedded driver tarball: ${DRIVER_TARBALL_PATH}"
     export DRIVER_TARBALL_PATH
 }
 
