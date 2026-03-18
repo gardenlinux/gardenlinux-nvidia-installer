@@ -2,7 +2,6 @@
 WORKSPACE_DIR ?= $(shell pwd)
 KERNEL_FLAVOR ?= cloud
 TARGET_ARCH ?= amd64
-DOCKER_CONTEXT ?= $(shell pwd)
 IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
 DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
 build: build-driver build-image
@@ -14,8 +13,6 @@ endif
 ifndef DRIVER_VERSION
 $(error DRIVER_VERSION is not set. Please set it before running make.)
 endif
-
-RELEASE_TAG ?= development
 
 # If KERNEL_NAME is already set (e.g. passed by CI after a separate extract step),
 # extract-kernel-name is a no-op. Otherwise it runs the kmodbuild container to determine it.
@@ -62,7 +59,7 @@ build-image: extract-kernel-name
            --platform=linux/${TARGET_ARCH} \
            -t $(IMAGE_PATH):$(TAG1) \
            -t $(IMAGE_PATH):$(TAG2) \
-           -f Dockerfile $(DOCKER_CONTEXT)
+           -f Dockerfile $(WORKSPACE_DIR)
 	@echo $(TAG1) > $(WORKSPACE_DIR)/tag1
 	@echo $(TAG2) > $(WORKSPACE_DIR)/tag2
 
