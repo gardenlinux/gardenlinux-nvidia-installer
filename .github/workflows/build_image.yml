@@ -89,7 +89,7 @@ jobs:
           IMAGE_PATH=${IMAGE_PATH})
 
           TAG1=$(cat "${{ github.workspace }}/tag1")
-          TAG1=$(cat "${{ github.workspace }}/tag2")
+          TAG2=$(cat "${{ github.workspace }}/tag2")
 
           docker push $IMAGE_PATH:$TAG1
           docker push $IMAGE_PATH:$TAG2
