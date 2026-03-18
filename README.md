@@ -8,7 +8,7 @@ at build time.
 
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
-  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/heads/main/helm/gpu-operator-values.yaml
+  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.0.4/helm/gpu-operator-values.yaml
 ```
 
 Built images are published at:
