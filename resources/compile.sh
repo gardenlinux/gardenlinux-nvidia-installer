@@ -12,7 +12,6 @@ if [ -z "$TARGET_ARCH" ]; then
     exit 1
 fi
 
-set -x
 mkdir -p /tmp/nvidia
 
 declare -A arch_translation
@@ -110,8 +109,6 @@ compile_kernel_type() {
     find /tmp/nvidia -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
 
     echo "Archiving assets"
-
-    set -x
 
     # Archive library .so files
     mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$OUTDIR"/usr/bin

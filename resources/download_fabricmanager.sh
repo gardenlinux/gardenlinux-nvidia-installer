@@ -1,6 +1,5 @@
 #!/bin/bash
 echo "Downloading NVIDIA fabric manager for driver version $DRIVER_VERSION"
-set -x
 DRIVER_BRANCH=$(echo "$DRIVER_VERSION" | grep -oE '^[0-9]+')
 if [ -z "$TARGET_ARCH" ]; then
     echo "Error: TARGET_ARCH is not set."
