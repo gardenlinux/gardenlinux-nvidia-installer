@@ -81,11 +81,11 @@ jobs:
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/driver"
 
           TAG=$(make build-image \
+          WORKSPACE_DIR="${{ github.workspace }}" \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
           KERNEL_FLAVOR=$KERNEL_FLAVOR \
           TARGET_ARCH=$TARGET_ARCH \
-          RELEASE_TAG=${RELEASE_TAG} \
           IMAGE_PATH=${IMAGE_PATH})
 
           TAG1=$(echo "$TAG" | sed -n 1p)

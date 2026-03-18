@@ -4,7 +4,7 @@ ARG GL_VERSION
 FROM ghcr.io/gardenlinux/gardenlinux:${GL_VERSION} AS packager
 ARG TARGET_ARCH
 ARG DRIVER_VERSION
-ARG RELEASE_TAG
+ARG KERNEL_NAME
 
 COPY resources/* /opt/nvidia-installer/
 
@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     kmod \
     pciutils \
     ca-certificates \
-    wget \
     xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,11 +26,14 @@ RUN rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x
          /usr/bin/chfn /usr/bin/gpasswd
 
 RUN echo "${DRIVER_VERSION}" > /tmp/driver-version
-RUN echo "${RELEASE_TAG}" > /tmp/release-tag
+RUN echo "${KERNEL_NAME}" > /tmp/kernel-name
 
-# Note: /out is intentionally excluded from rootfs - it is only used during driver
-# compilation (in kmodbuild container). The runtime image downloads pre-compiled
-# tarballs from GitHub Releases instead of embedding them.
+# Embed both open and proprietary pre-compiled driver tarballs into the image.
+# The correct one is selected at runtime by load_install_gpu_driver.sh based on
+# the GPU architecture and driver version (via KERNEL_MODULE_TYPE / auto-detection).
+COPY out/nvidia/driver-${DRIVER_VERSION}-open-${KERNEL_NAME}.tar.gz /opt/nvidia-installer/drivers/
+COPY out/nvidia/driver-${DRIVER_VERSION}-proprietary-${KERNEL_NAME}.tar.gz /opt/nvidia-installer/drivers/
+
 RUN mkdir -p /rootfs \
         && cp -ar /bin /boot /etc /home /lib /lib64 /media /mnt /opt /root /run /sbin /srv /tmp /usr /var /rootfs \
         && rm -rf /rootfs/opt/actions-runner
