@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     pciutils \
     ca-certificates \
     xz-utils \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 RUN /opt/nvidia-installer/download_fabricmanager.sh
