@@ -5,7 +5,7 @@ TARGET_ARCH ?= amd64
 DOCKER_CONTEXT ?= $(shell pwd)
 IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
 DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
-build: build-image
+build: build-driver build-image
 
 ifndef GL_VERSION
 $(error GL_VERSION is not set. Please set it before running make.)
@@ -32,8 +32,8 @@ endif
 # single kmodbuild container invocation via compile.sh.
 build-driver: extract-kernel-name
 	mkdir -p $(WORKSPACE_DIR)/out ;\
-    if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-open-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz ] || \
-       [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-proprietary-$(DRIVER_VERSION)-$(KERNEL_NAME).tar.gz ]; then \
+    if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-$(KERNEL_NAME).tar.gz ] || \
+       [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-$(KERNEL_NAME).tar.gz ]; then \
 		docker run --rm \
 			   -v $(WORKSPACE_DIR):/workspace \
 			   -v $(WORKSPACE_DIR)/out:/out \
@@ -52,10 +52,6 @@ build-driver: extract-kernel-name
 # KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
 # append KERNEL_FLAVOR or TARGET_ARCH separately.
 build-image: extract-kernel-name
-	$(MAKE) build-driver \
-		WORKSPACE_DIR=$(WORKSPACE_DIR) KERNEL_NAME=$(KERNEL_NAME) \
-		GL_VERSION=$(GL_VERSION) DRIVER_VERSION=$(DRIVER_VERSION) \
-		TARGET_ARCH=$(TARGET_ARCH) KERNEL_FLAVOR=$(KERNEL_FLAVOR)
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
@@ -71,8 +67,8 @@ build-image: extract-kernel-name
 	@echo $(TAG2)
 
 clean:
-	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-open-$(DRIVER_VERSION)-*.tar.gz
-	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-proprietary-$(DRIVER_VERSION)-*.tar.gz
+	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-*.tar.gz
+	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-*.tar.gz
 
 clean-all:
 	rm -rf $(WORKSPACE_DIR)/out/
