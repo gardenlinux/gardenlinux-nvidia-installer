@@ -80,6 +80,8 @@ jobs:
 
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/driver"
 
+          set -x
+
           TAG=$(make build-image \
           WORKSPACE_DIR="${{ github.workspace }}" \
           GL_VERSION=$GL_VERSION \
