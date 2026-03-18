@@ -23,8 +23,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: main
 
       - name: Resolve release tag
         id: resolve-tag
