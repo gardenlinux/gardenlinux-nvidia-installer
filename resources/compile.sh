@@ -56,7 +56,7 @@ compile_kernel_type() {
               --no-drm \
               --no-install-compat32-libs \
               --no-opengl-files \
-              --ui=none --no-questions \
+              --ui=none --no-questions --silent \
               --no-kernel-module-source \
               --no-systemd \
               --skip-depmod \
@@ -82,7 +82,7 @@ compile_kernel_type() {
               --no-drm \
               --no-opengl-files \
               --no-kernel-module-source \
-              --ui=none --no-questions \
+              --ui=none --no-questions --silent \
               --no-systemd \
               --skip-depmod \
               --log-file-name="$PWD"/nvidia-installer.log \
