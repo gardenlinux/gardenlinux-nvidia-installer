@@ -82,7 +82,7 @@ jobs:
 
           set -x
 
-          TAG=$(make build-image \
+          TAG=$(make build \
           WORKSPACE_DIR="${{ github.workspace }}" \
           GL_VERSION=$GL_VERSION \
           DRIVER_VERSION=$DRIVER_VERSION \
