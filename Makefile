@@ -28,14 +28,12 @@ ifeq ($(KERNEL_NAME),)
            ./resources/extract_kernel_name.sh "$(KERNEL_FLAVOR)"))
 endif
 
-# build-driver compiles a single kernel module tarball for the given KERNEL_TYPE.
-# KERNEL_TYPE must be supplied: either "open" or "proprietary".
+# build-driver compiles both open and proprietary kernel module tarballs in a
+# single kmodbuild container invocation via compile.sh.
 build-driver: extract-kernel-name
-ifndef KERNEL_TYPE
-	$(error KERNEL_TYPE is not set. Please set it to open or proprietary before running make.)
-endif
 	mkdir -p $(WORKSPACE_DIR)/out ;\
-    if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-$(KERNEL_TYPE)-$(KERNEL_NAME).tar.gz ]; then \
+    if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-$(KERNEL_NAME).tar.gz ] || \
+       [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-$(KERNEL_NAME).tar.gz ]; then \
 		docker run --rm \
 			   -v $(WORKSPACE_DIR):/workspace \
 			   -v $(WORKSPACE_DIR)/out:/out \
@@ -45,7 +43,6 @@ endif
 			   --env GL_VERSION=$(GL_VERSION) \
 			   --env DRIVER_VERSION=$(DRIVER_VERSION) \
 			   --env KERNEL_NAME=$(KERNEL_NAME) \
-			   --env KERNEL_TYPE=$(KERNEL_TYPE) \
 			   ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
 			   bash ./resources/compile.sh ;\
 	fi
@@ -55,11 +52,7 @@ endif
 # KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
 # append KERNEL_FLAVOR or TARGET_ARCH separately.
 build-image: extract-kernel-name
-	$(MAKE) build-driver KERNEL_TYPE=open \
-		WORKSPACE_DIR=$(WORKSPACE_DIR) KERNEL_NAME=$(KERNEL_NAME) \
-		GL_VERSION=$(GL_VERSION) DRIVER_VERSION=$(DRIVER_VERSION) \
-		TARGET_ARCH=$(TARGET_ARCH) KERNEL_FLAVOR=$(KERNEL_FLAVOR)
-	$(MAKE) build-driver KERNEL_TYPE=proprietary \
+	$(MAKE) build-driver \
 		WORKSPACE_DIR=$(WORKSPACE_DIR) KERNEL_NAME=$(KERNEL_NAME) \
 		GL_VERSION=$(GL_VERSION) DRIVER_VERSION=$(DRIVER_VERSION) \
 		TARGET_ARCH=$(TARGET_ARCH) KERNEL_FLAVOR=$(KERNEL_FLAVOR)
