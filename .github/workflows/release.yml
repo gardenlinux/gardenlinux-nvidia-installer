@@ -39,18 +39,62 @@ jobs:
             echo "tag=${TAG}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
       - name: Update driver.repository in gpu-operator-values.yaml
         run: |
           TAG="${{ steps.resolve-tag.outputs.tag }}"
           sed -i "s|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/.*|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/${TAG}|" \
             helm/gpu-operator-values.yaml
 
+      - name: Update release tag in README.md
+        run: |
+          TAG="${{ steps.resolve-tag.outputs.tag }}"
+          # Replace every refs/tags/<version> URL and the inline image path example
+          sed -i \
+            -E "s|(refs/tags/)[0-9]+\.[0-9]+\.[0-9]+|\1${TAG}|g" \
+            README.md
+          # Replace the inline example path segment (e.g. /1.0.4/driver:)
+          sed -i \
+            -E "s|(gardenlinux-nvidia-installer/)[0-9]+\.[0-9]+\.[0-9]+(/driver)|\1${TAG}\2|g" \
+            README.md
+
+      - name: Update supported versions table in README.md
+        run: |
+          # Capture the output of list_versions.py
+          VERSIONS_OUTPUT="$(python3 list_versions.py)"
+
+          # Replace the content between the sentinel comments in README.md
+          awk -v new_content="${VERSIONS_OUTPUT}" '
+            /<!-- list_versions_output_start -->/ {
+              print
+              print "```"
+              print new_content
+              print "```"
+              in_block = 1
+              next
+            }
+            /<!-- list_versions_output_end -->/ {
+              in_block = 0
+              print
+              next
+            }
+            in_block { next }
+            { print }
+          ' README.md > README.md.tmp && mv README.md.tmp README.md
+
       - name: Commit and push
         run: |
           git config user.name "Garden Linux Builder"
           git config user.email "gardenlinux@users.noreply.github.com"
-          git add helm/gpu-operator-values.yaml
-          git diff --cached --quiet || git commit -m "Update Helm values for release ${{ steps.resolve-tag.outputs.tag }}"
+          git add helm/gpu-operator-values.yaml README.md
+          git diff --cached --quiet || git commit -m "Update release references for ${{ steps.resolve-tag.outputs.tag }}"
           git push
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

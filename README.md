@@ -129,6 +129,7 @@ python3 list_versions.py
 
 Example output:
 
+<!-- list_versions_output_start -->
 ```
 Supported OS ↔ Driver Versions
 ---------------------------------------------
@@ -136,6 +137,7 @@ OS 1592.18: 590.48.01, 580.126.20
 OS 1877.13: 590.48.01, 580.126.20
 OS 2150.0.0: 590.48.01, 580.126.20
 ```
+<!-- list_versions_output_end -->
 
 ## Driver lifecycle
 
