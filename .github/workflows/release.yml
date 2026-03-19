@@ -100,7 +100,7 @@ jobs:
           git diff --cached --quiet || git commit -m "Update release references for ${TAG}"
 
           git push --set-upstream origin update-readme
-          UPDATE_PR_LINK=$(gh pr create --base main --head update-history --title 'Update README.md for release ${TAG}' --body "automated update")
+          gh pr create --base main --head update-readme --title "Update README.md for release ${TAG}" --body "Automated update of Helm values and README.md for release ${TAG}."
 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
