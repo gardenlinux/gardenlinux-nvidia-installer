@@ -95,11 +95,11 @@ jobs:
           git config user.name "Garden Linux Builder"
           git config user.email "gardenlinux@users.noreply.github.com"
           git checkout -b update-readme
-
+          git add helm/gpu-operator-values.yaml README.md
           if git diff --cached --quiet --exit-code ; then
             echo "No changes to commit"
           else
-            git commit -am "Update release references for ${TAG}"
+            git commit -m "Update release references for ${TAG}"
             git push --set-upstream origin update-readme
             gh pr create --base main --head update-readme --title "Update README.md for release ${TAG}" --body "Automated update of Helm values and README.md for release ${TAG}."
           fi
