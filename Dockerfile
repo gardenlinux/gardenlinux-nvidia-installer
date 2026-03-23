@@ -12,6 +12,9 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
+
+RUN echo "${DRIVER_VERSION}" > /tmp/driver-version
+
 RUN /opt/nvidia-installer/download_fabricmanager.sh
 
 # Make this image compatible with the NVIDIA GPU Operator by using "nvidia-driver" as entrypoint

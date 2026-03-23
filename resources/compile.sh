@@ -1,10 +1,18 @@
 #!/bin/bash
 
-DRIVER_VERSION="590.48.01"
-ARCH_TYPE="x86_64"
+#Install kernel headers in a custom path
+
+KERNEL_NAME=$(uname -r)
+KENREL_VERSION=$(uname -r | cut -d'-' -f1)
+
+apt download linux-headers-"$KERNEL_NAME" -o /tmp/
+apt download linux-headers-"$KERNEL_VERSION" -o /tmp/
+
+dpkg -x /tmp/linux-headers-"$KERNEL_NAME"_*.deb /run/headers/"$KERNEL_NAME"
+dpkg -x /tmp/linux-headers-"$KERNEL_VERSION"_*.deb /run/headers/"$KERNEL_VERSION"
 
 DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
-curl -Ls "${DRIVER_URL}" -o nvidia.run
+curl -Ls "${DRIVER_URL}" -o /run/nvidia/nvidia.run
 CURL_EXIT=$?
 if [ $CURL_EXIT -ne 0 ]; then
   echo "Failed to download ${DRIVER_URL} (curl exit code: ${CURL_EXIT})"
