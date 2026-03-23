@@ -13,7 +13,7 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/*
 
 
-RUN echo "${DRIVER_VERSION}" > /tmp/driver-version
+RUN echo "$(DRIVER_VERSION)" > /tmp/driver-version
 
 RUN /opt/nvidia-installer/download_fabricmanager.sh
 

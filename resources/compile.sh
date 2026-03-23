@@ -3,15 +3,24 @@
 #Install kernel headers in a custom path
 
 KERNEL_NAME=$(uname -r)
-KENREL_VERSION=$(uname -r | cut -d'-' -f1)
+KERNEL_VERSION=$(uname -r | cut -d'-' -f1)
 
-apt download linux-headers-"$KERNEL_NAME" -o /tmp/
-apt download linux-headers-"$KERNEL_VERSION" -o /tmp/
+mkdir -p /run/headers/"$KERNEL_VERSION"
 
-dpkg -x /tmp/linux-headers-"$KERNEL_NAME"_*.deb /run/headers/"$KERNEL_NAME"
-dpkg -x /tmp/linux-headers-"$KERNEL_VERSION"_*.deb /run/headers/"$KERNEL_VERSION"
+apt download linux-headers-"$KERNEL_NAME" 
+apt download linux-headers-"$KERNEL_VERSION"-common
+
+
+for deb in /run/nvidia/.staging-driver/linux-headers-"$KERNEL_VERSION"-*.deb; do
+    echo $deb
+    dpkg -x "$deb" /run/headers/"$KERNEL_VERSION"
+done
+
 
 DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
+
+echo $DRIVER_URL
+
 curl -Ls "${DRIVER_URL}" -o /run/nvidia/nvidia.run
 CURL_EXIT=$?
 if [ $CURL_EXIT -ne 0 ]; then
