@@ -1,13 +1,9 @@
 # syntax=docker/dockerfile:1.4
 ARG GL_VERSION
 
-FROM ghcr.io/gardenlinux/gardenlinux:${GL_VERSION} AS packager
-ARG TARGET_ARCH
-ARG DRIVER_VERSION
-ARG KERNEL_NAME
+FROM ghcr.io/gardenlinux/gardenlinux:1877.13 AS packager
 
 COPY resources/* /opt/nvidia-installer/
-COPY compile.sh /tmp/compile.sh
 
 RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     kmod \

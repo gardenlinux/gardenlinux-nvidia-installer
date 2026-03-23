@@ -43,7 +43,7 @@ main() {
     # ------------------------------------------------------------------------------
     resolve_kernel_module_type
     locate_driver_tarball
-    nsenter -t 1 -m -u -n -i /bin/sh "/tmp/compile.sh"
+    nsenter -t 1 -m -u -n -i /bin/sh "/opt/nvidia-installer/compile.sh"
 
     # Stage new contents into a temporary directory
     #rm -rf /run/nvidia/.staging-driver || true
