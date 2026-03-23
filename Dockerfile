@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1.4
-ARG GL_VERSION
 
-FROM ghcr.io/gardenlinux/gardenlinux:1877.13 AS packager
+FROM ghcr.io/gardenlinux/gardenlinux:latest AS packager
 
 COPY resources/* /opt/nvidia-installer/
 COPY compile.sh /tmp/compile.sh

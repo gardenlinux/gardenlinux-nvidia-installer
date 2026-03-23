@@ -1,7 +1,3 @@
-os_versions:
-- '1877.13'
-kernel_flavour:
-- cloud
 cpu_arch:
 - amd64
 nvidia_drivers:

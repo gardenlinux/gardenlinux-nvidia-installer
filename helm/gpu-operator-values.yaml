@@ -5,9 +5,9 @@ toolkit:
   installDir: /opt/nvidia
 driver:
   imagePullPolicy: Always
-  usePrecompiled: true
   version: 590
   repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/refactor_compilation/1.2.1
+  image: driver
 node-feature-discovery:
   worker:
     config:
