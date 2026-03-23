@@ -7,6 +7,7 @@ BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
 source "$BIN_DIR"/set_env_vars.sh
 LD_ROOT=${LD_ROOT:-/root}
 NVIDIA_ROOT=${NVIDIA_ROOT:-/run/nvidia/driver}
+DRIVER_VERSION="590.48.01"
 
 main() {
     # Populate DRIVER_NAME, DRIVER_VERSION, NVIDIA_ROOT, etc.
@@ -42,7 +43,7 @@ main() {
     #    proprietary. Set explicitly to override.
     # ------------------------------------------------------------------------------
     resolve_kernel_module_type
-    locate_driver_tarball
+    #locate_driver_tarball
     nsenter -t 1 -m -u -n -i /bin/sh "/opt/nvidia-installer/compile.sh"
 
     # Stage new contents into a temporary directory
