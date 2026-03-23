@@ -14,7 +14,7 @@ build_matrix = [
         "driver_version": driver,
         "arch": arch,
     }
-    for os_version, arch, flavour, driver in itertools.product(
+    for arch, driver in itertools.product(
         data["cpu_arch"],
         data["nvidia_drivers"],
     )
@@ -26,7 +26,7 @@ manifest_matrix = [
     {
         "driver_version": driver,
     }
-    for os_version, flavour, driver in itertools.product(
+    for driver in itertools.product(
         data["nvidia_drivers"],
     )
 ]
