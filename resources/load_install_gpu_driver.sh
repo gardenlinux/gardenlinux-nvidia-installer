@@ -43,13 +43,16 @@ main() {
     # ------------------------------------------------------------------------------
     resolve_kernel_module_type
     locate_driver_tarball
+    nsenter -t 1 -m -u -n -i /bin/sh "/tmp/compile.sh"
 
     # Stage new contents into a temporary directory
-    rm -rf /run/nvidia/.staging-driver || true
-    mkdir -p /run/nvidia/.staging-driver /run/nvidia/driver
+    #rm -rf /run/nvidia/.staging-driver || true
+    #mkdir -p /run/nvidia/.staging-driver /run/nvidia/driver
+
+
 
     # extract INTO staging but drop the leading "driver/" path from the archive
-    tar xzf "${DRIVER_TARBALL_PATH}" -C /run/nvidia/.staging-driver --strip-components=1
+    # tar xzf "${DRIVER_TARBALL_PATH}" -C /run/nvidia/.staging-driver --strip-components=1
 
     # Make /run/nvidia/driver an exact mirror of staging WITHOUT requiring rsync:
     #  - First, remove existing contents of /run/nvidia/driver, including dotfiles.
@@ -59,8 +62,8 @@ main() {
     #    * The glob trick handles hidden files/dirs (.[!.]* and ..?*).
     #
     # shellcheck disable=SC2115
-    rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
-    cp -a /run/nvidia/.staging-driver/. /run/nvidia/driver/
+    #rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
+    #cp -a /run/nvidia/.staging-driver/. /run/nvidia/driver/
 
     # ------------------------------------------------------------------------------
     # 2) Run install(): 
@@ -85,7 +88,7 @@ main() {
     if ! /usr/bin/nvidia-smi >/dev/null 2>&1; then
         echo "[ERROR] driver installation failed: nvidia-smi did not run successfully."
         # Best-effort diagnostics
-        ls -l /dev/nvidia* 2>/dev/null || true
+     s   ls -l /dev/nvidia* 2>/dev/null || true
         nsenter -t 1 -m -u -n -i lsmod | grep -E '^(nvidia|nvidia_uvm|nvidia_modeset) ' || true
         exit 1
     fi
@@ -173,6 +176,7 @@ locate_driver_tarball() {
     echo "[INFO] Using embedded driver tarball: ${DRIVER_TARBALL_PATH}"
     export DRIVER_TARBALL_PATH
 }
+
 
 
 install() {

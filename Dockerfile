@@ -7,6 +7,7 @@ ARG DRIVER_VERSION
 ARG KERNEL_NAME
 
 COPY resources/* /opt/nvidia-installer/
+COPY compile.sh /tmp/compile.sh
 
 RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     kmod \
