@@ -27,15 +27,6 @@ RUN rm -rf /var/lib/apt/lists/* /usr/bin/dpkg /sbin/start-stop-daemon /usr/lib/x
          /var/lib/dpkg/info/libdb5.3* /usr/lib/x86_64-linux-gnu/libdb-5.3.so* /usr/share/doc/libdb5.3 \
          /usr/bin/chfn /usr/bin/gpasswd
 
-RUN echo "${DRIVER_VERSION}" > /tmp/driver-version
-RUN echo "${KERNEL_NAME}" > /tmp/kernel-name
-
-# Embed both open and proprietary pre-compiled driver tarballs into the image.
-# The correct one is selected at runtime by load_install_gpu_driver.sh based on
-# the GPU architecture and driver version (via KERNEL_MODULE_TYPE / auto-detection).
-COPY out/nvidia/driver-${DRIVER_VERSION}-open-${KERNEL_NAME}.tar.gz /opt/nvidia-installer/drivers/
-COPY out/nvidia/driver-${DRIVER_VERSION}-proprietary-${KERNEL_NAME}.tar.gz /opt/nvidia-installer/drivers/
-
 RUN mkdir -p /rootfs \
         && cp -ar /bin /boot /etc /home /lib /lib64 /media /mnt /opt /root /run /sbin /srv /tmp /usr /var /rootfs \
         && rm -rf /rootfs/opt/actions-runner
