@@ -8,12 +8,12 @@ import requests
 def update_versions():
     with open("versions.yaml", 'r') as version_file:
         data = yaml.safe_load(version_file)
-        get_latest_gl_tag(data)
-        update_driver_version(data)
+        get_latest_gardenlinux_tags(data)
+        update_nvidia_driver_version(data)
     with open("versions.yaml", 'w') as version_file:
         yaml.dump(data, version_file, default_flow_style=False, sort_keys=False)
 
-def update_driver_version(data):
+def update_nvidia_driver_version(data):
     with urlopen("https://developer.download.nvidia.com/compute/nvidia-driver/redist/nvidia_driver/linux-x86_64/") as response:
         html_data = html2text.html2text(response.read().decode('utf-8', errors='ignore'))
         lines = html_data.splitlines()
@@ -34,7 +34,7 @@ def update_driver_version(data):
                         old_version = match.group(0)
                         print(f"Driver Version update : {match.group(0)}")
 
-def get_latest_gl_tag(data):
+def get_latest_gardenlinux_tags(data):
     url = f"https://api.github.com/repos/gardenlinux/gardenlinux/tags"
     response = requests.get(url)
 
@@ -43,8 +43,8 @@ def get_latest_gl_tag(data):
         return []
 
     tags = [tag['name'] for tag in response.json()]
-    new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)].sort()
-    if data['os_versions'].sort() != new_os_versions:
+    new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
+    if sorted(data['os_versions']) != sorted(new_os_versions):
         print("Garden Linux version update: ", list(set(new_os_versions).difference(data['os_versions'])))
         data['os_versions'] = new_os_versions
 
