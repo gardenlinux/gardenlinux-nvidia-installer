@@ -1,14 +1,28 @@
 name: Update Versions
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
 jobs:
   update-version:
     runs-on: ubuntu-latest
     steps:
+      - name: Get release branch
+        id: get-release-branch
+        run: |
+          # Get the latest release branch, based on the latest release tag
+          TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+              --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
+          RELEASE_BRANCH=releases/${TAG}
+          echo "release_branch=${RELEASE_BRANCH}" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.get-release-branch.outputs.release_branch }}
 
       - name: Install Pip packages
         run: pip install html2text pyyaml
@@ -16,21 +30,38 @@ jobs:
       - name: Update Version
         id: update-version
         run: |
-          OUTPUT=$(python ./.ci/update_versions.py "${{ github.event.inputs.gl_version }}")
+          OUTPUT=$(python ./.ci/update_versions.py)
           echo "has-update<<EOF" >> $GITHUB_OUTPUT
           echo "$OUTPUT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      - name: create pull request
+
+      - name: Add versions commit to release branch
         run: |
           if [[ '${{ steps.update-version.outputs.has-update }}' ]]; then
-            git checkout -b update-version
             git add versions.yaml
             git config --global user.name "Garden Linux Builder"
             git config --global user.email "gardenlinux@users.noreply.github.com"
-            git commit -am 'Update Version'
-            git pull --rebase origin update-version || true
-            git push --set-upstream origin update-version
-            UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update version' --body "automated update")
+            git commit -am 'Update Garden Linux versions'
+            echo "version_commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT 
+            git push
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cherry-pick versions commit to main
+        run: |
+          if [[ '${{ steps.update-version.outputs.has-update }}' ]]; then
+            git checkout origin/main
+            git config --global user.name "Garden Linux Builder"
+            git config --global user.email "gardenlinux@users.noreply.github.com"
+            git cherry-pick ${{ steps.update-version.outputs.version_commit }}
+            git push --set-upstream origin update-version
+            UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update Garden Linux versions' --body "automated update")
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-images:
+    needs: update-version
+    uses: ./.github/workflows/build_image.yml
+
