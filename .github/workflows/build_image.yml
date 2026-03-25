@@ -118,6 +118,7 @@ jobs:
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
       KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
+      TARGET_ARCH: amd64
 
     steps:
       - uses: actions/checkout@v6
