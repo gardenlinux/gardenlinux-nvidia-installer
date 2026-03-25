@@ -49,7 +49,7 @@ build-driver: check-driver-version extract-kernel-name
 # Both tarballs are embedded in the image so that the correct one can be selected at runtime.
 # KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
 # append KERNEL_FLAVOR or TARGET_ARCH separately.
-build-image: check-driver-version, extract-kernel-name
+build-image: check-driver-version extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
