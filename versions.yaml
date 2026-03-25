@@ -1,6 +1,6 @@
 os_versions:
 - '1592.18'
-- '1877.13'
+- '1877.14'
 - 2150.0.0
 kernel_flavour:
 - cloud
