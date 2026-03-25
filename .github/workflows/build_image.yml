@@ -25,6 +25,7 @@ jobs:
               --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
           RELEASE_BRANCH=releases/${TAG}
           echo "release_branch=${RELEASE_BRANCH}" >> $GITHUB_OUTPUT
+          echo image_folder=$(echo "/${RELEASE_BRANCH#releases/}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -47,7 +48,6 @@ jobs:
       - name: Generate build and manifest matrices
         id: set-matrix
         run: |
-          echo "RELEASE_BRANCH=${{ needs.release-branch.outputs.release_branch }}"
           MATRIX_JSON=$(python3 .ci/generate_matrix.py)
           echo "build_matrix=$(echo "$MATRIX_JSON" | jq -c '.build')" >> $GITHUB_OUTPUT
           echo "manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.manifest')" >> $GITHUB_OUTPUT
@@ -80,19 +80,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract branch name as lower case
-        env:
-          RELEASE_BRANCH: ${{ needs.release-branch.outputs.release_branch }}
-        shell: bash
-        run: echo IMAGE_FOLDER=$(echo "/${RELEASE_BRANCH#releases/}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        id: extract_branch
-
       - name: Build and push Docker image
         id: build_image
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.IMAGE_FOLDER }}/driver"
+          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.release-branch.outputs.image_folder }}/driver"
 
           TAG="$DRIVER_VERSION-${{ steps.extract_kernel.outputs.kernel_name }}-gardenlinux0"
           if docker manifest inspect "$IMAGE_PATH:$TAG"; then
@@ -140,13 +133,6 @@ jobs:
       - name: Lowercase github.repository
         run: echo "FOLDER_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
 
-      - name: Extract branch name as lower case
-        shell: bash
-        env:
-          RELEASE_BRANCH: ${{ needs.release-branch.outputs.release_branch }}
-        run: echo IMAGE_FOLDER=$(echo "/${RELEASE_BRANCH#releases/}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        id: extract_branch
-
       - name: Create and push multi-arch manifest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -159,9 +145,10 @@ jobs:
           KERNEL_VERSION="${KERNEL_NAME%-*}"
           DRIVER_MAJOR_VERS="${{ matrix.driver_version }}"
           DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
-          MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.IMAGE_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
-          AMD64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.IMAGE_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
-          #ARM64_IMAGE="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.IMAGE_FOLDER }}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux0"
+          IMAGE_REGISTRY_FOLDER="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.release-branch.outputs.image_folder }}"
+          MANIFEST_TAG="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
+          AMD64_IMAGE="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
+          #ARM64_IMAGE="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux0"
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
