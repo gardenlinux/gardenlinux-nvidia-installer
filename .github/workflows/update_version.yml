@@ -34,6 +34,7 @@ jobs:
           echo "has-update<<EOF" >> $GITHUB_OUTPUT
           echo "$OUTPUT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+          echo "$OUTPUT"
 
       - name: Add versions commit to release branch
         run: |
