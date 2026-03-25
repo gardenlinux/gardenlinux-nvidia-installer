@@ -3,24 +3,32 @@ WORKSPACE_DIR ?= $(shell pwd)
 KERNEL_FLAVOR ?= cloud
 TARGET_ARCH ?= amd64
 IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
-DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
+
 build: build-driver build-image
 
 ifndef GL_VERSION
 $(error GL_VERSION is not set. Please set it before running make.)
 endif
 
-ifndef DRIVER_VERSION
-$(error DRIVER_VERSION is not set. Please set it before running make.)
-endif
+check-driver-version:
+	@if [ -z "$(DRIVER_VERSION)" ]; then \
+		echo "Error: DRIVER_VERSION is not set." >&2; \
+		exit 1; \
+	fi
 
-ifndef KERNEL_NAME
-$(error KERNEL_NAME is not set. Please set it before running make.)
-endif
+DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
+
+extract-kernel-name:
+	$(eval KERNEL_NAME := $(shell docker run --rm \
+           -v "$(PWD):/workspace" \
+           -w /workspace \
+           ghcr.io/gardenlinux/gardenlinux/kmodbuild:$(TARGET_ARCH)-$(GL_VERSION) \
+           ./resources/extract_kernel_name.sh "$(KERNEL_FLAVOR)"))
+	@echo $(KERNEL_NAME)
 
 # build-driver compiles both open and proprietary kernel module tarballs in a
 # single kmodbuild container invocation via compile.sh.
-build-driver: 
+build-driver: check-driver-version extract-kernel-name
 	mkdir -p $(WORKSPACE_DIR)/out ;\
     if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-$(KERNEL_NAME).tar.gz ] || \
        [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-$(KERNEL_NAME).tar.gz ]; then \
@@ -41,7 +49,7 @@ build-driver:
 # Both tarballs are embedded in the image so that the correct one can be selected at runtime.
 # KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
 # append KERNEL_FLAVOR or TARGET_ARCH separately.
-build-image: 
+build-image: check-driver-version, extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
