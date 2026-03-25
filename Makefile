@@ -14,20 +14,13 @@ ifndef DRIVER_VERSION
 $(error DRIVER_VERSION is not set. Please set it before running make.)
 endif
 
-# If KERNEL_NAME is already set (e.g. passed by CI after a separate extract step),
-# extract-kernel-name is a no-op. Otherwise it runs the kmodbuild container to determine it.
-extract-kernel-name:
-ifeq ($(KERNEL_NAME),)
-	$(eval KERNEL_NAME := $(shell docker run --rm \
-           -v "$(PWD):/workspace" \
-           -w /workspace \
-           ghcr.io/gardenlinux/gardenlinux/kmodbuild:$(TARGET_ARCH)-$(GL_VERSION) \
-           ./resources/extract_kernel_name.sh "$(KERNEL_FLAVOR)"))
+ifndef KERNEL_NAME
+$(error KERNEL_NAME is not set. Please set it before running make.)
 endif
 
 # build-driver compiles both open and proprietary kernel module tarballs in a
 # single kmodbuild container invocation via compile.sh.
-build-driver: extract-kernel-name
+build-driver: 
 	mkdir -p $(WORKSPACE_DIR)/out ;\
     if [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-$(KERNEL_NAME).tar.gz ] || \
        [ ! -f $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-$(KERNEL_NAME).tar.gz ]; then \
@@ -48,7 +41,7 @@ build-driver: extract-kernel-name
 # Both tarballs are embedded in the image so that the correct one can be selected at runtime.
 # KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
 # append KERNEL_FLAVOR or TARGET_ARCH separately.
-build-image: extract-kernel-name
+build-image: 
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
