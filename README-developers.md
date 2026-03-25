@@ -82,14 +82,22 @@ and therefore `helm/gpu-operator-values.yaml` sets `driver.usePrecompiled: true`
 Work is in progress to support compile-at-runtime drivers (`driver.usePrecompiled: true`) - see branch 
 [`refactor_compilation`](https://github.com/gardenlinux/gardenlinux-nvidia-installer/tree/refactor_compilation).
 
-### Release process
+### Release process [WIP]
 
-When a new release is made, the following steps are performed:
-1. [WIP] Create a new release branch from `main` named `release/<version>`, for example `release/1.2.1`.
+When a new release is made, the workflow in `.github/workflows/release.yml` runs and the following steps are performed:
+1. Create a new release branch from `main` named `release/<version>`, for example `release/1.2.1`.
 2. Update the `version` field in `helm/gpu-operator-values.yaml` to the new image tag, for example `1.2.1`.
 4. Update the `image` field in `helm/gpu-operator-values.yaml` to the new image tag, for example `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:590-6.12.72-cloud-amd64-gardenlinux0`.
 5. Build and push the new image to the registry.
 6. Create a pull request from the release branch to `main` and merge it after review. 
 
+### Version update nightly job
+
+Each night the workflow in `.github/workflows/update-version.yaml` runs. It checks for new NVIDIA driver versions and
+new Garden Linux versions. The `versions.yaml` file is updated on the release branch and any new images that need to be 
+built are built and pushed to the registry in the folder for that release branch.
+A pull request is then created to merge the `versions.yaml` changes back to `main`.
+
 ### Develpoment on `main` branch
 
+TODO
