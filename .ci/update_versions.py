@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 from urllib.request import urlopen
 import html2text
 import re
@@ -36,7 +35,6 @@ def update_nvidia_driver_version(data):
                         print(f"Driver Version update : {match.group(0)}")
 
 def get_latest_gardenlinux_tags(data):
-    sys.stderr.write("get_latest_gardenlinux_tags\n")
     url = f"https://api.github.com/repos/gardenlinux/gardenlinux/tags"
     response = requests.get(url)
 
