@@ -43,22 +43,10 @@ def get_latest_gl_tag(data):
         return []
 
     tags = [tag['name'] for tag in response.json()]
-    number_tags = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
-
-    for i, version in enumerate(data.get('os_versions', [])):
-        for tag in number_tags:
-            gl_major, gl_minor, *gl_patch = version.split('.')
-            major, minor, *patch = tag.split('.')
-            if(int(major) == int(gl_major)):
-                if(int(minor) > int(gl_minor)):
-                    data['os_versions'][i] = tag
-                    version = tag
-                    print(f"GL Version update : {tag}")
-                elif(gl_patch and patch):
-                    if((int(minor) == int(gl_minor)) & (int(patch[0]) > int(gl_patch[0]))):
-                        data['os_versions'][i] = tag
-                        version = tag
-                        print(f"GL Version update : {tag}")
+    new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)].sort()
+    if data['os_versions'].sort() != new_os_versions:
+        print("Garden Linux version update: ", list(set(new_os_versions).difference(data['os_versions'])))
+        data['os_versions'] = new_os_versions
 
 def main():
     update_versions()
