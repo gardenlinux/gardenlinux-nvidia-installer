@@ -16,6 +16,7 @@ jobs:
      runs-on: ubuntu-latest
      outputs:
        release_branch: ${{ steps.get-release-branch.outputs.release_branch }}
+       image_folder: ${{ steps.get-release-branch.outputs.image_folder }}
      steps:
       - name: Get release branch
         id: get-release-branch
