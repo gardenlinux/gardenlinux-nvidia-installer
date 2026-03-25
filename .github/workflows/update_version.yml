@@ -30,6 +30,7 @@ jobs:
       - name: Update Version
         id: update-version
         run: |
+          cat versions.yaml
           OUTPUT=$(python ./.ci/update_versions.py)
           echo "has-update<<EOF" >> $GITHUB_OUTPUT
           echo "$OUTPUT" >> $GITHUB_OUTPUT
