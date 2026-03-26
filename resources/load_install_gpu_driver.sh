@@ -122,6 +122,10 @@ resolve_kernel_module_type() {
                 # Open modules do not support Maxwell, Pascal, or Volta GPUs.
                 KERNEL_MODULE_TYPE="proprietary"
                 echo "[INFO] KERNEL_MODULE_TYPE=auto resolved to 'proprietary' (pre-Turing GPU detected)"
+            elif _has_older_kernel; then
+                # Open modules do not support kernels before 6.6.616
+                KERNEL_MODULE_TYPE="proprietary"
+                echo "[INFO] KERNEL_MODULE_TYPE=auto resolved to 'proprietary' (pre-6.6.616 kernel detected)"
             else
                 KERNEL_MODULE_TYPE="open"
                 echo "[INFO] KERNEL_MODULE_TYPE=auto resolved to 'open' (driver branch ${driver_major}, Turing or newer GPU)"
@@ -135,6 +139,43 @@ resolve_kernel_module_type() {
 
     echo "[INFO] Kernel module type: ${KERNEL_MODULE_TYPE}"
     export KERNEL_MODULE_TYPE
+}
+
+
+# Returns 0 (true in bash) if the running kernel version is older than 6.6.616,
+# i.e. the kernel version extracted from KERNEL_NAME is less than 6.6.616.
+# Returns 1 if the kernel is 6.6.616 or newer.
+# The version is parsed from the leading "MAJOR.MINOR.PATCH" of KERNEL_NAME,
+# e.g. "6.6.616-gardenlinux-cloud-amd64" -> major=6, minor=6, patch=616.
+_has_older_kernel() {
+    local kernel_version
+    kernel_version=$(echo "${KERNEL_NAME}" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+    if [ -z "${kernel_version}" ]; then
+        echo "[WARN] Could not parse kernel version from KERNEL_NAME='${KERNEL_NAME}'; assuming older kernel."
+        return 0
+    fi
+
+    local major minor patch
+    major=$(echo "${kernel_version}" | cut -d. -f1)
+    minor=$(echo "${kernel_version}" | cut -d. -f2)
+    patch=$(echo "${kernel_version}" | cut -d. -f3)
+
+    # Threshold: 6.6.616
+    local t_major=6 t_minor=6 t_patch=616
+
+    if   [ "${major}" -gt "${t_major}" ]; then
+        return 1
+    elif [ "${major}" -lt "${t_major}" ]; then
+        return 0
+    elif [ "${minor}" -gt "${t_minor}" ]; then
+        return 1
+    elif [ "${minor}" -lt "${t_minor}" ]; then
+        return 0
+    elif [ "${patch}" -ge "${t_patch}" ]; then
+        return 1
+    else
+        return 0
+    fi
 }
 
 

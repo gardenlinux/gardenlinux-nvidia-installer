@@ -121,6 +121,10 @@ In `auto` mode the container picks the module type based on two checks:
 Set `KERNEL_MODULE_TYPE` explicitly as a container environment variable when deploying via the GPU Operator to override
 the auto-detection.
 
+**Important note:** with Garden Linux versions 1592.14 and earlier, only proprietary kernel modules will work. This is
+handled by the "auto" logic only in releases 1.2.1 and later.
+
+
 ## Supported versions
 
 ```bash
