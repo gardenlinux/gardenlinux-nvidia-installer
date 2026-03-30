@@ -107,9 +107,9 @@ following steps are performed:
 3. Update the version in `README.md` to the new version number in the Helm command and registry path examples.
 4. Update the "Supported versions" section in `README.md` by running `python3 list_versions.py` and replacing the output
    in the README with the new output.
-5. Commit the changes to `helm/gpu-operator-values.yaml` and push to `main`. Note that the release process will not
-   trigger again because the release workflow only runs on PRs and commits that are merged to `main`, not on commits
-   that are pushed directly to `main`.
+5. Commit the changes to `helm/gpu-operator-values.yaml` and `README.md` and push to `main`. Note that the release 
+   process will not trigger again because the release workflow only runs on PRs and commits that are merged to `main`, 
+   not on commits that are pushed directly to `main`.
 6. Create a new GitHub release from `main` using the new version number.
 7. Generate a build matrix based on the dimensions in `versions.yaml`.
 8. For each combination of dimensions in the build matrix:
