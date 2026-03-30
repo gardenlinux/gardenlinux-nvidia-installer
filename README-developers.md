@@ -102,15 +102,17 @@ When a PR or commit is merged to main, the workflow in `.github/workflows/releas
 following steps are performed:
 1. Determine the new version number based on the commits merged to `main` since the last release according to the 
    semantic versioning rules described above.
-2. Update the `version` field in `helm/gpu-operator-values.yaml` to the new image tag, for example `1.2.1`.
-3. Update the `image` field in `helm/gpu-operator-values.yaml` to the new image tag, for example `ghcr.
-io/gardenlinux/gardenlinux-nvidia-installer/1.2.1/driver:590-6.12.72-cloud-amd64-gardenlinux0`.
-4. Commit the changes to `helm/gpu-operator-values.yaml` and push to `main`. Note that the release process will not
+2. Update the version in the `driver.repository` field in `helm/gpu-operator-values.yaml` to the new image registry 
+   path, for example `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.2.1/driver`.
+3. Update the version in `README.md` to the new version number in the Helm command and registry path examples.
+4. Update the "Supported versions" section in `README.md` by running `python3 list_versions.py` and replacing the output
+   in the README with the new output.
+5. Commit the changes to `helm/gpu-operator-values.yaml` and push to `main`. Note that the release process will not
    trigger again because the release workflow only runs on PRs and commits that are merged to `main`, not on commits
    that are pushed directly to `main`.
-5. Create a new GitHub release from `main` using the new version number.
-6. Generate a build matrix based on the dimensions in `versions.yaml`.
-7. For each combination of dimensions in the build matrix:
+6. Create a new GitHub release from `main` using the new version number.
+7. Generate a build matrix based on the dimensions in `versions.yaml`.
+8. For each combination of dimensions in the build matrix:
 
    * If this is a patch release, check if the image for that combination already exists in the registry for the 
       previous release. If it does: pull that image, tag with the current release and push.
