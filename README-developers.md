@@ -82,22 +82,45 @@ and therefore `helm/gpu-operator-values.yaml` sets `driver.usePrecompiled: true`
 Work is in progress to support compile-at-runtime drivers (`driver.usePrecompiled: true`) - see branch 
 [`refactor_compilation`](https://github.com/gardenlinux/gardenlinux-nvidia-installer/tree/refactor_compilation).
 
-### Release process [WIP]
+### Semantic versioning
 
-When a new release is made, the workflow in `.github/workflows/release.yml` runs and the following steps are performed:
-1. Create a new release branch from `main` named `release/<version>`, for example `release/1.2.1`.
+We follow semantic versioning for releases. The version number is in the format `MAJOR.MINOR.PATCH`, where:
+- `MAJOR` version is incremented when there are breaking changes in the image or the Helm chart.
+- `MINOR` version is incremented when functionality is added in a backwards-compatible manner or when there are updates 
+   to the NVIDIA driver minor/patch versions in precompiled images.
+- `PATCH` version is incremented when new versions of Garden Linux are supported without any other changes to the 
+  image or the Helm chart.
+
+The CI process will automatically create a new release when changes are merged to `main` for minor and patch versions. 
+Major versions will be released manually when needed. If follows that **breaking changes should be merged to a separate 
+branch** and released manually as a major release when ready, after which the branch can be merged to `main` to trigger 
+the release process for minor and patch releases.
+
+### Release process
+
+When a PR or commit is merged to main, the workflow in `.github/workflows/release.yml` runs and the 
+following steps are performed:
+1. Determine the new version number based on the commits merged to `main` since the last release according to the 
+   semantic versioning rules described above.
 2. Update the `version` field in `helm/gpu-operator-values.yaml` to the new image tag, for example `1.2.1`.
-4. Update the `image` field in `helm/gpu-operator-values.yaml` to the new image tag, for example `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:590-6.12.72-cloud-amd64-gardenlinux0`.
-5. Build and push the new image to the registry.
-6. Create a pull request from the release branch to `main` and merge it after review. 
+3. Update the `image` field in `helm/gpu-operator-values.yaml` to the new image tag, for example `ghcr.
+io/gardenlinux/gardenlinux-nvidia-installer/1.2.1/driver:590-6.12.72-cloud-amd64-gardenlinux0`.
+4. Commit the changes to `helm/gpu-operator-values.yaml` and push to `main`. Note that the release process will not
+   trigger again because the release workflow only runs on PRs and commits that are merged to `main`, not on commits
+   that are pushed directly to `main`.
+5. Create a new GitHub release from `main` using the new version number.
+6. Generate a build matrix based on the dimensions in `versions.yaml`.
+7. For each combination of dimensions in the build matrix:
+
+   * If this is a patch release, check if the image for that combination already exists in the registry for the 
+      previous release. If it does: pull that image, tag with the current release and push.
+
+   * Otherwise, build the driver tarballs and container image, tag with the current release and push the image to the 
+      registry.
 
 ### Version update nightly job
 
 Each night the workflow in `.github/workflows/update-version.yaml` runs. It checks for new NVIDIA driver versions and
-new Garden Linux versions. The `versions.yaml` file is updated on the release branch and any new images that need to be 
-built are built and pushed to the registry in the folder for that release branch.
-A pull request is then created to merge the `versions.yaml` changes back to `main`.
-
-### Develpoment on `main` branch
-
-TODO
+new Garden Linux versions. The `versions.yaml` file is updated and a pull request is then created to 
+merge the `versions.yaml` changes back to `main`. Once the PR is merged, the release process described above will be 
+triggered, which will create and push new images if needed.
