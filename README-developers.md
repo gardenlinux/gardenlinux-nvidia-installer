@@ -108,7 +108,7 @@ following steps are performed:
 4. Update the "Supported versions" section in `README.md` by running `python3 list_versions.py` and replacing the output
    in the README with the new output.
 5. Commit the changes to `helm/gpu-operator-values.yaml` and `README.md` and push to `main`. Note that the release 
-   process will not trigger again because the release workflow only runs on PRs and commits that are merged to `main`, 
+   process will not trigger again because the release workflow [only runs on PRs that are merged](https://stackoverflow.com/questions/60710209/trigger-github-actions-only-when-pr-is-merged) to `main`, 
    not on commits that are pushed directly to `main`.
 6. Create a new GitHub release from `main` using the new version number.
 7. Generate a build matrix based on the dimensions in `versions.yaml`.
