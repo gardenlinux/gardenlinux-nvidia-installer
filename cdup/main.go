@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -68,7 +67,7 @@ func loadVersionsConfig(path string) (*VersionsConfig, error) {
 }
 
 // buildImageList creates all combinations of images from the config
-func buildImageList(config *VersionsConfig) []image {
+func buildImageList(config *VersionsConfig) ([]image, error) {
 	var images []image
 
 	var scriptPath = "./resources/extract_kernel_name.sh"
@@ -77,8 +76,7 @@ func buildImageList(config *VersionsConfig) []image {
 			for _, kernelFlavor := range config.KernelFlavors {
 				kernelName, err := extractKernelName(scriptPath, arch, osVersion, kernelFlavor)
 				if err != nil {
-					fmt.Println("failed to extract kernel name: %w", err)
-					return nil
+					return nil, fmt.Errorf("invalid credentials: %w", err)
 				}
 
 				for _, nvidiaDriver := range config.NvidiaDrivers {
@@ -93,7 +91,7 @@ func buildImageList(config *VersionsConfig) []image {
 			}
 		}
 	}
-	return images
+	return images, nil
 }
 
 func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) (string, error) {
@@ -107,7 +105,7 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 
 	// Build the docker command
 	image := fmt.Sprintf("ghcr.io/gardenlinux/gardenlinux/kmodbuild:%s-%s", targetArch, glVersion)
-	
+
 	cmd := exec.Command("docker", "run", "--rm",
 		"-v", parentDir+":/workspace",
 		"-w", "/workspace",
@@ -134,21 +132,23 @@ func main() {
 	c := &cobra.Command{
 		Use:   "cdup",
 		Short: "Component descriptor publisher",
-		Run:   run,
+		RunE:  run,
 	}
 
 	// Define the version flag
 	c.Flags().StringVarP(&version, "version", "v", "", "release version (required)")
 	err := c.MarkFlagRequired("version")
 	if err != nil {
-		return
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	// Define the commit flag
 	c.Flags().StringVarP(&commit, "commit", "c", "", "Commitish (required)")
 	err = c.MarkFlagRequired("commit")
 	if err != nil {
-		return
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	if err := c.Execute(); err != nil {
@@ -157,30 +157,31 @@ func main() {
 	}
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(cmd *cobra.Command, args []string) error {
 
 	versionsPath := filepath.Join("..", "versions.yaml")
 
 	// Load the configuration
 	config, err := loadVersionsConfig(versionsPath)
 	if err != nil {
-		log.Fatalf("failed to load versions config: %v", err)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	// Build the image list from config
-	var images = buildImageList(config)
+	images, err := buildImageList(config)
+	if err != nil {
+		return fmt.Errorf("failed to build image list: %w", err)
+	}
 
 	cd, err := buildComponentDescriptor(images, version, commit, nvidiaRepo+"/"+version+"/driver")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	var y []byte
 	y, err = cd.ToYAML()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	fmt.Println(string(y))
@@ -198,15 +199,14 @@ func run(cmd *cobra.Command, args []string) {
 		"token":     os.Getenv("VAULT_TOKEN"),
 	})
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	o := &oci{}
 
 	ociCfg := map[string]any{
 		"config":     "gardenlinux",
-		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/tests",
+		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases",
 	}
 	// ociCfg := map[string]any{
 	// 	"config": "gardener",
@@ -215,25 +215,23 @@ func run(cmd *cobra.Command, args []string) {
 
 	err = o.SetOCMConfig(context.Background(), v, ociCfg)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	err = o.PublishComponentDescriptor(context.Background(), "1.2.1", y)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	err = o.Close()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	err = v.Close()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
+
+	return nil
 }
