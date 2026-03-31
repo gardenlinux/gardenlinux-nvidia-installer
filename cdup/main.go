@@ -1,12 +1,22 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/cobra"
 )
+
+var version string
+var commit string
 
 const (
 	uploadRepo        = "europe-docker.pkg.dev/gardener-project/releases"
@@ -34,16 +44,133 @@ func parseCredentials[CREDS any](rawCreds map[string]any, creds *CREDS) error {
 	return nil
 }
 
+// VersionsConfig represents the structure of versions.yaml
+type VersionsConfig struct {
+	OSVersions    []string `yaml:"os_versions"`
+	KernelFlavors []string `yaml:"kernel_flavour"`
+	CPUArch       []string `yaml:"cpu_arch"`
+	NvidiaDrivers []string `yaml:"nvidia_drivers"`
+}
+
+// loadVersionsConfig reads and parses the versions.yaml file
+func loadVersionsConfig(path string) (*VersionsConfig, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read versions.yaml: %w", err)
+	}
+
+	var config VersionsConfig
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("failed to parse versions.yaml: %w", err)
+	}
+
+	return &config, nil
+}
+
+// buildImageList creates all combinations of images from the config
+func buildImageList(config *VersionsConfig) []image {
+	var images []image
+
+	var scriptPath = "./resources/extract_kernel_name.sh"
+	for _, arch := range config.CPUArch {
+		for _, osVersion := range config.OSVersions {
+			for _, kernelFlavor := range config.KernelFlavors {
+				kernelName, err := extractKernelName(scriptPath, arch, osVersion, kernelFlavor)
+				if err != nil {
+					fmt.Println("failed to extract kernel name: %w", err)
+					return nil
+				}
+
+				for _, nvidiaDriver := range config.NvidiaDrivers {
+					images = append(images, image{
+						Arch:                arch,
+						OSVersion:           fmt.Sprintf("%v", osVersion),
+						KernelVersion:       kernelName,
+						KernelFlavor:        kernelFlavor,
+						NvidiaDriverVersion: nvidiaDriver,
+					})
+				}
+			}
+		}
+	}
+	return images
+}
+
+func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) (string, error) {
+	// Get current working directory
+	pwd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("failed to get working directory: %w", err)
+	}
+
+	parentDir := filepath.Dir(pwd)
+
+	// Build the docker command
+	image := fmt.Sprintf("ghcr.io/gardenlinux/gardenlinux/kmodbuild:%s-%s", targetArch, glVersion)
+	
+	cmd := exec.Command("docker", "run", "--rm",
+		"-v", parentDir+":/workspace",
+		"-w", "/workspace",
+		image,
+		path,
+		kernelFlavor,
+	)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err = cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("docker command failed: %w, stderr: %s", err, stderr.String())
+	}
+
+	// Trim whitespace/newlines from output
+	kernelName := strings.TrimSpace(stdout.String())
+	return kernelName, nil
+}
+
 func main() {
-	cd, err := buildComponentDescriptor([]image{
-		{
-			Arch:                "amd64",
-			OSVersion:           "1877.13",
-			KernelVersion:       "6.12.74",
-			KernelFlavor:        "cloud",
-			NvidiaDriverVersion: "590.48.01",
-		},
-	}, "1.2.1", "f5d498f1e4311e83c08834c5e906540661d8bb1b", "ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.2.1/driver")
+	c := &cobra.Command{
+		Use:   "cdup",
+		Short: "Component descriptor publisher",
+		Run:   run,
+	}
+
+	// Define the version flag
+	c.Flags().StringVarP(&version, "version", "v", "", "release version (required)")
+	err := c.MarkFlagRequired("version")
+	if err != nil {
+		return
+	}
+
+	// Define the commit flag
+	c.Flags().StringVarP(&commit, "commit", "c", "", "Commitish (required)")
+	err = c.MarkFlagRequired("commit")
+	if err != nil {
+		return
+	}
+
+	if err := c.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func run(cmd *cobra.Command, args []string) {
+
+	versionsPath := filepath.Join("..", "versions.yaml")
+
+	// Load the configuration
+	config, err := loadVersionsConfig(versionsPath)
+	if err != nil {
+		log.Fatalf("failed to load versions config: %v", err)
+	}
+
+	// Build the image list from config
+	var images = buildImageList(config)
+
+	cd, err := buildComponentDescriptor(images, version, commit, nvidiaRepo+"/"+version+"/driver")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
