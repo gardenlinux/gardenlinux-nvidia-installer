@@ -27,6 +27,18 @@ jobs:
           MAJOR_VERSION=$(echo "$TAG" | cut -d'.' -f1)
           RELEASE_BRANCH="releases/${MAJOR_VERSION}.x.x"
           echo "release_branch=${RELEASE_BRANCH}" >> $GITHUB_OUTPUT
+          MAJOR=$(echo $TAG | cut -d. -f1)
+          MINOR=$(echo $TAG | cut -d. -f2)
+          PATCH=$(echo $TAG | cut -d. -f3)
+          if [[ $PATCH -gt 0 ]]; then
+            OLD_TAG="${MAJOR}.$MINOR.$((PATCH-1))"
+          elif [[ $MINOR -gt 0 ]]; then
+            PREV_MINOR=$((MINOR-1))
+            OLD_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+              --jq --arg major "$MAJOR" --arg minor "$PREV_MINOR" \
+              '[.[] | select(.tagName | test("^" + $major + "\\." + $minor + "\\.[0-9]+$"))] | sort_by(.tagName | split(".") | map(tonumber)) | last | .tagName')
+          fi
+          echo "image_folder_old=/${OLD_TAG}" >> $GITHUB_OUTPUT
           echo "image_folder=$(echo "/${TAG}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -88,10 +100,21 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.release-branch.outputs.image_folder }}/driver"
-
+          OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}"${{ needs.release-branch.outputs.image_folder_old }}/driver"
+    
           TAG="$DRIVER_VERSION-${{ steps.extract_kernel.outputs.kernel_name }}-gardenlinux0"
-          if docker manifest inspect "$IMAGE_PATH:$TAG"; then
-            echo "Image $IMAGE_PATH:$TAG already exists, skipping build and push."
+          DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
+          TAG1="$DRIVER_MAJOR_VERS-${{ steps.extract_kernel.outputs.kernel_name }}-gardenlinux0"
+    
+          # Check if current image exists
+          if docker manifest inspect "$OLD_IMAGE_PATH:$TAG" 2>/dev/null; then
+            echo "Image $OLD_IMAGE_PATH:$TAG already exists, skipping build"
+            echo "Pull from old image path and retag to new image path"
+            docker pull "$OLD_IMAGE_PATH:$TAG"
+            docker tag "$OLD_IMAGE_PATH:$TAG" "$IMAGE_PATH:$TAG"
+            docker push "$IMAGE_PATH:$TAG"
+            docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
+            docker push "$IMAGE_PATH:$TAG1"
           else
             make build \
               WORKSPACE_DIR="${{ github.workspace }}" \
