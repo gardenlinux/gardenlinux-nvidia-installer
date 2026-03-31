@@ -58,7 +58,6 @@ def get_latest_gardenlinux_tags(data):
     new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
     
     if sorted(data['os_versions']) != sorted(new_os_versions):
-        print("Garden Linux version update: ", list(set(new_os_versions).difference(data['os_versions'])))
         data['os_versions'] = new_os_versions
         return True
     return False
