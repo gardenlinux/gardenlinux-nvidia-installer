@@ -76,7 +76,7 @@ func buildImageList(config *VersionsConfig) ([]image, error) {
 			for _, kernelFlavor := range config.KernelFlavors {
 				kernelName, err := extractKernelName(scriptPath, arch, osVersion, kernelFlavor)
 				if err != nil {
-					return nil, fmt.Errorf("invalid credentials: %w", err)
+					return nil, fmt.Errorf("kernel name extraction failed: %w", err)
 				}
 
 				for _, nvidiaDriver := range config.NvidiaDrivers {
@@ -164,7 +164,7 @@ func run(cmd *cobra.Command, args []string) error {
 	// Load the configuration
 	config, err := loadVersionsConfig(versionsPath)
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("version config load failed: %w", err)
 	}
 
 	// Build the image list from config
@@ -175,13 +175,13 @@ func run(cmd *cobra.Command, args []string) error {
 
 	cd, err := buildComponentDescriptor(images, version, commit, nvidiaRepo+"/"+version+"/driver")
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("failed to build component descriptor: %w", err)
 	}
 
 	var y []byte
 	y, err = cd.ToYAML()
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("failed to convert to yaml: %w", err)
 	}
 
 	fmt.Println(string(y))
@@ -199,7 +199,7 @@ func run(cmd *cobra.Command, args []string) error {
 		"token":     os.Getenv("VAULT_TOKEN"),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("vault authorisation failed: %w", err)
 	}
 
 	o := &oci{}
@@ -215,22 +215,22 @@ func run(cmd *cobra.Command, args []string) error {
 
 	err = o.SetOCMConfig(context.Background(), v, ociCfg)
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("failed to set ocm configuration: %w", err)
 	}
 
 	err = o.PublishComponentDescriptor(context.Background(), "1.2.1", y)
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("component descriptor publish failed: %w", err)
 	}
 
 	err = o.Close()
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("failed to close oci registry: %w", err)
 	}
 
 	err = v.Close()
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
+		return fmt.Errorf("failed to de-authorise vault: %w", err)
 	}
 
 	return nil
