@@ -8,21 +8,23 @@ jobs:
   update-version:
     runs-on: ubuntu-latest
     steps:
-      - name: Get release branch
-        id: get-release-branch
+      - name: Get release branch and tag 
+        id: get-release-branch-tag
         run: |
           # Get the latest release branch, based on the latest release tag
           TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
               --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
-          RELEASE_BRANCH=releases/${TAG}
+          MAJOR_VERSION=$(echo "$TAG" | cut -d'.' -f1)
+          RELEASE_BRANCH="releases/${MAJOR_VERSION}.x.x"
           echo "release_branch=${RELEASE_BRANCH}" >> $GITHUB_OUTPUT
+          echo "release_tag=${TAG}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ steps.get-release-branch.outputs.release_branch }}
+          ref: ${{ steps.get-release-branch-tag.outputs.release_branch }}
 
       - name: Install Pip packages
         run: pip install html2text pyyaml
@@ -31,9 +33,14 @@ jobs:
         id: update-version
         run: |
           OUTPUT=$(python ./.ci/update_versions.py)
-          echo "has-update<<EOF" >> $GITHUB_OUTPUT
-          echo "$OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Parse the output for each update type
+          GARDENLINUX_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GARDENLINUX_VERSION_UPDATE" | cut -d'=' -f2)
+          NVIDIA_DRIVER_VERSION_UPDATE=$(echo "$OUTPUT" | grep "NVIDIA_DRIVER_VERSION_UPDATE" | cut -d'=' -f2)
+          
+          echo "gardenlinux-update=$GARDENLINUX_VERSION_UPDATE" >> $GITHUB_OUTPUT
+          echo "nvidia-update=$NVIDIA_DRIVER_VERSION_UPDATE" >> $GITHUB_OUTPUT
+          echo "has-update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
       - name: Add versions commit to release branch
         run: |
@@ -60,6 +67,37 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Patch release for Garden Linux version update
+        if: steps.update-version.outputs.gardenlinux-update == 'true'
+        run: |
+          echo "Garden Linux was updated!"
+          TAG=${{ steps.get-release-branch-tag.outputs.release_tag }}
+          
+          MAJOR=$(echo $TAG | cut -d. -f1)
+          MINOR=$(echo $TAG | cut -d. -f2)
+          PATCH=$(echo $TAG | cut -d. -f3)
+          # Increment patch version
+          NEW_PATCH=$((PATCH + 1))
+          RELEASE_TAG="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          # Create the release if it does not yet exist; ignore error if it already does.
+          gh release create "${RELEASE_TAG}" \
+            --title "${RELEASE_TAG}" \
+
+      - name: Create Minor version release for NVIDIA driver update
+        if: steps.update-version.outputs.nvidia-update == 'true'
+        run: |
+          echo "NVIDIA driver was updated!"
+          TAG=${{ steps.get-release-branch-tag.outputs.release_tag }}
+          
+          MAJOR=$(echo $TAG | cut -d. -f1)
+          MINOR=$(echo $TAG | cut -d. -f2)
+          PATCH=$(echo $TAG | cut -d. -f3)
+          # Increment patch version
+          NEW_MINOR=$((MINOR + 1))
+          RELEASE_TAG="${MAJOR}.${NEW_MINOR}.0"
+          # Create the release if it does not yet exist; ignore error if it already does.
+          gh release create "${RELEASE_TAG}" \
+            --title "${RELEASE_TAG}" \
 
   build-images:
     needs: update-version
