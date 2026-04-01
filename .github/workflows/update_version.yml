@@ -18,9 +18,6 @@ jobs:
         id: update-version
         run: |
           OUTPUT=$(python ./.ci/update_versions.py)
-          
-          echo "DEBUG: GARDENLINUX_VERSION_UPDATE = '$GARDENLINUX_VERSION_UPDATE'"
-          echo "DEBUG: NVIDIA_DRIVER_VERSION_UPDATE = '$NVIDIA_DRIVER_VERSION_UPDATE'"
 
           # Parse the output for each update type
           GARDENLINUX_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GARDENLINUX_VERSION_UPDATE" | cut -d'=' -f2)
@@ -30,10 +27,12 @@ jobs:
           echo "DEBUG: NVIDIA_DRIVER_VERSION_UPDATE = '$NVIDIA_DRIVER_VERSION_UPDATE'"
 
           echo "has-update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "DEBUG: has-update = '$has-update'"
 
       - name: Add versions commit to release branch
         run: |
           if [[ '${{ steps.update-version.outputs.has-update }}' ]]; then
+            git checkout -b update-version
             git add versions.yaml
             git config --global user.name "Garden Linux Builder"
             git config --global user.email "gardenlinux@users.noreply.github.com"
