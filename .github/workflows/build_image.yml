@@ -12,32 +12,19 @@ permissions:
   packages: write
 
 jobs:
-  release-branch:
+  image-folder:
      runs-on: ubuntu-latest
      outputs:
-       release_branch: ${{ steps.get-release-branch.outputs.release_branch }}
-       image_folder: ${{ steps.get-release-branch.outputs.image_folder }}
+       image_folder: ${{ steps.get-image-folder.outputs.image_folder }}
      steps:
-      - name: Get release branch
-        id: get-release-branch
+      - name: Get image folder
+        id: get-image-folder
         run: |
           # Get the latest release branch, based on the latest release tag
           TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
               --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
-          MAJOR_VERSION=$(echo "$TAG" | cut -d'.' -f1)
-          RELEASE_BRANCH="releases/${MAJOR_VERSION}.x.x"
-          echo "release_branch=${RELEASE_BRANCH}" >> $GITHUB_OUTPUT
-          MAJOR=$(echo $TAG | cut -d. -f1)
-          MINOR=$(echo $TAG | cut -d. -f2)
-          PATCH=$(echo $TAG | cut -d. -f3)
-          if [[ $PATCH -gt 0 ]]; then
-            OLD_TAG="${MAJOR}.$MINOR.$((PATCH-1))"
-          elif [[ $MINOR -gt 0 ]]; then
-            PREV_MINOR=$((MINOR-1))
-            OLD_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
-              --jq --arg major "$MAJOR" --arg minor "$PREV_MINOR" \
-              '[.[] | select(.tagName | test("^" + $major + "\\." + $minor + "\\.[0-9]+$"))] | sort_by(.tagName | split(".") | map(tonumber)) | last | .tagName')
-          fi
+          OLD_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+                    --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | .[1].tagName'))
           echo "image_folder_old=/${OLD_TAG}" >> $GITHUB_OUTPUT
           echo "image_folder=$(echo "/${TAG}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
         env:
@@ -45,14 +32,11 @@ jobs:
 
   generate-matrix:
     runs-on: ubuntu-latest
-    needs: release-branch
     outputs:
       build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
       manifest_matrix: ${{ steps.set-matrix.outputs.manifest_matrix }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.release-branch.outputs.release_branch }}
           
       - name: Install PyYAML and jq
         run: |
@@ -67,7 +51,7 @@ jobs:
           echo "manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.manifest')" >> $GITHUB_OUTPUT
 
   build:
-    needs: [generate-matrix, release-branch]
+    needs: [generate-matrix, image-folder]
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -81,11 +65,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.release-branch.outputs.release_branch }}
 
       - name: Lowercase github.repository
         run: echo "FOLDER_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
+      - name: Extract branch name as lower case
+        shell: bash
+        run: echo BRANCH_FOLDER=$(echo "/${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        id: extract_branch
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
@@ -99,12 +86,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.release-branch.outputs.image_folder }}/driver"
-          OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}"${{ needs.release-branch.outputs.image_folder_old }}/driver"
+          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}/driver"
+          OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/driver"
+
+          KERNEL_NAME=$(make extract-kernel-name \
+            TARGET_ARCH=$TARGET_ARCH \
+            GL_VERSION=$GL_VERSION \
+            KERNEL_FLAVOR=$KERNEL_FLAVOR)
     
-          TAG="$DRIVER_VERSION-${{ steps.extract_kernel.outputs.kernel_name }}-gardenlinux0"
+          TAG="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
           DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
-          TAG1="$DRIVER_MAJOR_VERS-${{ steps.extract_kernel.outputs.kernel_name }}-gardenlinux0"
+          TAG1="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
     
           # Check if current image exists
           if docker manifest inspect "$OLD_IMAGE_PATH:$TAG" 2>/dev/null; then
@@ -145,8 +137,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.release-branch.outputs.release_branch }}
 
       - name: Log in to GHCR
         uses: docker/login-action@v4
@@ -170,7 +160,7 @@ jobs:
           KERNEL_VERSION="${KERNEL_NAME%-*}"
           DRIVER_MAJOR_VERS="${{ matrix.driver_version }}"
           DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
-          IMAGE_REGISTRY_FOLDER="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.release-branch.outputs.image_folder }}"
+          IMAGE_REGISTRY_FOLDER="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.image-folder.outputs.image_folder }}"
           MANIFEST_TAG="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
           AMD64_IMAGE="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
           #ARM64_IMAGE="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux0"

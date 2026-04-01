@@ -34,7 +34,7 @@ jobs:
             git config --global user.email "gardenlinux@users.noreply.github.com"
             git commit -am 'Update versions'
             git push --set-upstream origin update-version
-            UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update Garden Linux versions' --body "automated update")
+            UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update versions' --body "automated update")
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
