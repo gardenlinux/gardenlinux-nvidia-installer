@@ -16,6 +16,7 @@ jobs:
      runs-on: ubuntu-latest
      outputs:
        image_folder: ${{ steps.get-image-folder.outputs.image_folder }}
+       image_folder_old: ${{ steps.get-image-folder.outputs.image_folder_old }}
      steps:
       - name: Get image folder
         id: get-image-folder
