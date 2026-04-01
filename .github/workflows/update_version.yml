@@ -23,11 +23,7 @@ jobs:
           GARDENLINUX_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GARDENLINUX_VERSION_UPDATE" | cut -d'=' -f2)
           NVIDIA_DRIVER_VERSION_UPDATE=$(echo "$OUTPUT" | grep "NVIDIA_DRIVER_VERSION_UPDATE" | cut -d'=' -f2)
 
-          echo "DEBUG: GARDENLINUX_VERSION_UPDATE = '$GARDENLINUX_VERSION_UPDATE'"
-          echo "DEBUG: NVIDIA_DRIVER_VERSION_UPDATE = '$NVIDIA_DRIVER_VERSION_UPDATE'"
-
           echo "has_update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "DEBUG: has-update = '$has_update'"
 
       - name: Add versions commit to release branch
         run: |
