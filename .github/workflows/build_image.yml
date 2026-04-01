@@ -24,11 +24,25 @@ jobs:
           # Get the latest release branch, based on the latest release tag
           TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
               --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
+          
+          # Get the second latest release tag for old image folder
           OLD_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
                     --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | .[1].tagName')
 
+          MAJOR=$(echo "$TAG" | cut -d. -f1)
+          MINOR=$(echo "$TAG" | cut -d. -f2)
+          PATCH=$(echo "$TAG" | cut -d. -f3)
 
-          IMAGE_FOLDER_OLD=$(echo "/${OLD_TAG}" | tr '[:upper:]' '[:lower:]')
+          OLD_MAJOR=$(echo "$OLD_TAG" | cut -d. -f1)
+          OLD_MINOR=$(echo "$OLD_TAG" | cut -d. -f2)
+
+          # We only look at the previous folder in the case of a patch release - for minor and major releases
+          #  we build all images from scratch, so there is no old folder to pull from and IMAGE_FOLDER_OLD should be empty
+          if [[ "$MAJOR" == "$OLD_MAJOR" && "$MINOR" == "$OLD_MINOR" ]]; then
+            IMAGE_FOLDER_OLD=$(echo "/${OLD_TAG}" | tr '[:upper:]' '[:lower:]')
+          else
+            IMAGE_FOLDER_OLD=""
+          fi
           IMAGE_FOLDER=$(echo "/${TAG}" | tr '[:upper:]' '[:lower:]')
 
           echo "image_folder_old: ${IMAGE_FOLDER_OLD}"
@@ -97,27 +111,42 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}/driver"
-          OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/driver"
 
           KERNEL_NAME=$(make extract-kernel-name \
             TARGET_ARCH=$TARGET_ARCH \
             GL_VERSION=$GL_VERSION \
             KERNEL_FLAVOR=$KERNEL_FLAVOR)
     
-          TAG="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
+          TAG1="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
           DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
-          TAG1="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
-    
+          TAG2="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
+
+          BUILD_IMAGE=true
+          
           # Check if current image exists
-          if docker manifest inspect "$OLD_IMAGE_PATH:$TAG" 2>/dev/null; then
-            echo "Image $OLD_IMAGE_PATH:$TAG already exists, skipping build"
-            echo "Pull from old image path and retag to new image path"
-            docker pull "$OLD_IMAGE_PATH:$TAG"
-            docker tag "$OLD_IMAGE_PATH:$TAG" "$IMAGE_PATH:$TAG"
-            docker push "$IMAGE_PATH:$TAG"
-            docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
-            docker push "$IMAGE_PATH:$TAG1"
-          else
+          if [[ -n "${{ needs.image-folder.outputs.image_folder_old }}" ]]; then
+            BUILD_IMAGE=false
+            OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/driver"
+            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG1" 2>/dev/null; then
+              echo "Image $OLD_IMAGE_PATH:$TAG1 already exists, skipping build"
+              echo "Pull from old image path and retag to new image path"
+              docker pull "$OLD_IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
+              docker push "$IMAGE_PATH:$TAG1"
+            else
+              BUILD_IMAGE=true
+            fi
+            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG2" 2>/dev/null; then
+              echo "Image $OLD_IMAGE_PATH:$TAG2 already exists, skipping build"
+              echo "Pull from old image path and retag to new image path"
+              docker pull "$OLD_IMAGE_PATH:$TAG2"
+              docker tag "$OLD_IMAGE_PATH:$TAG2" "$IMAGE_PATH:$TAG2"
+              docker push "$IMAGE_PATH:$TAG2"
+            else
+              BUILD_IMAGE=true
+            fi
+          fi
+          if [[ "$BUILD_IMAGE" == "true" ]]; then
             make build \
               WORKSPACE_DIR="${{ github.workspace }}" \
               GL_VERSION=$GL_VERSION \
