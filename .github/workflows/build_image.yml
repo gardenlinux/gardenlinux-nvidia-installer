@@ -7,6 +7,7 @@ on:
     paths:
       - 'helm/**'
       - 'README.md'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
