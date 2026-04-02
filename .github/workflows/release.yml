@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
     types: [closed]
+    # Don't trigger on changes to helm chart or README, as those are updated in a separate PR after the release is created
+    paths-ignore:
+      - 'helm/**'
+      - 'README*.md'
 
 permissions:
   contents: write
@@ -12,7 +16,6 @@ permissions:
 
 jobs:
   determine-version:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump.outputs.new_tag }}
@@ -95,19 +98,11 @@ jobs:
     needs: determine-version
     runs-on: ubuntu-latest
     steps:
-      - name: Get GitHub App installation token
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: main
           # Use a token that allows pushing to protected branches if needed
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -158,9 +153,9 @@ jobs:
             in_block { next }
             { print }
           ' README.md > README.md.tmp && mv README.md.tmp README.md
-      - name: Commit and push directly to main
+      - name: Commit and create PR for updated files
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ needs.determine-version.outputs.new_tag }}"
           BRANCH="release-update/${TAG}"
@@ -180,23 +175,8 @@ jobs:
           git commit -m "Update release references for ${TAG}"
           git push origin "${BRANCH}"
           
-          # Create a pull request
-          PR_URL=$(gh pr create \
-            --title "Update release references for ${TAG}" \
-            --body "Automated PR to update release references for version ${TAG}" \
-            --base main \
-            --head "${BRANCH}")
-          
-          echo "Created PR: ${PR_URL}"
-          
-          # Extract PR number from URL
-          PR_NUMBER=$(echo "${PR_URL}" | grep -oE '[0-9]+$')
-          
-          # Merge the PR with admin bypass (--admin flag bypasses branch protection)
-          gh pr merge "${PR_NUMBER}" --squash --admin --delete-branch
-          
-          echo "PR merged successfully"
+          PR_LINK=$(gh pr create --base main --head ${BRANCH} --title 'Update release references for ${TAG}' --body "Automated PR to update release references for version ${TAG}")
 
   build-image:
-    needs: update-files
+    needs: determine-version
     uses: ./.github/workflows/build_image.yml
