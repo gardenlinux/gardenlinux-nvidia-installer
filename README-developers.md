@@ -107,9 +107,7 @@ following steps are performed:
 3. Update the version in `README.md` to the new version number in the Helm command and registry path examples.
 4. Update the "Supported versions" section in `README.md` by running `python3 list_versions.py` and replacing the output
    in the README with the new output.
-5. Commit the changes to `helm/gpu-operator-values.yaml` and `README.md` and push to `main`. Note that the release 
-   process will not trigger again because the release workflow [only runs on PRs that are merged](https://stackoverflow.com/questions/60710209/trigger-github-actions-only-when-pr-is-merged) to `main`, 
-   not on commits that are pushed directly to `main`.
+5. Commit the changes to `helm/gpu-operator-values.yaml` and `README.md` and create a pull request. 
 6. Create a new GitHub release from `main` using the new version number.
 7. Generate a build matrix based on the dimensions in `versions.yaml`.
 8. For each combination of dimensions in the build matrix:
@@ -119,6 +117,11 @@ following steps are performed:
 
    * Otherwise, build the driver tarballs and container image, tag with the current release and push the image to the 
       registry.
+9. Once the image building and pushing is complete (which may require somre retries if there are many combinations in 
+    the build matrix), an admin can merge the PR created in step 5 to `main` to update the Helm values and README with 
+    the new version number and supported versions, and users looking at `main` will now see examples with the new version number.
+    Note that the release process will not trigger from this PR merge because the release workflow ignores changes to 
+    these files.
 
 ### Version update nightly job
 
