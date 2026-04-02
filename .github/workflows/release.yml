@@ -1,9 +1,9 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    branches: [main]
+    types: [closed]
     # Only trigger on changes to versions.yaml or files in the helm/ directory
     paths-ignore:
       - 'helm/**'
