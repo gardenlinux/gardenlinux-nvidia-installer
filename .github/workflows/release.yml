@@ -13,9 +13,11 @@ permissions:
   contents: write
   id-token: write
   packages: write
+  pull-requests: write
 
 jobs:
   determine-version:
+    if: github.event.pull_request.merged == true # Only run if the PR was merged - needed to avoid creating a release for every PR that is closed without merging
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump.outputs.new_tag }}
