@@ -1,12 +1,9 @@
 name: Release
+
 on:
-  workflow_dispatch:
-  release:
-    types:
-      - published
-  push:
-    branches:
-      - main
+  pull_request:
+    branches: [main]
+    types: [closed]
 
 permissions:
   contents: write
@@ -14,29 +11,102 @@ permissions:
   packages: write
 
 jobs:
-  build-image:
-    uses: ./.github/workflows/build_image.yml
+  determine-version:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-  update-helm-values:
-    needs: build-image
+      - name: Determine new semver tag
+        id: bump
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Find the latest semver release tag
+          LAST_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+            --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName // empty')
+
+          if [[ -z "$LAST_TAG" ]]; then
+            echo "No previous release found, starting at 1.0.0"
+            MAJOR=1; MINOR=0; PATCH=0
+            NEW_TAG="1.0.0"
+            echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          MAJOR=$(echo "$LAST_TAG" | cut -d. -f1)
+          MINOR=$(echo "$LAST_TAG" | cut -d. -f2)
+          PATCH=$(echo "$LAST_TAG" | cut -d. -f3)
+
+          # Collect all commit messages since the last tag
+          COMMITS=$(git log "${LAST_TAG}..HEAD" --format="%s %b")
+
+          # Extract nvidia_drivers and os_versions lists at last tag and HEAD
+          NVIDIA_BEFORE=$(git show "${LAST_TAG}:versions.yaml" 2>/dev/null | \
+            awk '/^nvidia_drivers:/{found=1; next} found && /^[^ -]/{exit} found{print}')
+          NVIDIA_AFTER=$(git show HEAD:versions.yaml | \
+            awk '/^nvidia_drivers:/{found=1; next} found && /^[^ -]/{exit} found{print}')
+
+          OS_BEFORE=$(git show "${LAST_TAG}:versions.yaml" 2>/dev/null | \
+            awk '/^os_versions:/{found=1; next} found && /^[^ -]/{exit} found{print}')
+          OS_AFTER=$(git show HEAD:versions.yaml | \
+            awk '/^os_versions:/{found=1; next} found && /^[^ -]/{exit} found{print}')
+
+          NVIDIA_ADDED=$(diff <(echo "$NVIDIA_BEFORE") <(echo "$NVIDIA_AFTER") | grep -c '^>' || true)
+          OS_ADDED=$(diff <(echo "$OS_BEFORE") <(echo "$OS_AFTER") | grep -c '^>' || true)
+
+          # Detect changes outside of os_versions in versions.yaml
+          VERSIONS_YAML_BEFORE_NO_OS=$(git show "${LAST_TAG}:versions.yaml" 2>/dev/null | \
+            awk '/^os_versions:/{skip=1} skip && /^[^ -]/{skip=0} !skip{print}')
+          VERSIONS_YAML_AFTER_NO_OS=$(git show HEAD:versions.yaml | \
+            awk '/^os_versions:/{skip=1} skip && /^[^ -]/{skip=0} !skip{print}')
+          VERSIONS_YAML_OTHER_CHANGES=$(diff \
+            <(echo "$VERSIONS_YAML_BEFORE_NO_OS") \
+            <(echo "$VERSIONS_YAML_AFTER_NO_OS") \
+            | grep -c '^>' || true)
+
+          # Count any changed files other than versions.yaml
+          OTHER_FILES_CHANGED=$(git diff --name-only "${LAST_TAG}..HEAD" | grep -cv '^versions\.yaml$' || true)
+
+          # Determine version bump type:
+          #   [major] or "BREAKING CHANGE" in commits → major
+          #   new nvidia_drivers entry, changes to other files, or non-os_versions changes in versions.yaml → minor
+          #   new os_versions entry only → patch
+          if echo "$COMMITS" | grep -qiE '\[major\]|BREAKING CHANGE'; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+          elif [[ "$NVIDIA_ADDED" -gt 0 ]] || [[ "$OTHER_FILES_CHANGED" -gt 0 ]] || [[ "$VERSIONS_YAML_OTHER_CHANGES" -gt 0 ]]; then
+            MINOR=$((MINOR + 1)); PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+
+          NEW_TAG="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Last tag: ${LAST_TAG} → New tag: ${NEW_TAG}"
+          echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.bump.outputs.new_tag }}" \
+            --title "${{ steps.bump.outputs.new_tag }}" \
+            --generate-notes
+
+  update-files:
+    needs: determine-version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Resolve release tag
-        id: resolve-tag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          else
-            TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
-              --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
-            echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          fi
-          echo "Resolved tag: ${TAG}"
+        with:
+          ref: main
+          # Use a token that allows pushing to protected branches if needed
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,13 +118,13 @@ jobs:
 
       - name: Update driver.repository in gpu-operator-values.yaml
         run: |
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
+          TAG="${{ needs.determine-version.outputs.new_tag }}"
           sed -i "s|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/.*|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/${TAG}|" \
             helm/gpu-operator-values.yaml
 
       - name: Update release tag in README.md
         run: |
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
+          TAG="${{ needs.determine-version.outputs.new_tag }}"
           # Replace every refs/tags/<version> URL and the inline image path example
           sed -i \
             -E "s|(refs/tags/)[0-9]+\.[0-9]+\.[0-9]+|\1${TAG}|g" \
@@ -88,21 +158,21 @@ jobs:
             { print }
           ' README.md > README.md.tmp && mv README.md.tmp README.md
 
-      - name: Commit and push
+      - name: Commit and push directly to main
         run: |
-          TAG="${{ steps.resolve-tag.outputs.tag }}"
-          
+          TAG="${{ needs.determine-version.outputs.new_tag }}"
           git config user.name "Garden Linux Builder"
           git config user.email "gardenlinux@users.noreply.github.com"
-          git checkout -b update-readme
           git add helm/gpu-operator-values.yaml README.md
           if git diff --cached --quiet --exit-code ; then
             echo "No changes to commit"
           else
             git commit -m "Update release references for ${TAG}"
-            git push --set-upstream origin update-readme
-            gh pr create --base main --head update-readme --title "Update README.md for release ${TAG}" --body "Automated update of Helm values and README.md for release ${TAG}."
+            git push origin main
           fi
-
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-image:
+    needs: update-files
+    uses: ./.github/workflows/build_image.yml

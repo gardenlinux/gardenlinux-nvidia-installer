@@ -17,21 +17,25 @@ jobs:
       - name: Update Version
         id: update-version
         run: |
-          OUTPUT=$(python ./.ci/update_versions.py "${{ github.event.inputs.gl_version }}")
-          echo "has-update<<EOF" >> $GITHUB_OUTPUT
-          echo "$OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: create pull request
+          OUTPUT=$(python ./.ci/update_versions.py)
+
+          # Parse the output for each update type
+          GARDENLINUX_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GARDENLINUX_VERSION_UPDATE" | cut -d'=' -f2)
+          NVIDIA_DRIVER_VERSION_UPDATE=$(echo "$OUTPUT" | grep "NVIDIA_DRIVER_VERSION_UPDATE" | cut -d'=' -f2)
+
+          echo "has_update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+      - name: Add versions commit to release branch
         run: |
-          if [[ '${{ steps.update-version.outputs.has-update }}' ]]; then
+          if [[ '${{ steps.update-version.outputs.has_update }}' ]]; then
             git checkout -b update-version
             git add versions.yaml
             git config --global user.name "Garden Linux Builder"
             git config --global user.email "gardenlinux@users.noreply.github.com"
-            git commit -am 'Update Version'
-            git pull --rebase origin update-version || true
+            git commit -am 'Update versions'
             git push --set-upstream origin update-version
-            UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update version' --body "automated update")
+            UPDATE_PR_LINK=$(gh pr create --base main --head update-version --title 'Update versions' --body "automated update")
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
