@@ -7,7 +7,7 @@ on:
     # Only trigger on changes to versions.yaml or files in the helm/ directory
     paths-ignore:
       - 'helm/**'
-      - 'README.md'
+      - 'README*.md'
 
 permissions:
   contents: write
@@ -101,7 +101,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: main
           # Use a token that allows pushing to protected branches if needed
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -177,3 +176,7 @@ jobs:
           git push origin "${BRANCH}"
           
           PR_LINK=$(gh pr create --base main --head ${BRANCH} --title 'Update release references for ${TAG}' --body "Automated PR to update release references for version ${TAG}")
+
+  build-image:
+    needs: determine-version
+    uses: ./.github/workflows/build_image.yml

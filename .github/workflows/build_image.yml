@@ -1,12 +1,7 @@
 name: Build and Publish Container Images (matrix)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'helm/**'
-      - 'README.md'
+  workflow_call:
   workflow_dispatch:
 
 env:
