@@ -73,13 +73,7 @@ jobs:
           # Count any changed files other than versions.yaml
           OTHER_FILES_CHANGED=$(git diff --name-only "${LAST_TAG}..HEAD" | grep -cv '^versions\.yaml$' || true)
 
-          # Determine version bump type:
-          #   [major] or "BREAKING CHANGE" in commits → major
-          #   new nvidia_drivers entry, changes to other files, or non-os_versions changes in versions.yaml → minor
-          #   new os_versions entry only → patch
-          if echo "$COMMITS" | grep -qiE '\[major\]|BREAKING CHANGE'; then
-            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
-          elif [[ "$NVIDIA_ADDED" -gt 0 ]] || [[ "$OTHER_FILES_CHANGED" -gt 0 ]] || [[ "$VERSIONS_YAML_OTHER_CHANGES" -gt 0 ]]; then
+          if [[ "$NVIDIA_ADDED" -gt 0 ]] || [[ "$OTHER_FILES_CHANGED" -gt 0 ]] || [[ "$VERSIONS_YAML_OTHER_CHANGES" -gt 0 ]]; then
             MINOR=$((MINOR + 1)); PATCH=0
           else
             PATCH=$((PATCH + 1))
@@ -164,21 +158,44 @@ jobs:
             in_block { next }
             { print }
           ' README.md > README.md.tmp && mv README.md.tmp README.md
-
       - name: Commit and push directly to main
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           TAG="${{ needs.determine-version.outputs.new_tag }}"
+          BRANCH="release-update/${TAG}"
+          
           git config user.name "Garden Linux Builder"
           git config user.email "gardenlinux@users.noreply.github.com"
+          
+          # Check if there are changes to commit
           git add helm/gpu-operator-values.yaml README.md
-          if git diff --cached --quiet --exit-code ; then
+          if git diff --cached --quiet --exit-code; then
             echo "No changes to commit"
-          else
-            git commit -m "Update release references for ${TAG}"
-            git push origin main
+            exit 0
           fi
+          
+          # Create a new branch and commit changes
+          git checkout -b "${BRANCH}"
+          git commit -m "Update release references for ${TAG}"
+          git push origin "${BRANCH}"
+          
+          # Create a pull request
+          PR_URL=$(gh pr create \
+            --title "Update release references for ${TAG}" \
+            --body "Automated PR to update release references for version ${TAG}" \
+            --base main \
+            --head "${BRANCH}")
+          
+          echo "Created PR: ${PR_URL}"
+          
+          # Extract PR number from URL
+          PR_NUMBER=$(echo "${PR_URL}" | grep -oE '[0-9]+$')
+          
+          # Merge the PR with admin bypass (--admin flag bypasses branch protection)
+          gh pr merge "${PR_NUMBER}" --squash --admin --delete-branch
+          
+          echo "PR merged successfully"
 
   build-image:
     needs: update-files
