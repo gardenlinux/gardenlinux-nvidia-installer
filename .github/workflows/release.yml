@@ -1,10 +1,13 @@
 name: Release
 
 on:
-  pull_request:
-    branches: [main]
-    types: [closed]
-
+  push:
+    branches:
+      - main
+    # Only trigger on changes to versions.yaml or files in the helm/ directory
+    paths-ignore:
+      - 'helm/**'
+      - 'README.md'
 permissions:
   contents: write
   id-token: write
@@ -12,7 +15,6 @@ permissions:
 
 jobs:
   determine-version:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump.outputs.new_tag }}
@@ -151,7 +153,7 @@ jobs:
             in_block { next }
             { print }
           ' README.md > README.md.tmp && mv README.md.tmp README.md
-      - name: Commit and push directly to main
+      - name: Commit and create PR for updated files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -173,23 +175,4 @@ jobs:
           git commit -m "Update release references for ${TAG}"
           git push origin "${BRANCH}"
           
-          # Create a pull request
-          PR_URL=$(gh pr create \
-            --title "Update release references for ${TAG}" \
-            --body "Automated PR to update release references for version ${TAG}" \
-            --base main \
-            --head "${BRANCH}")
-          
-          echo "Created PR: ${PR_URL}"
-          
-          # Extract PR number from URL
-          PR_NUMBER=$(echo "${PR_URL}" | grep -oE '[0-9]+$')
-          
-          # Merge the PR with admin bypass (--admin flag bypasses branch protection)
-          gh pr merge "${PR_NUMBER}" --squash --admin --delete-branch
-          
-          echo "PR merged successfully"
-
-  build-image:
-    needs: update-files
-    uses: ./.github/workflows/build_image.yml
+          PR_LINK=$(gh pr create --base main --head ${BRANCH} --title 'Update release references for ${TAG}' --body "Automated PR to update release references for version ${TAG}")
