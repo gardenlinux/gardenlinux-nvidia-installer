@@ -177,7 +177,7 @@ jobs:
           git commit -m "Update release references for ${TAG}"
           git push origin "${BRANCH}"
           
-          PR_LINK=$(gh pr create --base main --head ${BRANCH} --title 'Update release references for ${TAG}' --body "Automated PR to update release references for version ${TAG}")
+          PR_LINK=$(gh pr create --base main --head ${BRANCH} --title "Update release references for ${TAG}" --body "Automated PR to update release references for version ${TAG}")
 
   build-image:
     needs: determine-version
