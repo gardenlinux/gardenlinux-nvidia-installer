@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     types: [closed]
-    # Only trigger on changes to versions.yaml or files in the helm/ directory
+    # Don't trigger on changes to helm chart or README, as those are updated in a separate PR after the release is created
     paths-ignore:
       - 'helm/**'
       - 'README*.md'
