@@ -101,12 +101,19 @@ jobs:
     needs: determine-version
     runs-on: ubuntu-latest
     steps:
+      - name: Get GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
           ref: main
           # Use a token that allows pushing to protected branches if needed
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -115,13 +122,6 @@ jobs:
 
       - name: Install PyYAML
         run: pip install pyyaml
-
-      - name: Get GitHub App installation token
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
           
       - name: Update driver.repository in gpu-operator-values.yaml
         run: |
@@ -166,6 +166,8 @@ jobs:
           ' README.md > README.md.tmp && mv README.md.tmp README.md
 
       - name: Commit and push directly to main
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           TAG="${{ needs.determine-version.outputs.new_tag }}"
           git config user.name "Garden Linux Builder"
@@ -177,8 +179,6 @@ jobs:
             git commit -m "Update release references for ${TAG}"
             git push origin main
           fi
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
   build-image:
     needs: update-files
