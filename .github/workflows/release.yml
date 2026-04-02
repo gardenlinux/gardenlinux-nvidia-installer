@@ -116,6 +116,13 @@ jobs:
       - name: Install PyYAML
         run: pip install pyyaml
 
+      - name: Get GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          
       - name: Update driver.repository in gpu-operator-values.yaml
         run: |
           TAG="${{ needs.determine-version.outputs.new_tag }}"
@@ -171,7 +178,7 @@ jobs:
             git push origin main
           fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
   build-image:
     needs: update-files
