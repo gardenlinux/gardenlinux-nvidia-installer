@@ -191,8 +191,8 @@ jobs:
             KERNEL_FLAVOR=$KERNEL_FLAVOR)
 
           KERNEL_VERSION="${KERNEL_NAME%-*}"
-          DRIVER_MAJOR_VERS="${{ matrix.driver_version }}"
-          DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
+          DRIVER_VERSION="${{ matrix.driver_version }}"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
           IMAGE_REGISTRY_FOLDER="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.image-folder.outputs.image_folder }}"
           MANIFEST_TAG="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
           AMD64_IMAGE="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
