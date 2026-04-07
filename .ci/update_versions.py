@@ -64,11 +64,13 @@ def get_latest_gardenlinux_tags(data):
     for i in reversed(new_os_versions):
         if i not in data['os_versions']:
             ancient_versions.append(i)
-        else:
+        else: # Stop when we get a match, so we avoid also removing the new versions at the top
             break
 
-    if sorted(data['os_versions']) != sorted(new_os_versions):
-        data['os_versions'] = [x for x in new_os_versions if x not in ancient_versions]
+    filtered_os_versions = [x for x in new_os_versions if x not in ancient_versions]
+
+    if sorted(data['os_versions']) != sorted(filtered_os_versions):
+        data['os_versions'] = filtered_os_versions
         return True
     return False
 
