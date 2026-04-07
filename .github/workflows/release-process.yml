@@ -183,5 +183,5 @@ jobs:
           PR_LINK=$(gh pr create --base main --head ${BRANCH} --title "Update release references for ${TAG}" --body "Automated PR to update release references for version ${TAG}. Merge PR to create GitHub release.")
 
   build-image:
-    needs: determine-version
+    needs: [determine-version, update-files]
     uses: ./.github/workflows/build_image.yml
