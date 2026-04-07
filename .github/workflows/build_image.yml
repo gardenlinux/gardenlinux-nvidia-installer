@@ -118,7 +118,7 @@ jobs:
             KERNEL_FLAVOR=$KERNEL_FLAVOR)
     
           TAG1="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
-          DRIVER_MAJOR_VERS="${DRIVER_MAJOR_VERS%%.*}"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
           TAG2="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
 
           BUILD_IMAGE=true
