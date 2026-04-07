@@ -117,6 +117,8 @@ jobs:
             GL_VERSION=$GL_VERSION \
             KERNEL_FLAVOR=$KERNEL_FLAVOR)
     
+          echo KERNEL_NAME=$(echo "${KERNEL_NAME}") >> $GITHUB_ENV
+    
           TAG1="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
           DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
           TAG2="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
@@ -156,40 +158,12 @@ jobs:
             docker push $IMAGE_PATH:$TAG2
           fi
 
-  manifest:
-    needs: [build, generate-matrix]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.manifest_matrix) }}
-    env:
-      IMAGE_NAME: "driver"
-      GL_VERSION: ${{ matrix.os_version }}
-      DRIVER_VERSION: ${{ matrix.driver_version }}
-      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
-      TARGET_ARCH: amd64
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Lowercase github.repository
-        run: echo "FOLDER_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
-
       - name: Create and push multi-arch manifest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KERNEL_NAME: ${{ env.KERNEL_NAME }}
+          IMAGE_NAME: "driver"
         run: |
-          KERNEL_NAME=$(make extract-kernel-name \
-            TARGET_ARCH=$TARGET_ARCH \
-            GL_VERSION=$GL_VERSION \
-            KERNEL_FLAVOR=$KERNEL_FLAVOR)
-
           KERNEL_VERSION="${KERNEL_NAME%-*}"
           DRIVER_VERSION="${{ matrix.driver_version }}"
           DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
