@@ -22,7 +22,8 @@ jobs:
      steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        fetch-depth: 0 # Get full history to be able to determine the latest release-update branch and latest release tag
+        with:
+          fetch-depth: 0 # Get full history to be able to determine the latest release-update branch and latest release tag
 
       - name: Get image folder
         id: get-image-folder
