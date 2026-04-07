@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Create GitHub release
         env:
@@ -41,12 +39,12 @@ jobs:
           
           # Merge main into the <major>.<minor> branch to update the release branch with the latest changes from main
           release_branch="${MAJOR}.${MINOR}"
-          git checkout -b "${release_branch}" origin/"${release_branch}" || git checkout "${release_branch}"
+          git checkout -B "${release_branch}" origin/"${release_branch}" || git checkout -b "${release_branch}"
           git merge main --no-edit
           git push origin "${release_branch}"
           
           # Merge main into the <major> branch to update the release branch with the latest changes from main
           release_branch="${MAJOR}"
-          git checkout -b "${release_branch}" origin/"${release_branch}" || git checkout "${release_branch}"
+          git checkout -B "${release_branch}" origin/"${release_branch}" || git checkout -b "${release_branch}"
           git merge main --no-edit
           git push origin "${release_branch}"
