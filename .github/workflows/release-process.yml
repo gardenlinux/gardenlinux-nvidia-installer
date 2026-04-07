@@ -1,13 +1,16 @@
-name: Release
+name: Release process
 
 on:
   pull_request:
     branches: [main]
     types: [closed]
-    # Don't trigger on changes to helm chart or README, as those are updated in a separate PR after the release is created
     paths-ignore:
+    # Don't trigger on changes to files that are updated in a separate PR after the release is created
       - 'helm/**'
       - 'README*.md'
+      - 'release-version.yaml'
+    # Don't trigger on changes to GitHub files, as these do not lead to updated or additional images
+      - '.github/**'
 
 permissions:
   contents: write
@@ -88,14 +91,6 @@ jobs:
           echo "Last tag: ${LAST_TAG} → New tag: ${NEW_TAG}"
           echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${{ steps.bump.outputs.new_tag }}" \
-            --title "${{ steps.bump.outputs.new_tag }}" \
-            --generate-notes
-
   update-files:
     needs: determine-version
     runs-on: ubuntu-latest
@@ -155,6 +150,12 @@ jobs:
             in_block { next }
             { print }
           ' README.md > README.md.tmp && mv README.md.tmp README.md
+
+      - name: Update release-version.yaml with new tag
+        run: |
+          TAG="${{ needs.determine-version.outputs.new_tag }}"
+          echo "${TAG}" > release-version.yaml
+
       - name: Commit and create PR for updated files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -166,7 +167,7 @@ jobs:
           git config user.email "gardenlinux@users.noreply.github.com"
           
           # Check if there are changes to commit
-          git add helm/gpu-operator-values.yaml README.md
+          git add helm/gpu-operator-values.yaml README*.md release-version.yaml
           if git diff --cached --quiet --exit-code; then
             echo "No changes to commit"
             exit 0
@@ -177,7 +178,7 @@ jobs:
           git commit -m "Update release references for ${TAG}"
           git push origin "${BRANCH}"
           
-          PR_LINK=$(gh pr create --base main --head ${BRANCH} --title "Update release references for ${TAG}" --body "Automated PR to update release references for version ${TAG}")
+          PR_LINK=$(gh pr create --base main --head ${BRANCH} --title "Update release references for ${TAG}" --body "Automated PR to update release references for version ${TAG}. Merge PR to create GitHub release.")
 
   build-image:
     needs: determine-version
