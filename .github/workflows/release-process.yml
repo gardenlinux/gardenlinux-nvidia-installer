@@ -178,7 +178,7 @@ jobs:
           # Create a new branch and commit changes
           git checkout -b "${BRANCH}"
           git commit -m "Update release references for ${TAG}"
-          git push origin "${BRANCH}"
+          git push -f origin "${BRANCH}"
           
           PR_LINK=$(gh pr create --base main --head ${BRANCH} --title "Update release references for ${TAG}" --body "Automated PR to update release references for version ${TAG}. Merge PR to create GitHub release.")
 
