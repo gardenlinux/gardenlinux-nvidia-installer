@@ -90,6 +90,8 @@ We follow semantic versioning for releases. The version number is in the format 
    to the NVIDIA driver minor/patch versions in precompiled images.
 - `PATCH` version is incremented when new versions of Garden Linux are supported without any other changes to the 
   image or the Helm chart.
+- The version is not updated if there are only changes to the CI workflows, documentation or other 
+  non-functional changes that do not affect the built image or Helm chart.
 
 The CI process will automatically create a new release when changes are merged to `main` for minor and patch versions. 
 Major versions will be released manually when needed. If follows that **breaking changes should be merged to a separate 
@@ -108,20 +110,20 @@ following steps are performed:
 4. Update the "Supported versions" section in `README.md` by running `python3 list_versions.py` and replacing the output
    in the README with the new output.
 5. Commit the changes to `helm/gpu-operator-values.yaml` and `README.md` and create a pull request. 
-6. Create a new GitHub release from `main` using the new version number.
-7. Generate a build matrix based on the dimensions in `versions.yaml`.
-8. For each combination of dimensions in the build matrix:
+6. Generate a build matrix based on the dimensions in `versions.yaml`.
+7. For each combination of dimensions in the build matrix:
 
    * If this is a patch release, check if the image for that combination already exists in the registry for the 
       previous release. If it does: pull that image, tag with the current release and push.
 
    * Otherwise, build the driver tarballs and container image, tag with the current release and push the image to the 
       registry.
-9. Once the image building and pushing is complete (which may require somre retries if there are many combinations in 
+8. Once the image building and pushing is complete (which may require somre retries if there are many combinations in 
     the build matrix), an admin can merge the PR created in step 5 to `main` to update the Helm values and README with 
     the new version number and supported versions, and users looking at `main` will now see examples with the new version number.
     Note that the release process will not trigger from this PR merge because the release workflow ignores changes to 
     these files.
+9. When the version update PR is merged, create a new GitHub release from `main` using the new version number.
 
 ### Version update nightly job
 

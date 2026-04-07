@@ -1,0 +1,34 @@
+name: Create GitHub release
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+    paths:
+    # Create a GitHub release when a PR is merged that changes the release-version.yaml file
+      - 'release-version.yaml'
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+  pull-requests: write
+
+jobs:
+  create-release:
+    if: github.event.pull_request.merged == true # Only run if the PR was merged - needed to avoid creating a release for every PR that is closed without merging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          release_tag=$(cat release-version.yaml)
+          gh release create "${release_tag}" \
+            --title "${release_tag}" \
+            --generate-notes
