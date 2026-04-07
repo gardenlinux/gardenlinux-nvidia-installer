@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-from urllib.request import urlopen
-import html2text
 import re
-import yaml
+from urllib.request import urlopen
+
+import html2text
 import requests
+import yaml
+
 
 def update_versions():
     updates = {
@@ -56,9 +58,19 @@ def get_latest_gardenlinux_tags(data):
 
     tags = [tag['name'] for tag in response.json()]
     new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
-    
-    if sorted(data['os_versions']) != sorted(new_os_versions):
-        data['os_versions'] = new_os_versions
+
+    # Any versions removed from the end of the old versions file, make sure they are removed from the new versions file
+    ancient_versions = []
+    for i in reversed(new_os_versions):
+        if i not in data['os_versions']:
+            ancient_versions.append(i)
+        else: # Stop when we get a match, so we avoid also removing the new versions at the top
+            break
+
+    filtered_os_versions = [x for x in new_os_versions if x not in ancient_versions]
+
+    if sorted(data['os_versions']) != sorted(filtered_os_versions):
+        data['os_versions'] = filtered_os_versions
         return True
     return False
 

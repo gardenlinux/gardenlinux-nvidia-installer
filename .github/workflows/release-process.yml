@@ -9,8 +9,9 @@ on:
       - 'helm/**'
       - 'README*.md'
       - 'release-version.yaml'
-    # Don't trigger on changes to GitHub files, as these do not lead to updated or additional images
+    # Don't trigger on changes to GitHub or CI files, as these do not lead to updated or additional images
       - '.github/**'
+      - '.ci/**'
 
 permissions:
   contents: write
@@ -79,7 +80,7 @@ jobs:
             | grep -c '^>' || true)
 
           # Count any changed files other than versions.yaml
-          OTHER_FILES_CHANGED=$(git diff --name-only "${LAST_TAG}..HEAD" | grep -cv -e '^versions\.yaml$' -e '^.github\/' || true)
+          OTHER_FILES_CHANGED=$(git diff --name-only "${LAST_TAG}..HEAD" | grep -cv -e '^versions\.yaml$' -e '^.github\/' -e '^.ci\/' || true)
 
           if [[ "$NVIDIA_ADDED" -gt 0 ]] || [[ "$OTHER_FILES_CHANGED" -gt 0 ]] || [[ "$VERSIONS_YAML_OTHER_CHANGES" -gt 0 ]]; then
             echo "NVIDIA_ADDED: ${NVIDIA_ADDED}, OTHER_FILES_CHANGED: ${OTHER_FILES_CHANGED}, VERSIONS_YAML_OTHER_CHANGES: ${VERSIONS_YAML_OTHER_CHANGES}"
