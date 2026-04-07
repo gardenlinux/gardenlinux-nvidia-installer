@@ -118,16 +118,17 @@ following steps are performed:
 
    * Otherwise, build the driver tarballs and container image, tag with the current release and push the image to the 
       registry.
-8. Once the image building and pushing is complete (which may require somre retries if there are many combinations in 
+8. Once the image building and pushing is complete (which may require some retries if there are many combinations in 
     the build matrix), an admin can merge the PR created in step 5 to `main` to update the Helm values and README with 
-    the new version number and supported versions, and users looking at `main` will now see examples with the new version number.
-    Note that the release process will not trigger from this PR merge because the release workflow ignores changes to 
-    these files.
-9. When the version update PR is merged, create a new GitHub release from `main` using the new version number.
+    the new version number and supported versions, and users looking at `main` will now see examples with the new 
+    version number. Note that the release process will not trigger from this PR merge because the release workflow 
+    ignores changes to these files.
+9. When the version update PR from the previous step is merged, create a new GitHub release from `main` using the new 
+   version number.
 
 ### Version update nightly job
 
 Each night the workflow in `.github/workflows/update-version.yaml` runs. It checks for new NVIDIA driver versions and
-new Garden Linux versions. The `versions.yaml` file is updated and a pull request is then created to 
-merge the `versions.yaml` changes back to `main`. Once the PR is merged, the release process described above will be 
+new Garden Linux versions. The `versions.yaml` and `history.yaml` files are updated and a pull request is then 
+created to merge those changes back to `main`. Once the PR is merged, the release process described above will be 
 triggered, which will create and push new images if needed.
