@@ -132,17 +132,11 @@ jobs:
               echo "Pull from old image path and retag to new image path"
               docker pull "$OLD_IMAGE_PATH:$TAG1"
               docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG2"
               docker push "$IMAGE_PATH:$TAG1"
-            else
-              BUILD_IMAGE=true
-            fi
-            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG2" 2>/dev/null; then
-              echo "Image $OLD_IMAGE_PATH:$TAG2 already exists, skipping build"
-              echo "Pull from old image path and retag to new image path"
-              docker pull "$OLD_IMAGE_PATH:$TAG2"
-              docker tag "$OLD_IMAGE_PATH:$TAG2" "$IMAGE_PATH:$TAG2"
               docker push "$IMAGE_PATH:$TAG2"
             else
+              echo "Image $OLD_IMAGE_PATH:$TAG1 does not exist - triggering a build"
               BUILD_IMAGE=true
             fi
           fi
