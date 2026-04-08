@@ -59,7 +59,7 @@ def get_latest_gardenlinux_tags(data):
     tags = [tag['name'] for tag in response.json()]
     new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
 
-    # Group new_os_versions by major version (first numeric component)
+    # Any older versions of Garden Linux removed from the old versions file should not appear in the new versions file
     major_versions = {}
     for tag in new_os_versions:
         major = tag.split('.')[0]
