@@ -59,13 +59,20 @@ def get_latest_gardenlinux_tags(data):
     tags = [tag['name'] for tag in response.json()]
     new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
 
-    # Any versions removed from the end of the old versions file, make sure they are removed from the new versions file
+    # Group new_os_versions by major version (first numeric component)
+    major_versions = {}
+    for tag in new_os_versions:
+        major = tag.split('.')[0]
+        major_versions.setdefault(major, []).append(tag)
+
+    # For each major version group, remove versions older than the oldest one tracked in data
     ancient_versions = []
-    for i in reversed(new_os_versions):
-        if i not in data['os_versions']:
-            ancient_versions.append(i)
-        else: # Stop when we get a match, so we avoid also removing the new versions at the top
-            break
+    for major, versions in major_versions.items():
+        for i in reversed(versions):
+            if i not in data['os_versions']:
+                ancient_versions.append(i)
+            else:  # Stop when we get a match, so we avoid also removing new versions at the top
+                break
 
     filtered_os_versions = [x for x in new_os_versions if x not in ancient_versions]
 
