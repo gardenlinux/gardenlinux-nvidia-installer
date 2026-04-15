@@ -12,6 +12,7 @@ on:
     # Don't trigger on changes to GitHub or CI files, as these do not lead to updated or additional images
       - '.github/**'
       - '.ci/**'
+      - 'cdup/**'
 
 permissions:
   contents: write
