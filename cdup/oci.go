@@ -34,6 +34,7 @@ type oci struct {
 type ociOCMConfig struct {
 	Config     string `mapstructure:"config"`
 	Repository string `mapstructure:"repository"`
+	Path       string `mapstructure:"path"`
 }
 
 func (p *oci) isConfigured() bool {
@@ -53,6 +54,8 @@ func (p *oci) SetOCMConfig(ctx context.Context, credsSource *vault, cfg map[stri
 		return errors.New("missing config")
 	case p.ociCfg.Repository == "":
 		return errors.New("missing repository")
+	case p.ociCfg.Path == "":
+		return errors.New("missing path")
 	}
 
 	err = credsSource.AcquireCreds(ctx, credsID{
@@ -105,8 +108,12 @@ func (p *oci) createClients(_ context.Context, rawCreds map[string]any) error {
 
 	p.clientsMtx.Lock()
 	defer p.clientsMtx.Unlock()
-
+	
 	fullRepositoryPath := p.ociCfg.Repository + repoSuffix
+	if p.ociCfg.Path == "idx" {
+		fullRepositoryPath = p.ociCfg.Repository + repoSuffixIdx
+	}
+
 	p.repo, err = remote.NewRepository(fullRepositoryPath)
 	if err != nil {
 		return fmt.Errorf("invalid OCI repository %s: %w", fullRepositoryPath, err)

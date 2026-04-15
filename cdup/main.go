@@ -20,9 +20,11 @@ var commit string
 const (
 	uploadRepo        = "europe-docker.pkg.dev/gardener-project/releases"
 	nvidiaRepo        = "github.com/gardenlinux/gardenlinux-nvidia-installer"
+	nvidiaRepoIdx     = "github.com/gardenlinux/gardenlinux-nvidia-installer-idx"
 	componentProvider = "SAP SE"
 	githubRepoURL     = "https://" + nvidiaRepo
 	repoSuffix        = "/component-descriptors/" + nvidiaRepo
+	repoSuffixIdx     = "/component-descriptors/" + nvidiaRepoIdx
 )
 
 func parseConfig[CONFIG any](cfg map[string]any, config *CONFIG) error {
@@ -201,24 +203,62 @@ func run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("vault authorisation failed: %w", err)
 	}
-
 	o := &oci{}
 
 	ociCfg := map[string]any{
 		"config":     "gardenlinux",
-		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases",
+		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/tests",
+		"path":       "driver",
 	}
-	// ociCfg := map[string]any{
-	// 	"config": "gardener",
-	// 	"repository": "europe-docker.pkg.dev/gardener-project/releases",
-	// }
 
 	err = o.SetOCMConfig(context.Background(), v, ociCfg)
 	if err != nil {
 		return fmt.Errorf("failed to set ocm configuration: %w", err)
 	}
 
-	err = o.PublishComponentDescriptor(context.Background(), "1.2.1", y)
+	err = o.PublishComponentDescriptor(context.Background(), version, y)
+	if err != nil {
+		return fmt.Errorf("component descriptor publish failed: %w", err)
+	}
+
+	o = &oci{}
+
+	ociCfg = map[string]any{
+		"config":     "gardenlinux",
+		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/tests",
+		"path":       "idx",
+	}
+
+	err = o.SetOCMConfig(context.Background(), v, ociCfg)
+	if err != nil {
+		return fmt.Errorf("failed to set ocm configuration: %w", err)
+	}
+
+	latestTag, err := o.GetLatestTag(context.Background())
+	if err != nil {
+		return fmt.Errorf("cannot get latest tag: %w", err)
+	}
+
+	fmt.Println(latestTag)
+
+	newVersion, err := bumpPatch(latestTag)
+	if err != nil {
+		return fmt.Errorf("failed to bump patch: %w", err)
+	}
+
+	updatedDescriptor, err := o.BuildIndexComponentDescriptor(version, newVersion)
+	if err != nil {
+		return fmt.Errorf("failed to update component descriptor: %w", err)
+	}
+
+	var yml []byte
+	yml, err = updatedDescriptor.ToYAML()
+	if err != nil {
+		return fmt.Errorf("failed to convert to yaml: %w", err)
+	}
+	fmt.Println(string(yml))
+
+	err = o.PublishComponentDescriptor(context.Background(), newVersion, yml)
 	if err != nil {
 		return fmt.Errorf("component descriptor publish failed: %w", err)
 	}

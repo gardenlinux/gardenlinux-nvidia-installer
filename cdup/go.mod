@@ -3,6 +3,7 @@ module github.com/gardenlinux/gardenlinux-nvidia-installer/cdup
 go 1.26.1
 
 require (
+	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/goccy/go-yaml v1.19.2
 	github.com/hashicorp/vault/api v1.23.0
 	github.com/hashicorp/vault/api/auth/approle v0.12.0
