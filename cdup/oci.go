@@ -108,9 +108,8 @@ func (p *oci) createClients(_ context.Context, rawCreds map[string]any) error {
 
 	p.clientsMtx.Lock()
 	defer p.clientsMtx.Unlock()
-
-	var fullRepositoryPath string
-	fullRepositoryPath = p.ociCfg.Repository + repoSuffix
+	
+	fullRepositoryPath := p.ociCfg.Repository + repoSuffix
 	if p.ociCfg.Path == "idx" {
 		fullRepositoryPath = p.ociCfg.Repository + repoSuffixIdx
 	}
