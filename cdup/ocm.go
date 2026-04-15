@@ -152,14 +152,14 @@ func buildComponentDescriptor(images []image, version, commit, name string) (*co
 					Value: img,
 				},
 			},
-			Type: "container_image",
+			Type: "ociImage",
 			Digest: componentDescriptorDigest{
 				HashAlgorithm:          "NO-DIGEST",
 				NormalisationAlgorithm: "EXCLUDE-FROM-SIGNATURE",
 				Value:                  "NO-DIGEST",
 			},
 			Access: componentDescriptorOCI{
-				Type: "oci",
+				Type: "ociRegistry",
 				Name: name,
 				Tag:  tag,
 			},
