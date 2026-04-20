@@ -69,7 +69,7 @@ cd ./NVIDIA-Linux-<arch>-<driver-version>
 
 ### Copy firmware files
 In addition to driver module itself, firmware files need to copied to the node. When the driver module is loaded in node, it tries to load the firmware.
-Make sure firmware signing is disabled in Kernel configuration[Refer Disable Firmware Signinig](#disable-firmware-signing) or sign the firmware
+Make sure firmware signing is disabled in Kernel configuration [Refer Disable Firmware Signinig](#disable-firmware-signing) or sign the firmware
 ```bash
 mkdir -p <custom-path>/lib/firmware/nvidia/<driver-version>/
 cp NVIDIA-Linux-<arch>-<driver-version>/firmware/* <custom-path>/lib/firmware/nvidia/<driver-version>/
@@ -109,6 +109,9 @@ sed -i 's/DAEMONIZE=1/DAEMONIZE=0/g' /etc/fabricmanager.cfg
 sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
 /usr/bin/nvidia-fabricmanager-start.sh --mode start --fm-config-file /etc/fabricmanager.cfg
 ```
+
+Note: Driver download and creation of docker image is completed handled in the repo for Garden Linux versions.
+
 # Install drivers with gpu-operator
 From above step we created a container image that compiles and installs NVIDIA driver. Next step is to pass this to gpu-operator to install on the node
 
@@ -185,6 +188,25 @@ Expected output:
 ```text
 ab:00.0 Infiniband controller: Mellanox Technologies MT2910 Family [ConnectX-7]
 ```
+
+### Check for NVLink Status (Inside Node)
+
+When Fabric manager is not installed properly, Fabric status shows In Progress
+```
+/run/nvidia/driver/bin/nvidia-smi -q -i 0 | grep -i -A 2 Fabric
+         Fabric
+            State                   : In Progress
+            Status                  : N/A
+```
+After successfull installation of Fabric Manager, status should be success
+
+```
+/run/nvidia/driver/bin/nvidia-smi -q -i 0 | grep -i -A 2 Fabric
+    Fabric
+        State                                          : Completed
+        Status                                         : Success
+```
+
 ## GPU Direct RDMA support
 GPUDirect RDMA is a technology in NVIDIA GPUs that enables direct data exchange between GPUs and a third-party peer device using PCI Express. The third-party devices could be network interfaces such as NVIDIA ConnectX SmartNICs or BlueField DPUs, or video acquisition adapters.
 
@@ -198,7 +220,7 @@ Note : We can enable all the configurations here and the modules will be loaded 
 - Enable DMABuf : Refer [Support DMABuf section](#dmabuf-configuration)
 
 #### Network Interfaces:
-We can verify the nerwork interface using lspci . Refer[EFA support](#efa-support) and [Mlx Support](#mlx-support)
+We can verify the nerwork interface using lspci . Refer [EFA support](#efa-support) and [Mlx Support](#mlx-support)
 
 ##### Mellanox Interfaces
 - Enable Mlx and Infiniband drivers: Refer [Support Mlx and Infiniband drivers](#mlx-and-infiniband-driver-configurations)
@@ -297,8 +319,20 @@ CONFIG_DEVICE_PRIVATE=y
 ## Network configuration
 In order to run big llm models, mtu must be set to 9216 for all the interfaces
 
-## Memlock support
+## Memlock limit
 In order to support llm models, memlimit has to be bigger
+
+```bash
+/etc/systemd/system/containerd.service.d/override.conf
+[Service]
+LimitMEMLOCK=infinity
+```
+
+Restart daemon
+```bash
+systemctl daemon-reload
+systemctl restart containerd
+```
 
 ## Kernel Parameter to suport DMABuf
 In order to support DMABuf , iommu have to be dsiabled. This can be done by appending kernel parameter with
@@ -571,6 +605,383 @@ Note this test is using host network in privileged mode. It is less secure. We s
 
 
 ### Basic RDMA communication btwn nodes
+#### RDMA Test Pod Configuration
+
+<details>
+<summary><b>Node1</b></summary>
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-test-node1
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: <node1>
+  restartPolicy: OnFailure
+  hostNetwork: true
+  containers:
+  - name: rdma-test
+    image: mellanox/cuda-perftest
+    securityContext:
+      privileged: true
+      capabilities:
+        add: [ "IPC_LOCK" ]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+      requests:
+        nvidia.com/gpu: 1
+    volumeMounts:
+    - name: dev-infiniband
+      mountPath: /dev/infiniband
+    - name: sys
+      mountPath: /sys
+    command: ["sleep", "infinity"]
+  volumes:
+  - name: dev-infiniband
+    hostPath:
+      path: /dev/infiniband
+      type: DirectoryOrCreate
+  - name: sys
+    hostPath:
+      path: /sys
+      type: Directory
+```
+</details>
+<details>
+<summary><b>Node2</b></summary>
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-test-node2
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: <node2>
+  restartPolicy: OnFailure
+  hostNetwork: true
+  containers:
+  - name: rdma-test
+    image: mellanox/cuda-perftest
+    securityContext:
+      privileged: true
+      capabilities:
+        add: [ "IPC_LOCK" ]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+      requests:
+        nvidia.com/gpu: 1
+    volumeMounts:
+    - name: dev-infiniband
+      mountPath: /dev/infiniband
+    - name: sys
+      mountPath: /sys
+    command: ["sleep", "infinity"]
+  volumes:
+  - name: dev-infiniband
+    hostPath:
+      path: /dev/infiniband
+      type: DirectoryOrCreate
+  - name: sys
+    hostPath:
+      path: /sys
+      type: Directory
+```
+</details>
+
+##### Start pods
+```bash
+kubectl apply -f <rdma_test_node1.yaml> -n rdma-test
+kubectl apply -f <rdma_test_node2.yaml> -n rdma-test
+```
+
+##### Run test inside pod
+**In Terminal 1 (server):**
+```bash
+kubectl exec -it rdma-test-node1 -n rdma-test -- ib_write_bw --use_cuda=0 --use_cuda_dmabuf \
+    -d mlx5_0 -a -F --report_gbits -q 1
+```
+**Output**
+```
+************************************
+* Waiting for client to connect... *
+************************************
+```
+
+**In Terminal 2 (client):**
+```bash
+kubectl exec -it rdma-test-node2 -n rdma-test -- ib_write_bw --use_cuda=0 --use_cuda_dmabuf \
+    -d mlx5_0 -a -F --report_gbits -q 1 <ip_address>
+```
+**Output**
+```
+---------------------------------------------------------------------------------------
+                    RDMA_Write BW Test
+ Dual-port       : OFF		Device         : mlx5_0
+ Number of qps   : 1		Transport type : IB
+ Connection type : RC		Using SRQ      : OFF
+ PCIe relax order: ON
+ ibv_wr* API     : ON
+ CQ Moderation   : 1
+ Mtu             : 4096[B]
+ Link type       : Ethernet
+ GID index       : 3
+ Max inline data : 0[B]
+ rdma_cm QPs	 : OFF
+ Data ex. method : Ethernet
+---------------------------------------------------------------------------------------
+ local address: LID 0000 QPN 0x0e2e PSN 0xf3aa42 RKey 0x186dc0 VAddr 0x007fad682b4000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:10:00:01:11
+ remote address: LID 0000 QPN 0x1d81 PSN 0xe9c73e RKey 0x186d4a VAddr 0x007f62137fa000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:10:00:01:12
+---------------------------------------------------------------------------------------
+ #bytes     #iterations    BW peak[Gb/sec]    BW average[Gb/sec]   MsgRate[Mpps]        BW min[Gb/sec]
+ 65536      5000             368.67             368.48 		   0.702829		  0.00
+---------------------------------------------------------------------------------------
+```
+Test can be repeated for other rdma interfaces
 ### Run All reduce test
+#### Start mpi operator 
+```
+kubectl apply -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.3.0/deploy/v2beta1/mpi-operator.yaml
+```
+
+#### Configuration file
+<details>
+<summary><b>Pod Definition</b></summary>
+
+```yaml
+apiVersion: kubeflow.org/v2beta1
+kind: MPIJob
+metadata:
+  name: nccl-test-72-gb200-8n-roce
+spec:
+  slotsPerWorker: 8
+  runPolicy:
+    cleanPodPolicy: Running
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        metadata:
+        spec:
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
+          containers:
+            - name: nccl
+              image: ghcr.io/coreweave/nccl-tests:13.1.0-devel-ubuntu24.04-nccl2.29.2-1-9dd6f94 
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  # Copy SSH keys with correct permissions
+                  mount -o remount,rw /root/.ssh
+                  cp -rL /mnt/ssh-secret/* /root/.ssh/
+                  chmod 700 /root/.ssh
+                  chmod 600 /root/.ssh/id_rsa
+                  chmod 644 /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys 2>/dev/null || true
+                  sed -i 's/^Port 22$/Port 2222/; s/^#Port 22$/Port 2222/' /etc/ssh/sshd_config
+                  sleep infinity 
+              env:
+                - name: OMPI_ALLOW_RUN_AS_ROOT
+                  value: "1"
+                - name: OMPI_ALLOW_RUN_AS_ROOT_CONFIRM
+                  value: "1"
+                - name: OMPI_MCA_plm_rsh_args
+                  value: "-p 2222"
+                - name: LD_LIBRARY_PATH
+                  value: "/usr/local/cuda/lib64:/run/nvidia/driver/lib:/run/nvidia/driver/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+              resources:
+                requests:
+                  cpu: 2
+                  memory: 32Gi
+                limits:
+                  memory: 64Gi
+              securityContext:
+                privileged: true
+              volumeMounts:                          
+                - name: ssh-secret
+                  mountPath: /mnt/ssh-secret
+                  readOnly: true
+                - name: nvidia-driver-bin
+                  mountPath: /usr/local/nvidia/bin
+                  readOnly: true
+                - name: nvidia-driver-lib
+                  mountPath: /run/nvidia/driver
+                  readOnly: true
+                - name: dshm
+                  mountPath: /dev/shm 
+          volumes:                                  
+            - name: ssh-secret
+              secret:
+                secretName: nccl-test-72-gb200-8n-roce-ssh
+                defaultMode: 0600
+            - name: nvidia-driver-bin
+              hostPath:
+                path: /run/nvidia/driver/bin
+                type: Directory
+            - name: nvidia-driver-lib
+              hostPath:
+                path: /run/nvidia/driver
+                type: Directory
+            - name: dshm                       
+              emptyDir:                       
+                medium: Memory                  
+                sizeLimit: 300Gi  
+          restartPolicy: Never
+
+    Worker:
+      replicas: 2
+      template:
+        metadata:
+          labels:
+            metadata.coreweave.cloud/job: nccl-test
+          annotations:
+            io.kubernetes.cri.shm-size: "500Gi"
+        spec:
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      training.kubeflow.org/job-name: nccl-test-72-gb200-8n-roce
+                      training.kubeflow.org/replica-type: worker
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - name: nccl
+              image: ghcr.io/coreweave/nccl-tests:13.1.0-devel-ubuntu24.04-nccl2.29.2-1-9dd6f94
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  mount -o remount,rw /root/.ssh
+                  cp -rL /mnt/ssh-secret/* /root/.ssh/
+                  chmod 700 /root/.ssh
+                  chmod 600 /root/.ssh/id_rsa
+                  chmod 644 /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys 2>/dev/null || true
+                  
+                  sed -i 's/^Port 22$/Port 2222/; s/^#Port 22$/Port 2222/' /etc/ssh/sshd_config
+                  service ssh start && sleep infinity
+              env:
+                - name: LD_LIBRARY_PATH
+                  value: "/usr/local/cuda/lib64:/run/nvidia/driver/lib:/run/nvidia/driver/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+              resources:
+                requests:
+                  nvidia.com/gpu: 8
+                  memory: 1500Gi
+                limits:
+                  nvidia.com/gpu: 8
+                  memory: 1500Gi
+              volumeMounts:
+                - mountPath: /dev/shm
+                  name: dshm
+                - mountPath: /dev/infiniband
+                  name: infiniband
+                - name: ssh-secret                  
+                  mountPath: /mnt/ssh-secret
+                  readOnly: true
+                - name: nvidia-driver-bin
+                  mountPath: /usr/local/nvidia/bin
+                  readOnly: true
+                - name: nvidia-driver-lib
+                  mountPath: /run/nvidia/driver
+                  readOnly: true
+              securityContext:
+                privileged: true
+          volumes:
+            - emptyDir:
+                medium: Memory
+                sizeLimit: 500Gi
+              name: dshm
+            - hostPath:
+                path: /dev/infiniband
+                type: Directory
+              name: infiniband
+            - name: ssh-secret                       
+              secret:
+                secretName: nccl-test-72-gb200-8n-roce-ssh
+                defaultMode: 0600
+            - name: nvidia-driver-bin
+              hostPath:
+                path: /run/nvidia/driver/bin
+                type: Directory
+            - name: nvidia-driver-lib
+              hostPath:
+                path: /run/nvidia/driver
+                type: Directory
+```
+</details>
+Note this test is using host network in privileged mode. It is less secure. We should use SRIOV instead with NVIDIA network operator
+
+#### Run test pods
+```bash
+kubectl apply -f nccl-test.yaml -n nccl-tests
+```
+#### Observer pods running
+```
+kubectl get pods -n nccl-tests
+
+kubectl get pods -n nccl-tests
+NAME                                       READY   STATUS    RESTARTS   AGE
+nccl-test-72-gb200-8n-roce-launcher-*                1/1     Running   0          4m39s
+nccl-test-72-gb200-8n-roce-worker-0         1/1     Running   0          4m39s
+nccl-test-72-gb200-8n-roce-worker-1         1/1     Running   0          4m39s
+```
+
+#### Run mpirun command inside launcher
+```
+kubectl exec -it -n nccl-tests nccl-test-72-gb200-8n-roce-launcher-* -- bash
+```
+**For Intra node**
+```
+mpirun -np 8 -N 8 --bind-to none --map-by slot \
+  --mca oob_tcp_if_include <mngt_interface>  \
+  --mca btl_tcp_if_include <mgmt_interface>   \
+  --mca pml ucx   \
+  --mca plm_rsh_args "-p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"  \
+  --hostfile /etc/mpi/hostfile   \
+  -x LD_LIBRARY_PATH   \
+  -x NCCL_DEBUG=INFO   \
+  -x NCCL_DEBUG_SUBSYS=NET,INET,GRAPH   \
+  -x NCCL_IB_GID_INDEX=3 \
+  -x NCCL_SOCKET_IFNAME=<mgmt_interface>   \
+  -x OMPI_MCA_coll_hcoll_enable=0   \
+  -x NCCL_IB_HCA=^mlx5_2,mlx5_6,mlx5_7,mlx5_8,mlx5_9 \
+  -x UCX_NET_DEVICES=mlx5_0:1,mlx5_1:1,mlx5_3:1,mlx5_4:1,mlx5_5:1,mlx5_10:1,mlx5_11:1,mlx5_12:1 \
+  /opt/nccl_tests/build/all_reduce_perf -b 16G -e 64G -f 2 -g 1
+```
+**Output**
+<img src="img/intra-node-bw.png" alt="alt text" width="700" height="300" />
+
+**For Inter node**
+```
+mpirun -np 16 -N 8 --bind-to none --map-by slot \
+  --mca oob_tcp_if_include <mngt_interface>  \
+  --mca btl_tcp_if_include <mgmt_interface>   \
+  --mca pml ucx   \
+  --mca plm_rsh_args "-p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"  \
+  --hostfile /etc/mpi/hostfile   \
+  -x LD_LIBRARY_PATH   \
+  -x NCCL_DEBUG=INFO   \
+  -x NCCL_DEBUG_SUBSYS=NET,INET,GRAPH   \
+  -x NCCL_IB_GID_INDEX=3 \
+  -x NCCL_SOCKET_IFNAME=<mgmt_interface>   \
+  -x OMPI_MCA_coll_hcoll_enable=0   \
+  -x NCCL_IB_HCA=^mlx5_2,mlx5_6,mlx5_7,mlx5_8,mlx5_9 \
+  -x UCX_NET_DEVICES=mlx5_0:1,mlx5_1:1,mlx5_3:1,mlx5_4:1,mlx5_5:1,mlx5_10:1,mlx5_11:1,mlx5_12:1 \
+  /opt/nccl_tests/build/all_reduce_perf -b 16G -e 64G -f 2 -g 1
+```
+**Output*
+<img src="img/inter-node-bw.png" alt="alt text" width="700" height="300" />
 
 ## References
+gpu operator : https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/overview.html
+Fabric Manager : https://docs.nvidia.com/datacenter/tesla/fabric-manager-user-guide/index.html
+Dynamo/Grove : 
+               https://developer.nvidia.com/blog/streamline-complex-ai-inference-on-kubernetes-with-nvidia-grove/
+               https://github.com/ai-dynamo/dynamo/blob/main/docs/kubernetes/README.md
+RDMA : https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-operator-rdma.html
+Soft RoCE : https://enterprise-support.nvidia.com/s/article/howto-configure-soft-roce
