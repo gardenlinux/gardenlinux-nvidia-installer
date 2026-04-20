@@ -1,6 +1,8 @@
 # NVIDIA Driver bring up on custom Kernel
 This Documentation gives information on how to bringup NVIDIA Driver with a custom Kernel. Garden Linux is used as OS to explain the configurations and setup
 
+There are parts in the documentation which is already implemented in the repo. Also configuratiuons for Garden Linux is already inplace. This is just a reference on how it is imeplemented / for debugging in case of issues
+
 ## Introduction to Garden Linux
 Garden Linux is a Debian GNU/Linux derivate that aims to provide small, auditable Linux images for most cloud providers (e.g. AWS, Azure, GCP etc.) and bare-metal machines. Garden Linux is the best Linux for Gardener nodes. Garden Linux provides great possibilities for customizing that is made by a highly customizable feature set to fit your needs.
 
