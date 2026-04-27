@@ -144,7 +144,7 @@ apt-get install -y -V nvidia-fabricmanager-<driver-major-version>=<driver-versio
 
 #### Install Fabric Manager
 
-For architectures using NVSwitch (e.g., Turing):
+For architectures using NVSwitch (e.g., Ampere):
 
 ```bash
 sed -i 's/DAEMONIZE=1/DAEMONIZE=0/g' /etc/fabricmanager.cfg
@@ -417,7 +417,7 @@ CONFIG_DEVICE_PRIVATE=y
 
 ## Network Configuration
 
-To run large LLM models, the MTU must be set to 9216 on all interfaces.
+To run large LLM models, the MTU must be set to 9000 on all interfaces.
 
 ## Memlock Limit
 
