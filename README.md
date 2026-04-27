@@ -16,7 +16,7 @@ Built images are published at:
 ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<release>/driver:<driver_major>-<kernel_version>-gardenlinux0
 ```
 
-For example: `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.6.5/driver:590-6.12.72-cloud-amd64-gardenlinux0`
+For example: `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.7.0/driver:590-6.12.72-cloud-amd64-gardenlinux0`
 
 If you have built the images yourself, override the registry and image name:
 
