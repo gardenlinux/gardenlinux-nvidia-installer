@@ -152,7 +152,7 @@ sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
 nv-fabricmanager -c /etc/fabricmanager.cfg
 ```
 
-For architectures using NVLink (e.g. Blackwell):
+For architectures using NVLink/NVLSM (e.g. Blackwell):
 
 ```bash
 apt-get install -y -V nvlsm
@@ -435,15 +435,6 @@ Restart the daemon to apply the change:
 systemctl daemon-reload
 systemctl restart containerd
 ```
-
-## Kernel Parameter to Support DMABuf
-
-DMABuf requires IOMMU to be disabled. This can be done by appending the following parameters to the kernel command line:
-
-``` iommu=pt intel_iommu=off ```
-
-If this is not set, it can lead to the issue described
-at https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting.html#:~:text=PCI%20Access%20Control%20Services%20(ACS)
 
 ## NCCL
 
