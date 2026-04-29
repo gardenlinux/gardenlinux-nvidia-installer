@@ -44,6 +44,7 @@ type componentDescriptorlabel struct {
 type componentDescriptorRepositoryContext struct {
 	Type    string `yaml:"type"`
 	BaseURL string `yaml:"baseUrl"`
+	SubPath string `yaml:"subPath"`
 }
 
 type componentDescriptorSource struct {
@@ -65,24 +66,18 @@ type componentDescriptorGitHub struct {
 type componentDesciptorResource struct {
 	Name          string                     `yaml:"name"`
 	Version       string                     `yaml:"version"`
+	Digest        string                     `yaml:"digest"`
+	SrcRefs       []string                   `yaml:"srcRefs"`
+	Relation      string                     `yaml:"relation"`
 	ExtraIdentity map[string]string          `yaml:"extraIdentity,omitempty"`
 	Labels        []componentDescriptorlabel `yaml:"labels,omitempty"`
 	Type          string                     `yaml:"type"`
-	Digest        componentDescriptorDigest  `yaml:"digest,omitzero"`
 	Access        componentDescriptorOCI     `yaml:"access"`
 }
 
-//nolint:tagliatelle // Defined by OCM.
-type componentDescriptorDigest struct {
-	HashAlgorithm          string `yaml:"hashAlgorithm"`
-	NormalisationAlgorithm string `yaml:"normalisationAlgorithm"`
-	Value                  string `yaml:"value"`
-}
-
 type componentDescriptorOCI struct {
-	Type string `yaml:"type"`
-	Name string `yaml:"name"`
-	Tag  string `yaml:"tag"`
+	Type           string `yaml:"type"`
+	ImageReference string `yaml:"imageReference"`
 }
 
 type image struct {
@@ -107,6 +102,7 @@ func buildComponentDescriptor(images []image, version, commit, name string) (*co
 				{
 					Type:    "OCIRegistry",
 					BaseURL: uploadRepo,
+					SubPath: "null",
 				},
 			},
 			Sources: []componentDescriptorSource{
@@ -135,10 +131,13 @@ func buildComponentDescriptor(images []image, version, commit, name string) (*co
 	}
 
 	for _, img := range images {
-		tag := fmt.Sprintf("%s-%s-%s-gardenlinux0", img.NvidiaDriverVersion, img.KernelVersion, img.Arch)
+		tag := fmt.Sprintf("%s-%s-gardenlinux0", img.NvidiaDriverVersion, img.KernelVersion)
 		descriptor.Component.Resources = append(descriptor.Component.Resources, componentDesciptorResource{
-			Name:    "gardenlinux-nvidia-installer",
-			Version: version,
+			Name:     "gardenlinux-nvidia-installer",
+			Version:  version,
+			Digest:   "null",
+			SrcRefs:  []string{},
+			Relation: "local",
 			ExtraIdentity: map[string]string{
 				"architecture":          img.Arch,
 				"os_version":            img.OSVersion,
@@ -153,15 +152,9 @@ func buildComponentDescriptor(images []image, version, commit, name string) (*co
 				},
 			},
 			Type: "ociImage",
-			Digest: componentDescriptorDigest{
-				HashAlgorithm:          "NO-DIGEST",
-				NormalisationAlgorithm: "EXCLUDE-FROM-SIGNATURE",
-				Value:                  "NO-DIGEST",
-			},
 			Access: componentDescriptorOCI{
-				Type: "ociRegistry",
-				Name: name,
-				Tag:  tag,
+				Type:           "ociRegistry",
+				ImageReference: name + ":" + tag,
 			},
 		},
 		)

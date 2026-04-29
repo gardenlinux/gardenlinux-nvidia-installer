@@ -18,13 +18,14 @@ var version string
 var commit string
 
 const (
-	uploadRepo        = "europe-docker.pkg.dev/gardener-project/releases"
+	uploadRepo        = "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/tests"
 	nvidiaRepo        = "github.com/gardenlinux/gardenlinux-nvidia-installer"
 	nvidiaRepoIdx     = "github.com/gardenlinux/gardenlinux-nvidia-installer-idx"
 	componentProvider = "SAP SE"
 	githubRepoURL     = "https://" + nvidiaRepo
 	repoSuffix        = "/component-descriptors/" + nvidiaRepo
 	repoSuffixIdx     = "/component-descriptors/" + nvidiaRepoIdx
+	imagePath         = "ghcr.io/gardenlinux/gardenlinux-nvidia-installer"
 )
 
 func parseConfig[CONFIG any](cfg map[string]any, config *CONFIG) error {
@@ -175,7 +176,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to build image list: %w", err)
 	}
 
-	cd, err := buildComponentDescriptor(images, version, commit, nvidiaRepo+"/"+version+"/driver")
+	cd, err := buildComponentDescriptor(images, version, commit, imagePath+"/"+version+"/driver")
 	if err != nil {
 		return fmt.Errorf("failed to build component descriptor: %w", err)
 	}

@@ -13,7 +13,12 @@ import (
 )
 
 type IndexComponentDescriptor struct {
+	Meta      indexComponentDescriptorMetadata  `yaml:"meta"`
 	Component indexComponentDescriptorComponent `yaml:"component"`
+}
+
+type indexComponentDescriptorMetadata struct {
+	ConfiguredVersion string `yaml:"schemaVersion"`
 }
 
 // ToYAML serializes a component desctiptor to YAML.
@@ -23,11 +28,18 @@ func (d *IndexComponentDescriptor) ToYAML() ([]byte, error) {
 
 //nolint:tagliatelle // Defined by OCM.
 type indexComponentDescriptorComponent struct {
-	Name                string                              `yaml:"name"`
-	Version             string                              `yaml:"version"`
-	Sources             []struct{}                          `yaml:"sources"`
-	ComponentReferences []indexComponentDescriptorReference `yaml:"componentReferences"`
-	Resources           []struct{}                          `yaml:"resources"`
+	Name                string                                      `yaml:"name"`
+	Version             string                                      `yaml:"version"`
+	Sources             []struct{}                                  `yaml:"sources"`
+	RepositoryContexts  []indexComponentDescriptorRepositoryContext `yaml:"repositoryContexts"`
+	ComponentReferences []indexComponentDescriptorReference         `yaml:"componentReferences"`
+	Resources           []struct{}                                  `yaml:"resources"`
+}
+
+type indexComponentDescriptorRepositoryContext struct {
+	Type    string `yaml:"type"`
+	BaseURL string `yaml:"baseUrl"`
+	SubPath string `yaml:"subPath"`
 }
 
 //nolint:tagliatelle // Defined by OCM.
@@ -93,11 +105,21 @@ func bumpPatch(version string) (string, error) {
 
 func (p *oci) BuildIndexComponentDescriptor(version string, newVersion string) (*IndexComponentDescriptor, error) {
 	descriptor := &IndexComponentDescriptor{
+		Meta: indexComponentDescriptorMetadata{
+			ConfiguredVersion: "v2",
+		},
 		Component: indexComponentDescriptorComponent{
 			Name:      "github.com/gardenlinux/gardenlinux-nvidia-installer-idx",
 			Version:   newVersion,
 			Resources: []struct{}{},
 			Sources:   []struct{}{},
+			RepositoryContexts: []indexComponentDescriptorRepositoryContext{
+				{
+					Type:    "OCIRegistry",
+					BaseURL: uploadRepo,
+					SubPath: "null",
+				},
+			},
 			ComponentReferences: []indexComponentDescriptorReference{
 				{
 					Name:          "nvidia-installer",
