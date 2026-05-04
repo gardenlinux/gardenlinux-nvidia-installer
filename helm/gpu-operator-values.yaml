@@ -6,7 +6,7 @@ toolkit:
 driver:
   imagePullPolicy: Always
   version: 590
-  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/refactor_compilation/1.2.1
+  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/refactor_compilation/1.7.0
   hostPaths:
     driverInstallDir: /opt/nvidia-installer
 node-feature-discovery:

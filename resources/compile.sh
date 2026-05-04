@@ -7,12 +7,14 @@ KERNEL_VERSION=$(uname -r | cut -d'-' -f1)
 #TODO
 DRIVER_VERSION="590.48.01"
 ARCH_TYPE=$(uname -m)
+KERNEL_MODULE_TYPE=$1
+DRIVER_VERSION=$2
 
 mkdir -p /run/nvidia/compile_dir
 cd /run/nvidia/compile_dir
-HOST_GL_VERSION = $(nsenter -t 1 -m sh -c "grep GARDENLINUX_VERSION /etc/os-release | cut -d= -f2")
+HOST_GL_VERSION=$(nsenter -t 1 -m sh -c "grep GARDENLINUX_VERSION /etc/os-release | cut -d= -f2")
 
-cat <<EOF > /etc/apt/sources.list.d/gardenlinux.sources.1
+cat <<EOF > /etc/apt/sources.list.d/gardenlinux_host.sources
 Types: deb
 URIs: https://packages.gardenlinux.io/gardenlinux
 Suites: $HOST_GL_VERSION

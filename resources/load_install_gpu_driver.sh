@@ -8,7 +8,6 @@ source "$BIN_DIR"/set_env_vars.sh
 LD_ROOT=${LD_ROOT:-/root}
 NVIDIA_ROOT=${NVIDIA_ROOT:-/run/nvidia/driver}
 echo $DRIVER_VERSION
-DRIVER_VERSION="590.48.01"
 
 main() {
     # Populate DRIVER_NAME, DRIVER_VERSION, NVIDIA_ROOT, etc.
@@ -53,9 +52,9 @@ main() {
 
     chmod +x /opt/nvidia-installer/compile.sh
 
-    /opt/nvidia-installer/compile.sh
+    /opt/nvidia-installer/compile.sh $KERNEL_MODULE_TYPE $DRIVER_VERSION
 
-    
+
 
     # extract INTO staging but drop the leading "driver/" path from the archive
     # tar xzf "${DRIVER_TARBALL_PATH}" -C /run/nvidia/.staging-driver --strip-components=1
