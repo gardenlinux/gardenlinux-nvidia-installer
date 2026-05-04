@@ -5,7 +5,7 @@ IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
 DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
 build: build-image
 
-echo $(DRIVER_VERSION)
+
 
 
 ifndef DRIVER_VERSION
@@ -17,6 +17,7 @@ endif
 # KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
 # append KERNEL_FLAVOR or TARGET_ARCH separately.
 build-image:
+    @echo $(DRIVER_VERSION)
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
