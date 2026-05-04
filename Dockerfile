@@ -13,6 +13,7 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
+RUN echo $(DRIVER_VERSION)
 
 RUN echo "$(DRIVER_VERSION)" > /tmp/driver-version
 

@@ -5,6 +5,8 @@ IMAGE_PATH ?= ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver
 DRIVER_MAJOR_VERS = $(firstword $(subst ., ,$(DRIVER_VERSION)))
 build: build-image
 
+echo $(DRIVER_VERSION)
+
 
 ifndef DRIVER_VERSION
 $(error DRIVER_VERSION is not set. Please set it before running make.)
