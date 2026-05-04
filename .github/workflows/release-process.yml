@@ -73,16 +73,16 @@ jobs:
 
           # Detect changes outside of os_versions in versions.yaml
           VERSIONS_YAML_BEFORE_NO_OS=$(git show "${LAST_TAG}:versions.yaml" 2>/dev/null | \
-            awk '/^os_versions:/{skip=1} skip && /^[^ -]/{skip=0} !skip{print}')
+             awk '/^os_versions:/{skip=1; next} skip && !/^-/{skip=0} !skip')
           VERSIONS_YAML_AFTER_NO_OS=$(git show HEAD:versions.yaml | \
-            awk '/^os_versions:/{skip=1} skip && /^[^ -]/{skip=0} !skip{print}')
+             awk '/^os_versions:/{skip=1; next} skip && !/^-/{skip=0} !skip')
           VERSIONS_YAML_OTHER_CHANGES=$(diff \
             <(echo "$VERSIONS_YAML_BEFORE_NO_OS") \
             <(echo "$VERSIONS_YAML_AFTER_NO_OS") \
             | grep -c '^>' || true)
 
           # Count any changed files other than versions.yaml
-          OTHER_FILES_CHANGED=$(git diff --name-only "${LAST_TAG}..HEAD" | grep -cv -e '^versions\.yaml$' -e '^.github\/' -e '^.ci\/' || true)
+          OTHER_FILES_CHANGED=$(git diff --name-only "${LAST_TAG}..HEAD" | grep -cv -e '^versions\.yaml$' -e '^.github\/' -e '^.ci\/' -e '^cdup\/' -e '^docs\/' || true)
 
           if [[ "$NVIDIA_ADDED" -gt 0 ]] || [[ "$OTHER_FILES_CHANGED" -gt 0 ]] || [[ "$VERSIONS_YAML_OTHER_CHANGES" -gt 0 ]]; then
             echo "NVIDIA_ADDED: ${NVIDIA_ADDED}, OTHER_FILES_CHANGED: ${OTHER_FILES_CHANGED}, VERSIONS_YAML_OTHER_CHANGES: ${VERSIONS_YAML_OTHER_CHANGES}"
