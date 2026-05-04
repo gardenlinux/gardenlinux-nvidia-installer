@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM ghcr.io/gardenlinux/gardenlinux:latest AS packager
+FROM ghcr.io/gardenlinux/gardenlinux/kmodbuild:latest AS packager
 
 COPY resources/* /opt/nvidia-installer/
 

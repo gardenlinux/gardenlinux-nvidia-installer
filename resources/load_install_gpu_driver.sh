@@ -51,11 +51,11 @@ main() {
     rm -rf /run/nvidia/.staging-driver || true
     mkdir -p /run/nvidia/.staging-driver /run/nvidia/driver
 
-    cp /opt/nvidia-installer/compile.sh /run/nvidia/.staging-driver/
-
     chmod +x /opt/nvidia-installer/compile.sh
 
     /opt/nvidia-installer/compile.sh
+
+    
 
     # extract INTO staging but drop the leading "driver/" path from the archive
     # tar xzf "${DRIVER_TARBALL_PATH}" -C /run/nvidia/.staging-driver --strip-components=1
