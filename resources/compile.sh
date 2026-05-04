@@ -10,8 +10,9 @@ ARCH_TYPE=$(uname -m)
 KERNEL_MODULE_TYPE=$1
 DRIVER_VERSION=$2
 
-mkdir -p /run/nvidia/compile_dir
-cd /run/nvidia/compile_dir
+COMPILE_DIR="/tmp/compile_dir"
+mkdir -p $COMPILE_DIR
+cd $COMPILE_DIR
 HOST_GL_VERSION=$(nsenter -t 1 -m sh -c "grep GARDENLINUX_VERSION /etc/os-release | cut -d= -f2")
 
 cat <<EOF > /etc/apt/sources.list.d/gardenlinux_host.sources
@@ -38,7 +39,7 @@ attempt=0
 MAX_ATTEMPTS=3
 
 while (( attempt < MAX_ATTEMPTS )); do
-    wget -qO /run/nvidia/compile_dir/nvidia.run "${DRIVER_URL}" && break
+    wget -qO "${COMPILE_DIR}"/nvidia.run "${DRIVER_URL}" && break
     echo "Attempt $attempt failed. Retrying..."
     ((attempt++))
     sleep 2 
@@ -51,7 +52,7 @@ else
     echo "Download succeeded."
 fi
 
-wget -qO /run/nvidia/compile_dir/nvidia.run "${DRIVER_URL}"
+wget -qO "${COMPILE_DIR}"/nvidia.run "${DRIVER_URL}"
 WGET_EXIT=$?
 if [ $WGET_EXIT -ne 0 ]; then
   echo "Failed to download ${DRIVER_URL} (wget exit code: ${WGET_EXIT})"
@@ -59,7 +60,7 @@ if [ $WGET_EXIT -ne 0 ]; then
 fi
 
 chmod +x nvidia.run
-./nvidia.run -x -s --tmpdir /run/nvidia/compile_dir
+./nvidia.run -x -s --tmpdir $COMPILE_DIR
       
 export IGNORE_MISSING_MODULE_SYMVERS=1
 
@@ -135,4 +136,4 @@ mkdir -p "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$HOST_OUT_DIR"/usr/bin
 cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
 cp -a /usr/bin/nvidia* "$HOST_OUT_DIR"/usr/bin
 
-cp -a  /run/nvidia/driver/ /run/nvidia/.staging-driver/
+#cp -a  /run/nvidia/driver/ /run/nvidia/.staging-driver/
