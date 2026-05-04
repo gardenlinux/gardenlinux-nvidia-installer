@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.4
 
 FROM ghcr.io/gardenlinux/gardenlinux:latest AS packager
+ARG DRIVER_VERSION
 
 COPY resources/* /opt/nvidia-installer/
 

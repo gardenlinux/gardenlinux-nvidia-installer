@@ -7,12 +7,13 @@ BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
 source "$BIN_DIR"/set_env_vars.sh
 LD_ROOT=${LD_ROOT:-/root}
 NVIDIA_ROOT=${NVIDIA_ROOT:-/run/nvidia/driver}
-echo $DRIVER_VERSION
+
 
 main() {
     # Populate DRIVER_NAME, DRIVER_VERSION, NVIDIA_ROOT, etc.
     parse_parameters "$@"
 
+    echo $DRIVER_VERSION
     # Always run cleanup if your script provides it
     trap post_process EXIT
 
