@@ -127,9 +127,12 @@ case $ARCH_TYPE in
         ;;
 esac
 
+HOST_OUT_DIR="/run/nvidia/.staging-driver"
+
+mkdir -p "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$HOST_OUT_DIR"/usr/bin
+
 # Archive library .so files
-mkdir -p "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$OUTDIR"/usr/bin
-cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$OUTDIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
-cp -a /usr/bin/nvidia* "$OUTDIR"/usr/bin
+cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
+cp -a /usr/bin/nvidia* "$HOST_OUT_DIR"/usr/bin
 
 cp -a  /run/nvidia/driver/ /run/nvidia/.staging-driver/
