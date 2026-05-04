@@ -34,6 +34,23 @@ DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$A
 
 echo $DRIVER_URL
 
+attempt=0
+MAX_ATTEMPTS=3
+
+while (( attempt < MAX_ATTEMPTS )); do
+    wget -qO /run/nvidia/compile_dir/nvidia.run "${DRIVER_URL}" && break
+    echo "Attempt $attempt failed. Retrying..."
+    ((attempt++))
+    sleep 2 
+done
+
+if (( attempt >= MAX_ATTEMPTS )); then
+    echo "Download failed after $MAX_ATTEMPTS attempts."
+    exit 1
+else
+    echo "Download succeeded."
+fi
+
 wget -qO /run/nvidia/compile_dir/nvidia.run "${DRIVER_URL}"
 WGET_EXIT=$?
 if [ $WGET_EXIT -ne 0 ]; then

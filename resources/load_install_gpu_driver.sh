@@ -54,6 +54,9 @@ main() {
     chmod +x /opt/nvidia-installer/compile.sh
 
     /opt/nvidia-installer/compile.sh $KERNEL_MODULE_TYPE $DRIVER_VERSION
+ 
+    rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
+    cp -a /run/nvidia/.staging-driver/. /run/nvidia/driver/
 
 
 
