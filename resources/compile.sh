@@ -85,7 +85,7 @@ case $ARCH_TYPE in
           --log-file-name="$PWD"/nvidia-installer.log \
           --utility-prefix="$OUTDIR" \
           --utility-libdir=lib \
-          --kernel-install-path="$OUTDIR"/lib/modules/$KERNEL_NAME" \
+          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_NAME" \
         && test -e "$OUTDIR"/lib/modules/"$KERNEL_NAME"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA $KERNEL_MODULE_TYPE modules"
@@ -110,7 +110,7 @@ case $ARCH_TYPE in
           --log-file-name="$PWD"/nvidia-installer.log \
           --utility-prefix="$OUTDIR" \
           --utility-libdir=lib \
-          --kernel-install-path="$OUTDIR"/lib/modules/$KERNEL_NAME" \
+          --kernel-install-path="$OUTDIR"/lib/modules/"$KERNEL_NAME" \
         && test -e "$OUTDIR"/lib/modules/"$KERNEL_NAME"/nvidia.ko
       then
         echo "Successfully compiled NVIDIA $KERNEL_MODULE_TYPE modules"
