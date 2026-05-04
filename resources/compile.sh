@@ -69,7 +69,7 @@ cd NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION
 export PATH="/run/headers/usr/bin:$PATH"
 OUTDIR="/run/nvidia/driver"
 case $ARCH_TYPE in
-    amd64)
+    x86_64)
       if ./nvidia-installer \
           --no-libglx-indirect \
           --no-install-libglvnd \
@@ -95,7 +95,7 @@ case $ARCH_TYPE in
         exit 1
       fi
         ;;
-    arm64)
+    aarch64)
       if ./nvidia-installer \
           --no-libglx-indirect \
           --no-install-libglvnd \
