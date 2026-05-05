@@ -24,4 +24,4 @@ jobs:
           go build -o cdup
       - name: Run cdup
         run: |
-          ./cdup/cdup -v ${{ github.event.inputs.version_input }} -c xxxxxxx
+          ./cdup/cdup -v ${{ github.event.inputs.version_input }}
