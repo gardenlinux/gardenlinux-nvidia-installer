@@ -154,7 +154,7 @@ func main() {
 
 func run(cmd *cobra.Command, args []string) error {
 
-	versionsPath := filepath.Join("..", "versions.yaml")
+	versionsPath := filepath.Join(".", "versions.yaml")
 
 	// Load the configuration
 	config, err := loadVersionsConfig(versionsPath)
