@@ -30,6 +30,7 @@ func (d *IndexComponentDescriptor) ToYAML() ([]byte, error) {
 type indexComponentDescriptorComponent struct {
 	Name                string                                      `yaml:"name"`
 	Version             string                                      `yaml:"version"`
+	Provider            string                                      `yaml:"provider"`
 	Sources             []struct{}                                  `yaml:"sources"`
 	RepositoryContexts  []indexComponentDescriptorRepositoryContext `yaml:"repositoryContexts"`
 	ComponentReferences []indexComponentDescriptorReference         `yaml:"componentReferences"`
@@ -37,9 +38,9 @@ type indexComponentDescriptorComponent struct {
 }
 
 type indexComponentDescriptorRepositoryContext struct {
-	Type    string `yaml:"type"`
-	BaseURL string `yaml:"baseUrl"`
-	SubPath string `yaml:"subPath"`
+	Type    string  `yaml:"type"`
+	BaseURL string  `yaml:"baseUrl"`
+	SubPath *string `yaml:"subPath"`
 }
 
 //nolint:tagliatelle // Defined by OCM.
@@ -111,13 +112,14 @@ func (p *oci) BuildIndexComponentDescriptor(version string, newVersion string) (
 		Component: indexComponentDescriptorComponent{
 			Name:      "github.com/gardenlinux/gardenlinux-nvidia-installer-idx",
 			Version:   newVersion,
+			Provider:  componentProvider,
 			Resources: []struct{}{},
 			Sources:   []struct{}{},
 			RepositoryContexts: []indexComponentDescriptorRepositoryContext{
 				{
 					Type:    "OCIRegistry",
 					BaseURL: uploadRepo,
-					SubPath: "null",
+					SubPath: nil,
 				},
 			},
 			ComponentReferences: []indexComponentDescriptorReference{

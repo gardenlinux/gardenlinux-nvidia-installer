@@ -66,7 +66,7 @@ type componentDescriptorGitHub struct {
 type componentDesciptorResource struct {
 	Name          string                     `yaml:"name"`
 	Version       string                     `yaml:"version"`
-	Digest        string                     `yaml:"digest"`
+	Digest        *string                    `yaml:"digest"`
 	SrcRefs       []string                   `yaml:"srcRefs"`
 	Relation      string                     `yaml:"relation"`
 	ExtraIdentity map[string]string          `yaml:"extraIdentity,omitempty"`
@@ -135,7 +135,7 @@ func buildComponentDescriptor(images []image, version, commit, name string) (*co
 		descriptor.Component.Resources = append(descriptor.Component.Resources, componentDesciptorResource{
 			Name:     "gardenlinux-nvidia-installer",
 			Version:  version,
-			Digest:   "null",
+			Digest:   nil,
 			SrcRefs:  []string{},
 			Relation: "local",
 			ExtraIdentity: map[string]string{

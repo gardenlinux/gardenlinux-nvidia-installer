@@ -1,0 +1,24 @@
+name: cdup.yml
+on:
+  workflow_dispatch:
+    inputs:
+      version_input:
+        description: 'Version/tag/branch to checkout'
+        required: true
+        type: string
+
+jobs:
+  cdup:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.version_input }}
+
+      - name: Run cdup
+        run: |
+          ./cdup -v ${{ github.event.inputs.version_input }}
+
