@@ -1,9 +1,9 @@
-name: cdup.yml
+name: cdup
 on:
   workflow_dispatch:
     inputs:
       version_input:
-        description: 'Version/tag/branch to checkout'
+        description: 'Version/Tag to checkout'
         required: true
         type: string
 
@@ -24,5 +24,4 @@ jobs:
           go build -o cdup
       - name: Run cdup
         run: |
-          ./cdup/cdup -v ${{ github.event.inputs.version_input }}
-
+          ./cdup/cdup -v ${{ github.event.inputs.version_input }} -c xxxxxxx
