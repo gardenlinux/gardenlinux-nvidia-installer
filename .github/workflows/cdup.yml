@@ -18,7 +18,11 @@ jobs:
         with:
           ref: ${{ github.event.inputs.version_input }}
 
+      - name: Build cdup
+        run: |
+          cd cdup
+          go build -o cdup
       - name: Run cdup
         run: |
-          ./cdup -v ${{ github.event.inputs.version_input }}
+          ./cdup/cdup -v ${{ github.event.inputs.version_input }}
 
