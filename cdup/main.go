@@ -154,7 +154,7 @@ func main() {
 
 func run(cmd *cobra.Command, args []string) error {
 
-	versionsPath := filepath.Join("..", "versions.yaml")
+	versionsPath := filepath.Join(".", "versions.yaml")
 
 	// Load the configuration
 	config, err := loadVersionsConfig(versionsPath)
@@ -209,10 +209,10 @@ func run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to set ocm configuration: %w", err)
 	}
 
-	//err = o.PublishComponentDescriptor(context.Background(), version, y)
-	//if err != nil {
-	//	return fmt.Errorf("component descriptor publish failed: %w", err)
-	//}
+	err = o.PublishComponentDescriptor(context.Background(), version, y)
+	if err != nil {
+		return fmt.Errorf("component descriptor publish failed: %w", err)
+	}
 
 	o = &oci{}
 
@@ -251,10 +251,10 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println(string(yml))
 
-	//err = o.PublishComponentDescriptor(context.Background(), newVersion, yml)
-	//if err != nil {
-	//	return fmt.Errorf("component descriptor publish failed: %w", err)
-	//}
+	err = o.PublishComponentDescriptor(context.Background(), newVersion, yml)
+	if err != nil {
+		return fmt.Errorf("component descriptor publish failed: %w", err)
+	}
 
 	err = o.Close()
 	if err != nil {
