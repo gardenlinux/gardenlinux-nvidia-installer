@@ -63,6 +63,7 @@ jobs:
     outputs:
       build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
       manifest_matrix: ${{ steps.set-matrix.outputs.manifest_matrix }}
+      driver_versions: ${{ steps.set-matrix.outputs.driver_versioons }}
     steps:
       - uses: actions/checkout@v6
           
@@ -77,6 +78,9 @@ jobs:
           MATRIX_JSON=$(python3 .ci/generate_matrix.py)
           echo "build_matrix=$(echo "$MATRIX_JSON" | jq -c '.build')" >> $GITHUB_OUTPUT
           echo "manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.manifest')" >> $GITHUB_OUTPUT
+          # Output unique driver versions as a JSON array
+          DRIVER_VERSIONS=$(cat versions.yaml | yq '.nvidia_drivers' | jq -c '.')
+          echo "driver_versions=$DRIVER_VERSIONS" >> $GITHUB_OUTPUT
 
   build:
     needs: [generate-matrix, image-folder]
@@ -178,18 +182,16 @@ jobs:
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
+  
   build-runtime-driver-image:
     needs: [generate-matrix, image-folder]
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.build_matrix.driver_version) }}
+      matrix:
+        driver_version: ${{ fromJson(needs.generate-matrix.outputs.driver_versions) }}
     env:
-      GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
-      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
-      TARGET_ARCH: ${{ matrix.arch }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
