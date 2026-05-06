@@ -15,8 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.version_input }}
+       # with:
+        #  ref: ${{ github.event.inputs.version_input }}
 
       - name: Build cdup
         run: |

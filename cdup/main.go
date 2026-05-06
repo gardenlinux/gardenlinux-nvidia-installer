@@ -105,6 +105,7 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 	}
 
 	parentDir := filepath.Dir(pwd)
+	fmt.Println(parentDir)
 
 	// Build the docker command
 	image := fmt.Sprintf("ghcr.io/gardenlinux/gardenlinux/kmodbuild:%s-%s", targetArch, glVersion)
@@ -113,8 +114,7 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 		"-v", parentDir+":/workspace",
 		"-w", "/workspace",
 		image,
-		path,
-		kernelFlavor,
+		"ls",
 	)
 
 	var stdout, stderr bytes.Buffer
@@ -141,6 +141,14 @@ func main() {
 	// Define the version flag
 	c.Flags().StringVarP(&version, "version", "v", "", "release version (required)")
 	err := c.MarkFlagRequired("version")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// Define the version flag
+	c.Flags().StringVarP(&version, "commit", "c", "", "Commitish (required)")
+	err = c.MarkFlagRequired("commit")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -209,10 +217,10 @@ func run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to set ocm configuration: %w", err)
 	}
 
-	err = o.PublishComponentDescriptor(context.Background(), version, y)
-	if err != nil {
-		return fmt.Errorf("component descriptor publish failed: %w", err)
-	}
+	//err = o.PublishComponentDescriptor(context.Background(), version, y)
+	//if err != nil {
+	//	return fmt.Errorf("component descriptor publish failed: %w", err)
+	//}
 
 	o = &oci{}
 
@@ -251,10 +259,10 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println(string(yml))
 
-	err = o.PublishComponentDescriptor(context.Background(), newVersion, yml)
-	if err != nil {
-		return fmt.Errorf("component descriptor publish failed: %w", err)
-	}
+	//err = o.PublishComponentDescriptor(context.Background(), newVersion, yml)
+	//if err != nil {
+	//	return fmt.Errorf("component descriptor publish failed: %w", err)
+	//}
 
 	err = o.Close()
 	if err != nil {
