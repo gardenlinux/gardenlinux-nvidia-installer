@@ -11,11 +11,15 @@ with open("versions.yaml") as f:
 # a separate matrix dimension.
 build_matrix = [
     {
+        "os_version": os_version,
         "driver_version": driver,
         "arch": arch,
+        "kernel_flavour": flavour,
     }
-    for arch, driver in itertools.product(
+    for os_version, arch, flavour, driver in itertools.product(
+        data["os_versions"],
         data["cpu_arch"],
+        data["kernel_flavour"],
         data["nvidia_drivers"],
     )
 ]
@@ -24,9 +28,13 @@ build_matrix = [
 # Used by the manifest job in build_image.yml to create multi-arch manifests.
 manifest_matrix = [
     {
+        "os_version": os_version,
         "driver_version": driver,
+        "kernel_flavour": flavour,
     }
-    for driver in itertools.product(
+    for os_version, flavour, driver in itertools.product(
+        data["os_versions"],
+        data["kernel_flavour"],
         data["nvidia_drivers"],
     )
 ]

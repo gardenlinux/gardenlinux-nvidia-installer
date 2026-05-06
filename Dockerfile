@@ -52,4 +52,3 @@ COPY nvidia-driver /usr/local/bin
 ENV LD_LIBRARY_PATH=/run/nvidia/driver/lib:/run/nvidia/driver/usr/lib/x86_64-linux-gnu
 
 ENTRYPOINT ["nvidia-driver"]
-s
