@@ -128,6 +128,7 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 
 	// Trim whitespace/newlines from output
 	kernelName := strings.TrimSpace(stdout.String())
+	fmt.Printf("KernelName: %s\n", kernelName)
 	return kernelName, nil
 }
 
