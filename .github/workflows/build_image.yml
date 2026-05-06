@@ -79,7 +79,7 @@ jobs:
           echo "build_matrix=$(echo "$MATRIX_JSON" | jq -c '.build')" >> $GITHUB_OUTPUT
           echo "manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.manifest')" >> $GITHUB_OUTPUT
           # Output unique driver versions as a JSON array
-          DRIVER_VERSIONS=$(cat versions.yaml | yq '.nvidia_drivers' | jq -c '.')
+          DRIVER_VERSIONS=$(yq -o=json '.nvidia_drivers' versions.yaml | jq -c '.')
           echo "driver_versions=$DRIVER_VERSIONS" >> $GITHUB_OUTPUT
 
   build:
