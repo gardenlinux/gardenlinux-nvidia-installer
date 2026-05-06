@@ -12,6 +12,52 @@ permissions:
   packages: write
 
 jobs:
+  image-folder:
+     runs-on: ubuntu-latest
+     outputs:
+       image_folder: ${{ steps.get-image-folder.outputs.image_folder }}
+       image_folder_old: ${{ steps.get-image-folder.outputs.image_folder_old }}
+     env:
+       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Get full history to be able to determine the latest release-update branch and latest release tag
+
+      - name: Get image folder
+        id: get-image-folder
+        run: |
+          # Get the to-be-built release version, based on the latest release-update branch
+          TAG=$(git ls-remote --heads origin 'release-update*' | head -n 1 | cut -f2 | cut -d/ -f4)
+          
+          # Get the previous version, based on the latest release tag
+          OLD_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
+            --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName // empty')
+
+          MAJOR=$(echo "$TAG" | cut -d. -f1)
+          MINOR=$(echo "$TAG" | cut -d. -f2)
+          PATCH=$(echo "$TAG" | cut -d. -f3)
+
+          OLD_MAJOR=$(echo "$OLD_TAG" | cut -d. -f1)
+          OLD_MINOR=$(echo "$OLD_TAG" | cut -d. -f2)
+
+          # We only look at the previous folder in the case of a patch release - for minor and major releases
+          #  we build all images from scratch, so there is no old folder to pull from and IMAGE_FOLDER_OLD should be empty
+          if [[ "$MAJOR" == "$OLD_MAJOR" && "$MINOR" == "$OLD_MINOR" ]]; then
+            IMAGE_FOLDER_OLD=$(echo "/${OLD_TAG}" | tr '[:upper:]' '[:lower:]')
+          else
+            IMAGE_FOLDER_OLD=""
+          fi
+          IMAGE_FOLDER=$(echo "/${TAG}" | tr '[:upper:]' '[:lower:]')
+
+          echo "image_folder_old: ${IMAGE_FOLDER_OLD}"
+          echo "image_folder: ${IMAGE_FOLDER}"
+
+          echo "image_folder_old=${IMAGE_FOLDER_OLD}" >> $GITHUB_OUTPUT
+          echo "image_folder=${IMAGE_FOLDER}" >> $GITHUB_OUTPUT
+
+
   generate-matrix:
     runs-on: ubuntu-latest
     outputs:
@@ -19,7 +65,7 @@ jobs:
       manifest_matrix: ${{ steps.set-matrix.outputs.manifest_matrix }}
     steps:
       - uses: actions/checkout@v6
-
+          
       - name: Install PyYAML and jq
         run: |
           pip install pyyaml
@@ -33,13 +79,15 @@ jobs:
           echo "manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.manifest')" >> $GITHUB_OUTPUT
 
   build:
-    needs: generate-matrix
+    needs: [generate-matrix, image-folder]
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.build_matrix) }}
     env:
+      GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
+      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
       TARGET_ARCH: ${{ matrix.arch }}
 
     steps:
@@ -49,6 +97,11 @@ jobs:
       - name: Lowercase github.repository
         run: echo "FOLDER_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
 
+      - name: Extract branch name as lower case
+        shell: bash
+        run: echo BRANCH_FOLDER=$(echo "/${GITHUB_REF#refs/heads/}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        id: extract_branch
+
       - name: Log in to GHCR
         uses: docker/login-action@v4
         with:
@@ -56,31 +109,158 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract branch name as lower case
-        shell: bash
-        run: echo BRANCH_FOLDER=$(echo "/${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-        id: extract_branch
-
       - name: Build and push Docker image
         id: build_image
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # On main, use the latest release tag matching [0-9].[0-9].[0-9].
-          # On a tag build github.ref_name is the tag itself (e.g. "1.2.3").
-          # On any other branch it falls back to the branch name.
-          RELEASE_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
-            --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName')
-          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}/${RELEASE_TAG}/driver"
-          echo $DRIVER_VERSION
-          make build-image \
-          WORKSPACE_DIR="${{ github.workspace }}" \
-          DRIVER_VERSION=$DRIVER_VERSION \
-          TARGET_ARCH=$TARGET_ARCH \
-          IMAGE_PATH=${IMAGE_PATH}
+          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}/driver"
 
-          TAG1=$(cat "${{ github.workspace }}/tag1")
-          TAG2=$(cat "${{ github.workspace }}/tag2")
+          KERNEL_NAME=$(make extract-kernel-name \
+            TARGET_ARCH=$TARGET_ARCH \
+            GL_VERSION=$GL_VERSION \
+            KERNEL_FLAVOR=$KERNEL_FLAVOR)
+    
+          echo KERNEL_NAME=$(echo "${KERNEL_NAME}") >> $GITHUB_ENV
+    
+          TAG1="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
+          TAG2="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
 
-          docker push $IMAGE_PATH:$TAG1
-          docker push $IMAGE_PATH:$TAG2
+          BUILD_IMAGE=true
+          
+          # Check if current image exists
+          if [[ -n "${{ needs.image-folder.outputs.image_folder_old }}" ]]; then
+            BUILD_IMAGE=false
+            OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/driver"
+            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG1" 2>/dev/null; then
+              echo "Image $OLD_IMAGE_PATH:$TAG1 already exists, skipping build"
+              echo "Pull from old image path and retag to new image path"
+              docker pull "$OLD_IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG2"
+              docker push "$IMAGE_PATH:$TAG1"
+              docker push "$IMAGE_PATH:$TAG2"
+            else
+              echo "Image $OLD_IMAGE_PATH:$TAG1 does not exist - triggering a build"
+              BUILD_IMAGE=true
+            fi
+          fi
+          if [[ "$BUILD_IMAGE" == "true" ]]; then
+            make build \
+              WORKSPACE_DIR="${{ github.workspace }}" \
+              GL_VERSION=$GL_VERSION \
+              DRIVER_VERSION=$DRIVER_VERSION \
+              KERNEL_FLAVOR=$KERNEL_FLAVOR \
+              TARGET_ARCH=$TARGET_ARCH \
+              IMAGE_PATH=${IMAGE_PATH}
+
+            TAG1=$(cat "${{ github.workspace }}/tag1")
+            TAG2=$(cat "${{ github.workspace }}/tag2")
+
+            docker push $IMAGE_PATH:$TAG1
+            docker push $IMAGE_PATH:$TAG2
+          fi
+
+      - name: Create and push multi-arch manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KERNEL_NAME: ${{ env.KERNEL_NAME }}
+          IMAGE_NAME: "driver"
+        run: |
+          KERNEL_VERSION="${KERNEL_NAME%-*}"
+          DRIVER_VERSION="${{ matrix.driver_version }}"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
+          IMAGE_REGISTRY_FOLDER="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.image-folder.outputs.image_folder }}"
+          MANIFEST_TAG="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-gardenlinux0"
+          AMD64_IMAGE="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-amd64-gardenlinux0"
+          #ARM64_IMAGE="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-${KERNEL_VERSION}-arm64-gardenlinux0"
+
+          docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
+          docker manifest push $MANIFEST_TAG
+  build-runtime-driver-image:
+    needs: [generate-matrix, image-folder]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.build_matrix.driver_version) }}
+    env:
+      GL_VERSION: ${{ matrix.os_version }}
+      DRIVER_VERSION: ${{ matrix.driver_version }}
+      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
+      TARGET_ARCH: ${{ matrix.arch }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Lowercase github.repository
+        run: echo "FOLDER_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
+      - name: Extract branch name as lower case
+        shell: bash
+        run: echo BRANCH_FOLDER=$(echo "/${GITHUB_REF#refs/heads/}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        id: extract_branch
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image to build driver Runtime
+        id: build_runtime_image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}/driver"
+    
+          TAG1="$DRIVER_VERSION-gardenlinux0"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
+          TAG2="$DRIVER_MAJOR_VERS-gardenlinux0"
+
+          BUILD_IMAGE=true
+          
+          # Check if current image exists
+          if [[ -n "${{ needs.image-folder.outputs.image_folder_old }}" ]]; then
+            BUILD_IMAGE=false
+            OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/driver"
+            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG1" 2>/dev/null; then
+              echo "Image $OLD_IMAGE_PATH:$TAG1 already exists, skipping build"
+              echo "Pull from old image path and retag to new image path"
+              docker pull "$OLD_IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG2"
+              docker push "$IMAGE_PATH:$TAG1"
+              docker push "$IMAGE_PATH:$TAG2"
+            else
+              echo "Image $OLD_IMAGE_PATH:$TAG1 does not exist - triggering a build"
+              BUILD_IMAGE=true
+            fi
+          fi
+          if [[ "$BUILD_IMAGE" == "true" ]]; then
+            make build-runtime-image \
+              WORKSPACE_DIR="${{ github.workspace }}" \
+              DRIVER_VERSION=$DRIVER_VERSION \
+              IMAGE_PATH=${IMAGE_PATH}
+
+            TAG1=$(cat "${{ github.workspace }}/tag1")
+            TAG2=$(cat "${{ github.workspace }}/tag2")
+
+            docker push $IMAGE_PATH:$TAG1
+            docker push $IMAGE_PATH:$TAG2
+          fi
+
+      - name: Create and push multi-arch manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_NAME: "driver"
+        run: |
+          DRIVER_VERSION="${{ matrix.driver_version }}"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
+          IMAGE_REGISTRY_FOLDER="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ needs.image-folder.outputs.image_folder }}"
+          MANIFEST_TAG="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-gardenlinux0"
+
+          docker manifest create $MANIFEST_TAG
+          docker manifest push $MANIFEST_TAG
