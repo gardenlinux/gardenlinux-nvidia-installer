@@ -105,7 +105,6 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 	}
 
 	parentDir := filepath.Dir(pwd)
-	fmt.Println(parentDir)
 
 	// Build the docker command
 	image := fmt.Sprintf("ghcr.io/gardenlinux/gardenlinux/kmodbuild:%s-%s", targetArch, glVersion)
@@ -114,7 +113,8 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 		"-v", parentDir+":/workspace",
 		"-w", "/workspace/gardenlinux-nvidia-installer",
 		image,
-		"ls",
+		path,
+		kernelFlavor,
 	)
 
 	var stdout, stderr bytes.Buffer
@@ -128,7 +128,6 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 
 	// Trim whitespace/newlines from output
 	kernelName := strings.TrimSpace(stdout.String())
-	fmt.Printf("KernelName: %s\n", kernelName)
 	return kernelName, nil
 }
 
