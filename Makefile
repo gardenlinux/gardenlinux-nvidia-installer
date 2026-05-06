@@ -64,6 +64,18 @@ build-image: check-driver-version extract-kernel-name
 	@echo $(TAG1) > $(WORKSPACE_DIR)/tag1
 	@echo $(TAG2) > $(WORKSPACE_DIR)/tag2
 
+build-runtime-image:
+	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-gardenlinux0")
+	$(eval TAG2 := "$(DRIVER_VERSION)-gardenlinux0")
+	@DOCKER_BUILDKIT=1 docker build \
+           --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
+           --platform=linux/amd64 \
+           -t $(IMAGE_PATH):$(TAG1) \
+           -t $(IMAGE_PATH):$(TAG2) \
+           -f Dockerfile_Runtime $(WORKSPACE_DIR)
+	@echo $(TAG1) > $(WORKSPACE_DIR)/tag1
+	@echo $(TAG2) > $(WORKSPACE_DIR)/tag2
+	
 clean:
 	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-*.tar.gz
 	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-*.tar.gz
