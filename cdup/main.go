@@ -112,7 +112,7 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 
 	cmd := exec.Command("docker", "run", "--rm",
 		"-v", parentDir+":/workspace",
-		"-w", "/workspace",
+		"-w", "/workspace/gardenlinux-nvidia-installer",
 		image,
 		"ls",
 	)
