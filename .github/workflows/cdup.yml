@@ -6,6 +6,10 @@ on:
         description: 'Version/Tag to checkout'
         required: true
         type: string
+      commit_input:
+        description: 'Commit of the Tag'
+        required: true
+        type: string
 
 jobs:
   cdup:
@@ -24,4 +28,4 @@ jobs:
           go build -o cdup
       - name: Run cdup
         run: |
-          ./cdup/cdup -v ${{ github.event.inputs.version_input }}
+          ./cdup/cdup -v ${{ github.event.inputs.version_input }} -c ${{ github.event.inputs.commit_input }}

@@ -111,7 +111,7 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 
 	cmd := exec.Command("docker", "run", "--rm",
 		"-v", parentDir+":/workspace",
-		"-w", "/workspace",
+		"-w", "/workspace/gardenlinux-nvidia-installer",
 		image,
 		path,
 		kernelFlavor,
@@ -141,6 +141,14 @@ func main() {
 	// Define the version flag
 	c.Flags().StringVarP(&version, "version", "v", "", "release version (required)")
 	err := c.MarkFlagRequired("version")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// Define the commit flag
+	c.Flags().StringVarP(&commit, "commit", "c", "", "Commitish (required)")
+	err = c.MarkFlagRequired("commit")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
