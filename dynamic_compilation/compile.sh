@@ -5,10 +5,23 @@ KERNEL_VERSION=$(uname -r | cut -d'-' -f1)
 ARCH_TYPE=$(uname -m)
 KERNEL_MODULE_TYPE=$1
 DRIVER_VERSION=$2
+NVIDIA_BIN=$3
 
 COMPILE_DIR="/tmp/compile_dir"
 mkdir -p $COMPILE_DIR
 cd $COMPILE_DIR
+
+
+nsenter -t 1 -m -u -n -i "${NVIDIA_BIN}/nvidia-smi"
+if [ $? -eq 0 ]; then
+  HOST_DRIVER_VERSION=$(nsenter -t 1 -m -u -n -i "${NVIDIA_BIN}/nvidia-smi" --query-gpu=driver_version --format=csv,noheader)
+  if [ "$HOST_DRIVER_VERSION" == "$DRIVER_VERSION" ]; then
+    echo "Driver already installed"
+    sleep infinity
+  else
+    echo "Driver version mismatch"
+  fi
+  
 HOST_GL_VERSION=$(nsenter -t 1 -m sh -c "grep GARDENLINUX_VERSION /etc/os-release | cut -d= -f2")
 
 cat <<EOF > /etc/apt/sources.list.d/gardenlinux_host.sources

@@ -33,6 +33,9 @@ main() {
         exit 1
     fi
 
+    NVIDIA_USR_BIN="${NVIDIA_ROOT}/usr/bin" # For nvidia-modprobe
+    NVIDIA_BIN="${NVIDIA_ROOT}/bin"
+
     # ------------------------------------------------------------------------------
     # 1) Resolve KERNEL_MODULE_TYPE and locate the pre-compiled driver tarball
     #    embedded in the image under /opt/nvidia-installer/drivers/.
@@ -44,7 +47,6 @@ main() {
     #    proprietary. Set explicitly to override.
     # ------------------------------------------------------------------------------
     resolve_kernel_module_type
-    #locate_driver_tarball
     
 
     # Stage new contents into a temporary directory
@@ -53,7 +55,7 @@ main() {
 
     chmod +x /opt/nvidia-installer/compile.sh
 
-    /opt/nvidia-installer/compile.sh $KERNEL_MODULE_TYPE $DRIVER_VERSION
+    /opt/nvidia-installer/compile.sh $KERNEL_MODULE_TYPE $DRIVER_VERSION $NVIDIA_BIN
  
     rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
     cp -a /run/nvidia/.staging-driver/. /run/nvidia/
@@ -78,8 +80,6 @@ main() {
     # 2) Run install(): 
     #    We also pass NVIDIA_BIN so probes can find tools easily inside this pod.
     # ------------------------------------------------------------------------------
-    NVIDIA_USR_BIN="${NVIDIA_ROOT}/usr/bin" # For nvidia-modprobe
-    NVIDIA_BIN="${NVIDIA_ROOT}/bin"
     cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}"
 
     install "$DRIVER_NAME" "$NVIDIA_BIN"
