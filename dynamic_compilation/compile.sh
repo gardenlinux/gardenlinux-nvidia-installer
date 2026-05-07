@@ -20,12 +20,12 @@ else
   HOST_GL_VERSION=$(nsenter -t 1 -m sh -c "grep GARDENLINUX_VERSION /etc/os-release | cut -d= -f2")
     
   cat <<EOF > /etc/apt/sources.list.d/gardenlinux_host.sources
-  Types: deb
-  URIs: https://packages.gardenlinux.io/gardenlinux
-  Suites: $HOST_GL_VERSION
-  Components: main
-  Enabled: yes
-  Signed-By: /etc/apt/trusted.gpg.d/keyring.asc
+Types: deb
+URIs: https://packages.gardenlinux.io/gardenlinux
+Suites: $HOST_GL_VERSION
+Components: main
+Enabled: yes
+Signed-By: /etc/apt/trusted.gpg.d/keyring.asc
 EOF
     
 
