@@ -1,11 +1,7 @@
 #!/bin/bash
 
-#Install kernel headers in a custom path
-
 KERNEL_NAME=$(uname -r)
 KERNEL_VERSION=$(uname -r | cut -d'-' -f1)
-#TODO
-DRIVER_VERSION="590.48.01"
 ARCH_TYPE=$(uname -m)
 KERNEL_MODULE_TYPE=$1
 DRIVER_VERSION=$2
@@ -25,6 +21,8 @@ Signed-By: /etc/apt/trusted.gpg.d/keyring.asc
 EOF
 
 apt-get update
+
+#Update kernel headers to match host
 
 apt install -y -qq linux-headers-"$KERNEL_NAME" 
 apt install -y -qq linux-headers-"$KERNEL_VERSION"-common
