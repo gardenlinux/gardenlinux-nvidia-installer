@@ -26,7 +26,7 @@ else
   Components: main
   Enabled: yes
   Signed-By: /etc/apt/trusted.gpg.d/keyring.asc
-  EOF
+EOF
     
 
   apt-get update
