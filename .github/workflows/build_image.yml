@@ -63,7 +63,7 @@ jobs:
     outputs:
       build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
       manifest_matrix: ${{ steps.set-matrix.outputs.manifest_matrix }}
-      driver_versions: ${{ steps.set-matrix.outputs.driver_versioons }}
+      driver_versions: ${{ steps.set-matrix.outputs.driver_versions }}
     steps:
       - uses: actions/checkout@v6
           
@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        driver_version: ${{ needs.generate-matrix.outputs.driver_versions }}
+        driver_version: ${{ fromJson(needs.generate-matrix.outputs.driver_versions) }}
     env:
       DRIVER_VERSION: ${{ matrix.driver_version }}
     steps:
