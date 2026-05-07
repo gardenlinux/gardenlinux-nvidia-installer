@@ -21,6 +21,7 @@ if [ $? -eq 0 ]; then
   else
     echo "Driver version mismatch"
   fi
+fi
   
 HOST_GL_VERSION=$(nsenter -t 1 -m sh -c "grep GARDENLINUX_VERSION /etc/os-release | cut -d= -f2")
 
