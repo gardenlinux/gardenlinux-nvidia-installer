@@ -154,19 +154,6 @@ jobs:
             docker push $IMAGE_PATH:$TAG2
           fi
 
-      - name: Create and push multi-arch manifest
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE_NAME: "driver"
-        run: |
-          DRIVER_VERSION="${{ matrix.driver_version }}"
-          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
-          IMAGE_REGISTRY_FOLDER="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}"
-          MANIFEST_TAG="${IMAGE_REGISTRY_FOLDER}/${{ env.IMAGE_NAME }}:${DRIVER_MAJOR_VERS}-gardenlinux0"
-
-          docker manifest create $MANIFEST_TAG
-          docker manifest push $MANIFEST_TAG
-
   build:
     needs: [generate-matrix, image-folder]
     runs-on: ubuntu-24.04
