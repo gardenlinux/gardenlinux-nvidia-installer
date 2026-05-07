@@ -3,7 +3,7 @@ echo "nvidia-installer begins"
 set -e
 
 BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 source "$BIN_DIR"/set_env_vars.sh
 LD_ROOT=${LD_ROOT:-/root}
 NVIDIA_ROOT=${NVIDIA_ROOT:-/run/nvidia/driver}
@@ -204,7 +204,7 @@ EOF
     '
     
     set +e
-    # shellcheck disable=SC1090
+    # shellcheck disable=SC1091
     source "${BIN_DIR}/install.sh"
     set -e 
 }

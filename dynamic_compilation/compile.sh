@@ -5,7 +5,9 @@ KERNEL_VERSION=$(uname -r | cut -d'-' -f1)
 ARCH_TYPE=$(uname -m)
 KERNEL_MODULE_TYPE=$1
 DRIVER_VERSION=$2
+# shellcheck disable=SC2034
 NVIDIA_BIN=$3
+# shellcheck disable=SC2027
 OUTDIR="/run/nvidia/"$DRIVER_VERSION"/driver"
 
 COMPILE_DIR="/tmp/compile_dir"
