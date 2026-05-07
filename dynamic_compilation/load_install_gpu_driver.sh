@@ -55,26 +55,10 @@ main() {
 
     chmod +x /opt/nvidia-installer/compile.sh
 
-    /opt/nvidia-installer/compile.sh $KERNEL_MODULE_TYPE $DRIVER_VERSION $NVIDIA_BIN
+    /opt/nvidia-installer/compile.sh "$KERNEL_MODULE_TYPE" "$DRIVER_VERSION" "$NVIDIA_BIN"
  
     rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
     cp -a /run/nvidia/.staging-driver/. /run/nvidia/
-
-
-
-    # extract INTO staging but drop the leading "driver/" path from the archive
-    # tar xzf "${DRIVER_TARBALL_PATH}" -C /run/nvidia/.staging-driver --strip-components=1
-
-    # Make /run/nvidia/driver an exact mirror of staging WITHOUT requiring rsync:
-    #  - First, remove existing contents of /run/nvidia/driver, including dotfiles.
-    #  - Then, copy everything from staging (preserving perms/links with -a).
-    #  Notes:
-    #    * We remove the contents, not the directory, to avoid breaking any watches.
-    #    * The glob trick handles hidden files/dirs (.[!.]* and ..?*).
-    #
-    # shellcheck disable=SC2115
-    #rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
-    #cp -a /run/nvidia/.staging-driver/. /run/nvidia/driver/
 
     # ------------------------------------------------------------------------------
     # 2) Run install(): 

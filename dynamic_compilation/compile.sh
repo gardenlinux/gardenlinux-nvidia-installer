@@ -10,6 +10,7 @@ OUTDIR="/run/nvidia/"$DRIVER_VERSION"/driver"
 
 COMPILE_DIR="/tmp/compile_dir"
 mkdir -p $COMPILE_DIR
+# shellcheck disable=SC2164
 cd $COMPILE_DIR
 
 HOST_GL_VERSION=$(nsenter -t 1 -m sh -c "grep GARDENLINUX_VERSION /etc/os-release | cut -d= -f2")
@@ -29,11 +30,11 @@ apt-get update
 
 apt install -y -qq linux-headers-"$KERNEL_NAME" 
 apt install -y -qq linux-headers-"$KERNEL_VERSION"-common
-apt install -y -qq linux-kbuild-$KERNEL_VERSION
+apt install -y -qq linux-kbuild-"$KERNEL_VERSION"
 
 DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
 
-echo $DRIVER_URL
+echo "$DRIVER_URL"
     
 attempt=0
 MAX_ATTEMPTS=3
@@ -63,7 +64,8 @@ chmod +x nvidia.run
       
 export IGNORE_MISSING_MODULE_SYMVERS=1
 
-cd NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION
+# shellcheck disable=SC2164
+cd NVIDIA-Linux-"$ARCH_TYPE"-"$DRIVER_VERSION"
 
 case $ARCH_TYPE in
   x86_64)
@@ -132,4 +134,4 @@ mkdir -p "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$HOST_OUT_DIR"/usr/bin
 cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu
 cp -a /usr/bin/nvidia* "$HOST_OUT_DIR"/usr/bin
 
-cp -a  $OUTDIR /run/nvidia/.staging-driver/
+cp -a  "$OUTDIR" /run/nvidia/.staging-driver/
