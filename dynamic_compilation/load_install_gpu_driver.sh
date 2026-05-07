@@ -13,7 +13,7 @@ main() {
     # Populate DRIVER_NAME, DRIVER_VERSION, NVIDIA_ROOT, etc.
     parse_parameters "$@"
 
-    echo $DRIVER_VERSION
+    echo "$DRIVER_VERSION"
     # Always run cleanup if your script provides it
     trap post_process EXIT
 
