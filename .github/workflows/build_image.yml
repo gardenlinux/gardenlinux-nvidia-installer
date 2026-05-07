@@ -81,6 +81,7 @@ jobs:
           # Output unique driver versions as a JSON array
           DRIVER_VERSIONS=$(yq -o=json '.nvidia_drivers' versions.yaml | jq -c '.')
           echo "driver_versions=$DRIVER_VERSIONS" >> $GITHUB_OUTPUT
+          echo "Driver versions: $DRIVER_VERSIONS" 
 
   build-runtime-driver-image:
     needs: [generate-matrix, image-folder]
