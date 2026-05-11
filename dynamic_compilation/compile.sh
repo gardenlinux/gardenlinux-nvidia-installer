@@ -34,7 +34,7 @@ apt install -y -qq linux-headers-"$KERNEL_NAME"
 apt install -y -qq linux-headers-"$KERNEL_VERSION"-common
 apt install -y -qq linux-kbuild-"$KERNEL_VERSION"
 
-DRIVER_URL="$BASE_URL/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
+DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
 
 echo "$DRIVER_URL"
     
