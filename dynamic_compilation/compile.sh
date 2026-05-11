@@ -34,7 +34,7 @@ apt install -y -qq linux-headers-"$KERNEL_NAME"
 apt install -y -qq linux-headers-"$KERNEL_VERSION"-common
 apt install -y -qq linux-kbuild-"$KERNEL_VERSION"
 
-DRIVER_URL="https://uk.download.nvidia.com/tesla/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
+DRIVER_URL="$BASE_URL/$DRIVER_VERSION/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION.run"
 
 echo "$DRIVER_URL"
     
@@ -121,6 +121,10 @@ case $ARCH_TYPE in
 esac
 
 HOST_OUT_DIR="/run/nvidia/.staging-driver/driver"
+
+echo "Copy GSP Firmware binary"
+mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
+find $COMPILE_DIR -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
 
 mkdir -p "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$HOST_OUT_DIR"/usr/bin
 
