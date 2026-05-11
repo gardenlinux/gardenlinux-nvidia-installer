@@ -81,7 +81,7 @@ main() {
     if ! /usr/bin/nvidia-smi >/dev/null 2>&1; then
         echo "[ERROR] driver installation failed: nvidia-smi did not run successfully."
         # Best-effort diagnostics
-     s   ls -l /dev/nvidia* 2>/dev/null || true
+        ls -l /dev/nvidia* 2>/dev/null || true
         nsenter -t 1 -m -u -n -i lsmod | grep -E '^(nvidia|nvidia_uvm|nvidia_modeset) ' || true
         exit 1
     fi

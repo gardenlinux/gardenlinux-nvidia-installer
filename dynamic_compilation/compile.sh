@@ -117,13 +117,12 @@ case $ARCH_TYPE in
       echo "Successfully compiled NVIDIA $KERNEL_MODULE_TYPE modules"
     else
       echo "[ERROR] Failed to compile NVIDIA $KERNEL_MODULE_TYPE modules"
-      cat /tmp/nvidia/NVIDIA-Linux-aarch64-"$DRIVER_VERSION"/nvidia-installer.log
       cat "$PWD"/nvidia-installer.log
       exit 1
     fi
       ;;
   *)
-    echo "Unsupported architecture"
+    echo "Unsupported architecture $ARCH_TYPE. Expected x86_64 or aarch64"
     exit 3
     ;;
 esac
