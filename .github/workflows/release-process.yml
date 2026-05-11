@@ -118,6 +118,12 @@ jobs:
           TAG="${{ needs.determine-version.outputs.new_tag }}"
           sed -i "s|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/.*|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/${TAG}|" \
             helm/gpu-operator-values.yaml
+      
+      - name: Update driver.repository in gpu-operator-values-runtime.yaml
+        run: |
+          TAG="${{ needs.determine-version.outputs.new_tag }}"
+          sed -i "s|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/.*|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/${TAG}|" \
+            helm/gpu-operator-values-runtime.yaml
 
       - name: Update release tag in README.md
         run: |
