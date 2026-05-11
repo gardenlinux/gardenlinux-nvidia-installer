@@ -4,8 +4,10 @@ FROM ghcr.io/gardenlinux/gardenlinux:latest AS packager
 ARG DRIVER_VERSION
 
 ARG BASE_URL=https://us.download.nvidia.com/tesla
+ENV BASE_URL=${BASE_URL}
 
 COPY resources/* /opt/nvidia-installer/
+
 #compile.sh and load_install_gpu_driver.sh is overwritten
 COPY dynamic_compilation/* /opt/nvidia-installer
 
