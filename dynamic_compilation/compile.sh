@@ -54,13 +54,6 @@ else
   echo "Download succeeded."
 fi
 
-wget -qO "${COMPILE_DIR}"/nvidia.run "${DRIVER_URL}"
-WGET_EXIT=$?
-if [ $WGET_EXIT -ne 0 ]; then
-  echo "Failed to download ${DRIVER_URL} (wget exit code: ${WGET_EXIT})"
-  exit 1
-fi
-
 chmod +x nvidia.run
 ./nvidia.run -x -s --tmpdir $COMPILE_DIR
       

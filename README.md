@@ -97,8 +97,11 @@ version updates are applied automatically via CI; major driver version bumps are
 - **Garden Linux versions** are tracked from https://github.com/gardenlinux/gardenlinux/releases
 - **NVIDIA driver versions** are tracked from https://www.nvidia.com/en-us/drivers/
 
-This project maintains the latest three Garden Linux releases for the precompiled flavor. If support for older 
-Garden Linux versions is needed, you can use the runtime build by applying the Helm values from helm/gpu-operator-values-runtime.yaml.
+## Runtime Driver compilation
+
+This project also supprts compilation of kernel during runtime. With this feature, the operator automatically 
+detects the host’s kernel version and builds the required driver modules using the host’s kernel headers.
+To enable runtime driver compilation, apply the Helm values provided in helm/gpu-operator-values-runtime.yaml.
 Note: When using the runtime image, please be aware that driver availability may take approximately 4 minutes.
 
 ## Background
