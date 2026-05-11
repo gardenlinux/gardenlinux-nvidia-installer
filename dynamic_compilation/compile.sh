@@ -122,6 +122,10 @@ esac
 
 HOST_OUT_DIR="/run/nvidia/.staging-driver/driver"
 
+echo "Copy GSP Firmware binary"
+mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
+find $COMPILE_DIR -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
+
 mkdir -p "$HOST_OUT_DIR"/usr/lib/"$ARCH_TYPE"-linux-gnu "$HOST_OUT_DIR"/usr/bin
 
 # Archive library .so files
