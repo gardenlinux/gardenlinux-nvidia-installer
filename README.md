@@ -97,6 +97,10 @@ version updates are applied automatically via CI; major driver version bumps are
 - **Garden Linux versions** are tracked from https://github.com/gardenlinux/gardenlinux/releases
 - **NVIDIA driver versions** are tracked from https://www.nvidia.com/en-us/drivers/
 
+This project maintains the latest three Garden Linux releases for the precompiled flavor. If support for older 
+Garden Linux versions is needed, you can use the runtime build by applying the Helm values from helm/gpu-operator-values-runtime.yaml.
+Note: When using the runtime image, please be aware that driver availability may take approximately 4 minutes.
+
 ## Background
 
 Garden Linux ships without build tools and without accessible kernel sources on the running node. This project solves
