@@ -13,7 +13,9 @@ on:
       - '.github/**'
       - '.ci/**'
       - 'cdup/**'
+    # Don't trigger on documentation changes
       - 'docs/**'
+      - '*.md'
 
 permissions:
   contents: write
