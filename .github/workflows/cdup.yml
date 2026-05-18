@@ -23,7 +23,9 @@ jobs:
           ref: ${{ github.event.inputs.version_input }}
 
       - name: Download dependencies
-        run: go mod tidy
+        run: |
+          cd cdup
+          go mod tidy
 
       - name: Build cdup
         run: |
