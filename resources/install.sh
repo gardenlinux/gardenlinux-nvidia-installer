@@ -38,6 +38,7 @@ echo "$error_out" | grep -v 'depmod: WARNING:'
 # Copy local nvidia-uvm.conf files to /drivers, but don't overwrite.
 # (existing files may have been configured by GPU Operator - see driver.kernelModuleConfig Helm value)
 # This disables High Memory Mode (hmm) which fixes an issue with B200 GPUs.
+mkdir -p /drivers
 cp nvidia-uvm.conf --no-clobber {} /drivers
 
 _get_module_params
