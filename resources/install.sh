@@ -39,9 +39,10 @@ echo "$error_out" | grep -v 'depmod: WARNING:'
 # (existing files may have been configured by GPU Operator - see driver.kernelModuleConfig Helm value)
 # This disables High Memory Mode (hmm) which fixes an issue with B200 GPUs.
 mkdir -p /drivers
-cp /opt/nvidia-installer/nvidia-uvm.conf --no-clobber {} /drivers
+cp --no-clobber /opt/nvidia-installer/nvidia-uvm.conf /drivers
 
 _get_module_params
+
 echo -n "/run/nvidia/driver/lib/firmware" > /sys/module/firmware_class/parameters/path
 modprobe -d "$INSTALL_DIR/$DRIVER_NAME" nvidia "${NVIDIA_MODULE_PARAMS[@]}"; rc=$?
 [ $rc -ne 0 ] && { echo "[ERROR] modprobe nvidia failed: $rc"; exit 1; }
