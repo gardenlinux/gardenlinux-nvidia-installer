@@ -100,6 +100,13 @@ Image tags (three per build):
 - `{DRIVER_MAJOR}-{KERNEL_VERSION}-gardenlinux0`
 - `{DRIVER_VERSION}-{KERNEL_VERSION}-gardenlinux0`
 
+## Quirks & Gotchas
+
+- **GL_VERSION format**: Use two-part version (`1877.17`, `2150.3`), NOT three-part (`1877.17.0`). The kmodbuild image tag is `kmodbuild:amd64-{GL_VERSION}` and will fail with `manifest unknown` if you use a three-part version.
+- **`make build` vs `make build-image`**: If no pre-compiled tarball exists in `out/nvidia/` for the target GL version, run `make build` (not `make build-image`) to compile + package. `make build-image` alone will fail if the tarball is missing.
+- **Mixed-kernel clusters**: During GL version upgrades, different nodes may run different kernels. The GPU Operator creates one DaemonSet per kernel version — both the old and new kernel images may need to be pushed.
+- **B200 node recovery**: After a cluster node replacement, the B200 node may stay `NotReady` for 10–20+ minutes before NFD labels it and the GPU Operator creates a driver DaemonSet for it.
+
 # Coding guidelines
 
 ## 1. Think Before Coding
