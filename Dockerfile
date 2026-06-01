@@ -20,10 +20,22 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
 # on Blackwell (B200) hosts to detect NVL5+ NVLink topology. It is not present in
 # the Garden Linux 2150 main repo, so we pull it from Debian unstable, pinned to
 # only the ibstat package set (Garden Linux is Debian-sid based, so ABI matches).
-RUN echo "deb http://deb.debian.org/debian unstable main" > /etc/apt/sources.list.d/debian-unstable.list \
-    && printf 'Package: *\nPin: release a=unstable\nPin-Priority: -1\n\nPackage: infiniband-diags libibnetdisc5* libibmad5* libibumad3*\nPin: release a=unstable\nPin-Priority: 500\n' > /etc/apt/preferences.d/debian-unstable \
-    && apt-get -o Acquire::AllowInsecureRepositories=true update -qq \
-    && apt-get install -qq --no-install-recommends -y --allow-unauthenticated infiniband-diags \
+# debian-archive-keyring is installed first so apt can verify the sid Release
+# signature. signed-by= scopes the trusted key to this source line only.
+# All four packages (incl. transitive deps) are pinned to exact versions so
+# rebuilds are deterministic: infiniband-diags=63.0-1 pulls
+# libibnetdisc5t64=63.0-1, libibmad5=63.0-1, libibumad3=63.0-1.
+RUN apt-get install -qq --no-install-recommends -y debian-archive-keyring \
+    && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian unstable main" \
+        > /etc/apt/sources.list.d/debian-unstable.list \
+    && printf 'Package: *\nPin: release a=unstable\nPin-Priority: -1\n\nPackage: infiniband-diags libibnetdisc5t64 libibmad5 libibumad3\nPin: release a=unstable\nPin-Priority: 500\n' \
+        > /etc/apt/preferences.d/debian-unstable \
+    && apt-get update -qq \
+    && apt-get install -qq --no-install-recommends -y \
+        infiniband-diags=63.0-1 \
+        libibnetdisc5t64=63.0-1 \
+        libibmad5=63.0-1 \
+        libibumad3=63.0-1 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN /opt/nvidia-installer/download_fabricmanager.sh

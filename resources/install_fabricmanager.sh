@@ -39,9 +39,13 @@ elif [[ "$GPU_NAME" =~ B200 ]]; then
     name=$(echo "$dev_line" | awk '{print $NF}')
     major=$(echo "$dev_line" | awk '{print $5}' | tr -d ',')
     minor=$(echo "$dev_line" | awk '{print $6}')
-    [ -z "$name" ] || [ -z "$major" ] || [ -z "$minor" ] && continue
+    # Validate name, major, and minor before creating any device node.
+    [[ "$name" =~ ^(umad|issm)[0-9]+$ ]] || continue
+    [[ "$major" =~ ^[0-9]+$ ]] || continue
+    [[ "$minor" =~ ^[0-9]+$ ]] || continue
     [ -e "/dev/infiniband/$name" ] && continue
-    mknod "/dev/infiniband/$name" c "$major" "$minor" 2>/dev/null || true
+    mknod "/dev/infiniband/$name" c "$major" "$minor" 2>/dev/null \
+      || echo "[WARN] mknod /dev/infiniband/$name ($major:$minor) failed — nvlsm may not be able to open InfiniBand management port" >&2
   done < <(nsenter -t 1 -m -u -n -i ls -la /dev/infiniband/ 2>/dev/null | grep -E '^c' | grep -E 'umad|issm')
 
   # Run Fabric Manager
