@@ -16,6 +16,16 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
+# infiniband-diags (provides ibstat) is required by nvidia-fabricmanager-start.sh
+# on Blackwell (B200) hosts to detect NVL5+ NVLink topology. It is not present in
+# the Garden Linux 2150 main repo, so we pull it from Debian unstable, pinned to
+# only the ibstat package set (Garden Linux is Debian-sid based, so ABI matches).
+RUN echo "deb http://deb.debian.org/debian unstable main" > /etc/apt/sources.list.d/debian-unstable.list \
+    && printf 'Package: *\nPin: release a=unstable\nPin-Priority: -1\n\nPackage: infiniband-diags libibnetdisc5* libibmad5* libibumad3*\nPin: release a=unstable\nPin-Priority: 500\n' > /etc/apt/preferences.d/debian-unstable \
+    && apt-get -o Acquire::AllowInsecureRepositories=true update -qq \
+    && apt-get install -qq --no-install-recommends -y --allow-unauthenticated infiniband-diags \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN /opt/nvidia-installer/download_fabricmanager.sh
 
 # Remove several things that are not needed, some of which raise Black Duck scan vulnerabilities

@@ -21,10 +21,28 @@ if [[ "$GPU_NAME" =~ (A100|H100|H200|B100) ]]; then
   # Run Fabric Manager
   nv-fabricmanager -c /etc/fabricmanager.cfg
   echo "Fabric manager running"
-# For Blackwell architecture NVlink needs to be activated. nvidia-fabricmanager-start.sh starts NVLink 
+# For Blackwell architecture NVlink needs to be activated. nvidia-fabricmanager-start.sh starts NVLink
 elif [[ "$GPU_NAME" =~ B200 ]]; then
   sed 's/DAEMONIZE=1/DAEMONIZE=0/g' "/usr/share/nvidia/nvswitch/fabricmanager.cfg" > /etc/fabricmanager.cfg
   sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
+
+  # nvidia-fabricmanager-start.sh's NVL5 detection requires the ib_umad kernel
+  # module on the host. Load it via nsenter so it lands on the host kernel.
+  nsenter -t 1 -m -u -n -i modprobe ib_umad
+
+  # Mirror the host's /dev/infiniband umad/issm character devices into the
+  # container so nvlsm and nv-fabricmanager can open the InfiniBand management
+  # ports. Host /dev/infiniband is not propagated into the GPU Operator driver
+  # daemonset by default.
+  mkdir -p /dev/infiniband
+  while IFS= read -r dev_line; do
+    name=$(echo "$dev_line" | awk '{print $NF}')
+    major=$(echo "$dev_line" | awk '{print $5}' | tr -d ',')
+    minor=$(echo "$dev_line" | awk '{print $6}')
+    [ -z "$name" ] || [ -z "$major" ] || [ -z "$minor" ] && continue
+    [ -e "/dev/infiniband/$name" ] && continue
+    mknod "/dev/infiniband/$name" c "$major" "$minor" 2>/dev/null || true
+  done < <(nsenter -t 1 -m -u -n -i ls -la /dev/infiniband/ 2>/dev/null | grep -E '^c' | grep -E 'umad|issm')
 
   # Run Fabric Manager
   /usr/bin/nvidia-fabricmanager-start.sh --mode start --fm-config-file /etc/fabricmanager.cfg

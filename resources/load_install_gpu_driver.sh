@@ -307,6 +307,7 @@ log() {
 }
 
 post_process() {
+  true
 }
 
 main "${@}"
