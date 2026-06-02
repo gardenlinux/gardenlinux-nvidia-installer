@@ -1,6 +1,30 @@
 #!/bin/bash
 #set -euo pipefail
 
+NVIDIA_MODULE_PARAMS=()
+NVIDIA_UVM_MODULE_PARAMS=()
+
+# Read optional kernel module parameters from conf files mounted at /drivers/.
+# Each line in the file is one parameter token, e.g. "NVreg_DeviceFileMode=0666".
+# Multiple parameters: one per line.
+_get_module_params() {
+    local base_path="/drivers"
+    if [ -f "${base_path}/nvidia.conf" ]; then
+        while read -r param || [ -n "$param" ]; do
+            [[ -z "$param" || "$param" == \#* ]] && continue
+            NVIDIA_MODULE_PARAMS+=("$param")
+        done <"${base_path}/nvidia.conf"
+        echo "Module parameters provided for nvidia: ${NVIDIA_MODULE_PARAMS[*]}"
+    fi
+    if [ -f "${base_path}/nvidia-uvm.conf" ]; then
+        while read -r param || [ -n "$param" ]; do
+            [[ -z "$param" || "$param" == \#* ]] && continue
+            NVIDIA_UVM_MODULE_PARAMS+=("$param")
+        done <"${base_path}/nvidia-uvm.conf"
+        echo "Module parameters provided for nvidia-uvm: ${NVIDIA_UVM_MODULE_PARAMS[*]}"
+    fi
+}
+
 echo "Installing NVIDIA modules for driver version $DRIVER_VERSION"
 echo "INSTALL_DIR: $INSTALL_DIR"
 echo "DRIVER_NAME: $DRIVER_NAME"
@@ -9,11 +33,21 @@ echo "NVIDIA_BIN: $NVIDIA_BIN"
 # Build dep maps relative to the alt root (your INSTALL_DIR/DRIVER_NAME)
 error_out=$(depmod -b "$INSTALL_DIR/$DRIVER_NAME" 2>&1 )
 # filter harmless depmod warnings
-echo "$error_out" | grep -v 'depmod: WARNING:' 
+echo "$error_out" | grep -v 'depmod: WARNING:'
+
+# Copy local nvidia-uvm.conf files to /drivers, but don't overwrite.
+# (existing files may have been configured by GPU Operator - see driver.kernelModuleConfig Helm value)
+# This disables High Memory Mode (hmm) which fixes an issue with B200 GPUs.
+mkdir -p /drivers
+cp --no-clobber /opt/nvidia-installer/nvidia-uvm.conf /drivers
+
+_get_module_params
 
 echo -n "/run/nvidia/driver/lib/firmware" > /sys/module/firmware_class/parameters/path
-modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia
-modprobe -q -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm
+modprobe -d "$INSTALL_DIR/$DRIVER_NAME" nvidia "${NVIDIA_MODULE_PARAMS[@]}"; rc=$?
+[ $rc -ne 0 ] && { echo "[ERROR] modprobe nvidia failed: $rc"; exit 1; }
+modprobe -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm "${NVIDIA_UVM_MODULE_PARAMS[@]}"; rc=$?
+[ $rc -ne 0 ] && { echo "[ERROR] modprobe nvidia-uvm failed: $rc"; exit 1; }
 
 # Ensure device nodes exist on the host (idempotent, preferred over manual mknod)
 # -u: create /dev/nvidia-uvm

@@ -307,9 +307,7 @@ log() {
 }
 
 post_process() {
-    if ${DEBUG}; then
-        sleep infinity
-    fi
+  true
 }
 
 main "${@}"
