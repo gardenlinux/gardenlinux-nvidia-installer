@@ -317,9 +317,8 @@ lspci | grep -i -E 'nvidia|efa'
 ```
 
 Expected output:
+<img src="img/efa.png" alt="alt text" width="500" height="500" />
 
-```text
-```
 
 If the EFA device does not appear in the `lspci` output, the AWS instance reservation is likely misconfigured. The EFA
 network interface type must be enabled when creating or reserving the instance. Refer
@@ -444,75 +443,89 @@ systemctl restart containerd
 <summary><b>nccl container image</b></summary>
 
 ```
-ARG CUDA_VERSION=12.9.1
-ARG BASE_IMAGE=nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04
-FROM ${BASE_IMAGE} AS base
+FROM nvidia/cuda:12.9.1-devel-ubuntu22.04 AS base
+ENV DEBIAN_FRONTEND=noninteractive
 
-ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -qq update && \
-    apt-get -qq install -y \
-    --allow-change-held-packages \
-    --no-install-recommends \
-    --allow-downgrades \
-    build-essential \
-    wget devscripts debhelper fakeroot pkg-config check openssh-server \
-    libopenmpi-dev \
-    openmpi-bin \
-    git \
-    libtool \
-    autoconf \
-    automake \
-    curl
+      apt-get -qq install -y \
+      --allow-change-held-packages \
+      --no-install-recommends \
+      --allow-downgrades \
+      build-essential \
+      wget devscripts debhelper fakeroot pkg-config check openssh-server \
+      git libtool autoconf automake curl pciutils \
+      udev \
+      libnl-3-200 \
+      libnl-3-dev \
+      libnl-route-3-200 \
+      libnl-route-3-dev \
+      libudev-dev \
+      python3-docutils \
+      libhwloc15 \
+      libhwloc-dev \
+      libevent-dev \
+      libpmix-dev
 
-# Install EFA installer
 RUN cd /tmp && \
-    curl -O https://efa-installer.amazonaws.com/aws-efa-installer-latest.tar.gz && \
-    tar -xf aws-efa-installer-latest.tar.gz && \
-    cd aws-efa-installer && \
-    # Install EFA without kernel modules (not needed in container)
-    ./efa_installer.sh -y --skip-kmod --skip-limit-conf --no-verify --mpi=openmpi4 && \
-    cd / && \
-    rm -rf /tmp/aws-efa-installer*
+      curl -O https://efa-installer.amazonaws.com/aws-efa-installer-latest.tar.gz && \
+      tar -xf aws-efa-installer-latest.tar.gz && \
+      cd aws-efa-installer && \
+      dpkg -i DEBS/UBUNTU2204/x86_64/rdma-core/libibverbs1_61.0-1_amd64.deb \
+              DEBS/UBUNTU2204/x86_64/rdma-core/ibverbs-providers_61.0-1_amd64.deb \
+              DEBS/UBUNTU2204/x86_64/rdma-core/librdmacm1_61.0-1_amd64.deb \
+              DEBS/UBUNTU2204/x86_64/rdma-core/rdma-core_61.0-1_amd64.deb \
+              DEBS/UBUNTU2204/x86_64/rdma-core/libibverbs-dev_61.0-1_amd64.deb \
+              DEBS/UBUNTU2204/x86_64/rdma-core/librdmacm-dev_61.0-1_amd64.deb && \
+      apt-get install -f -y && \
+      ./efa_installer.sh -y --skip-kmod --skip-limit-conf --no-verify --mpi=openmpi4 && \
+      dpkg -i DEBS/UBUNTU2204/x86_64/libfabric1-aws_2.4.0amzn3.0_amd64.deb \
+              DEBS/UBUNTU2204/x86_64/libfabric-aws-bin_2.4.0amzn3.0_amd64.deb && \
+      apt-get install -f -y && \
+      dpkg -r libnccl-ofi-ngc-v3 2>/dev/null || true && \
+      dpkg -i DEBS/UBUNTU2204/x86_64/libnccl-ofi_1.19.0-1_amd64.deb && \
+      apt-get install -f -y && \
+      dpkg -i DEBS/UBUNTU2204/x86_64/efa-profile_1.7_all.deb && \
+      apt-get install -f -y && \
+      dpkg -i DEBS/UBUNTU2204/x86_64/openmpi40-aws_4.1.7-1_amd64.deb && \
+      apt-get install -f -y && \
+      cd / && \
+      rm -rf /tmp/aws-efa-installer*
+
+RUN ldconfig
+
+# Rebuild libfabric v2.4.0 with CUDA DMABUF MR patch (enables GDR without nvidia-peermem)
+COPY efa_dmabuf.patch /tmp/
+RUN git clone --depth=1 --branch v2.4.0 \
+        https://github.com/ofiwg/libfabric.git /tmp/libfabric-src && \
+    cd /tmp/libfabric-src && \
+    git apply /tmp/efa_dmabuf.patch && \
+    ./autogen.sh && \
+    ./configure \
+        --prefix=/opt/amazon/efa \
+        --enable-efa=yes \
+        --with-cuda=/usr/local/cuda \
+        --disable-opx \
+        --disable-usnic \
+        --disable-verbs && \
+    make -j$(nproc) install && \
+    rm -rf /tmp/libfabric-src /tmp/efa_dmabuf.patch
 
 FROM base AS libnccl2
 
-# NCCL with EFA plugin
 ARG TARGET_NCCL_VERSION='2.28.3-1'
-ARG AWS_OFI_NCCL_VERSION='v1.18.0'
 
-# Build NCCL
 RUN mkdir /tmp/build && \
-    cd /tmp/build && \
-    wget -qO- "https://github.com/NVIDIA/nccl/archive/refs/tags/v${TARGET_NCCL_VERSION}.tar.gz" \
-    | tar --strip-components=1 -xzf - && \
-    make -j20 pkg.debian.build NVCC_GENCODE="-gencode=arch=compute_80,code=sm_80 -gencode=arch=compute_90,code=sm_90 -gencode=arch=compute_100,code=sm_100" && \
-    cd build/pkg/deb && \
-    ls -l && \
-    mkdir /tmp/libnccl2 && \
-    mv ./libnccl*.deb /tmp/libnccl2/ && \
-    cd /tmp && \
-    rm -r /tmp/build
-
-# Build AWS OFI NCCL plugin
-RUN cd /tmp && \
-    git clone https://github.com/aws/aws-ofi-nccl.git -b ${AWS_OFI_NCCL_VERSION} && \
-    cd aws-ofi-nccl && \
-    ./autogen.sh && \
-    CXXFLAGS="-Wno-cast-function-type" ./configure --prefix=/opt/aws-ofi-nccl \
-        --with-libfabric=/opt/amazon/efa \
-        --with-cuda=/usr/local/cuda \
-        --enable-platform-aws && \
-    make -j20 && \
-    make install && \
-    cd / && \
-    rm -rf /tmp/aws-ofi-nccl
+      cd /tmp/build && \
+      wget -qO- "https://github.com/NVIDIA/nccl/archive/refs/tags/v${TARGET_NCCL_VERSION}.tar.gz" \
+      | tar --strip-components=1 -xzf - && \
+      make -j20 pkg.debian.build NVCC_GENCODE="-gencode=arch=compute_80,code=sm_80 -gencode=arch=compute_90,code=sm_90 -gencode=arch=compute_100,code=sm_100" && \
+      mkdir /tmp/libnccl2 && \
+      mv build/pkg/deb/libnccl*.deb /tmp/libnccl2/ && \
+      rm -rf /tmp/build
 
 FROM base AS base-amd64
 RUN --mount=type=bind,from=libnccl2,source=/tmp/libnccl2,target=/tmp/install \
-    cd /tmp/install && dpkg -i *.deb
-
-# Copy AWS OFI NCCL plugin
-COPY --from=libnccl2 /opt/aws-ofi-nccl /opt/aws-ofi-nccl
+      cd /tmp/install && dpkg -i *.deb
 
 FROM base-amd64
 
@@ -520,17 +533,46 @@ ENV NCCL_TESTS_COMMITISH=2535da805b34e96d1dc08be66289be1a6d57f5ad
 
 WORKDIR /opt/nccl-tests
 
-RUN wget -q -O - https://github.com/NVIDIA/nccl-tests/archive/${NCCL_TESTS_COMMITISH}.tar.gz | tar --strip-components=1 -xzf - && \
-    make -j20 MPI=1 MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi && \
-    ln -s /opt/nccl-tests /opt/nccl_tests
-
-# SSH dependencies for MPI
-RUN sed -i 's/[ #]*\(.*StrictHostKeyChecking \).*/\1no/g' /etc/ssh/ssh_config
-RUN echo "    UserKnownHostsFile /dev/null" >> /etc/ssh/ssh_config
-RUN sed -i 's/#\(StrictModes \).*/\1no/g' /etc/ssh/sshd_config
-RUN mkdir /var/run/sshd -p
+RUN wget -q -O - https://github.com/NVIDIA/nccl-tests/archive/${NCCL_TESTS_COMMITISH}.tar.gz \
+      | tar --strip-components=1 -xzf - && \
+      make -j20 MPI=1 MPI_HOME=/opt/amazon/openmpi \
+      NCCL_HOME=/usr/lib/x86_64-linux-gnu \
+      CUDA_HOME=/usr/local/cuda
 ```
+EFA with DMABuf has issues in libfabric, hence patch below is applied in Containerfile. 
 
+```
+diff --git a/prov/efa/src/efa_mr.c b/prov/efa/src/efa_mr.c
+index fc62d21..f4804f0 100644
+--- a/prov/efa/src/efa_mr.c
++++ b/prov/efa/src/efa_mr.c
+@@ -544,6 +544,25 @@ static struct ibv_mr *efa_mr_reg_ibv_mr(struct efa_mr *efa_mr, struct fi_mr_attr
+ 	 * TODO: need such fallback for cuda as well when
+ 	 * FI_CUDA_API_PERMITTED is true
+ 	 */
++#if HAVE_EFA_DMABUF_MR && HAVE_CUDA
++	if (efa_mr_is_cuda(efa_mr)) {
++		ret = ofi_hmem_get_dmabuf_fd(
++			efa_mr->peer.iface, mr_attr->mr_iov->iov_base,
++			mr_attr->mr_iov->iov_len, &dmabuf_fd, &offset);
++
++		if (ret == FI_SUCCESS) {
++			/* Success => invoke ibv_reg_dmabuf_mr */
++			ibv_mr = efa_mr_reg_ibv_dmabuf_mr(
++				efa_mr->domain->ibv_pd, offset,
++				mr_attr->mr_iov->iov_len,
++				(uint64_t) mr_attr->mr_iov->iov_base, dmabuf_fd,
++				access);
++			(void) ofi_hmem_put_dmabuf_fd(efa_mr->peer.iface,
++						      dmabuf_fd);
++			return ibv_mr;
++		}
++	}
++#endif
+ 	if (efa_mr_is_neuron(efa_mr)) {
+ 		ret = ofi_hmem_get_dmabuf_fd(
+ 				efa_mr->peer.iface,
+```
 </details>
 
 ### YAML File to Start the NCCL Container
@@ -864,6 +906,151 @@ The test can be repeated for other RDMA interfaces.
 kubectl apply -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.3.0/deploy/v2beta1/mpi-operator.yaml
 ```
 
+mpi-operator must be allowed to create pods, hence we need to apply below ClusterRole
+
+```
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mpi-operator
+  namespace: mpi-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mpi-operator
+rules:
+# Core resources
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - pods/status
+  - services
+  - endpoints
+  - persistentvolumeclaims
+  - events
+  - configmaps
+  - secrets
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+# Apps resources
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+# Batch resources
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  - cronjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+# Kubeflow resources
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - mpijobs
+  - mpijobs/status
+  - mpijobs/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+# RBAC resources
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+# Coordination resources (for leader election)
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+# Scheduling resources (for PriorityClasses)
+- apiGroups:
+  - scheduling.k8s.io
+  resources:
+  - priorityclasses
+  verbs:
+  - get
+  - list
+  - watch
+# Policy resources
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mpi-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mpi-operator
+subjects:
+- kind: ServiceAccount
+  name: mpi-operator
+  namespace: mpi-operator
+```
+
 #### Configuration File
 
 <details>
@@ -1048,7 +1235,7 @@ kubectl get pods -n nccl-tests
 
 kubectl get pods -n nccl-tests
 NAME                                       READY   STATUS    RESTARTS   AGE
-nccl-test-72-gb200-8n-roce-launcher-*                1/1     Running   0          4m39s
+nccl-test-72-gb200-8n-roce-launcher-*       1/1     Running   0          4m39s
 nccl-test-72-gb200-8n-roce-worker-0         1/1     Running   0          4m39s
 nccl-test-72-gb200-8n-roce-worker-1         1/1     Running   0          4m39s
 ```
@@ -1105,6 +1292,24 @@ mpirun -np 16 -N 8 --bind-to none --map-by slot \
 **Output**
 <img src="img/inter-node-bw.png" alt="alt text" width="700" height="300" />
 
+
+#### EFA mpirun test command
+```
+/opt/amazon/openmpi/bin/mpirun \
+  --mca plm_rsh_args "-p 2222 -o StrictHostKeyChecking=no" \
+  --mca btl_tcp_if_include 10.250.0.0/19 \
+  -x FI_EFA_USE_DEVICE_RDMA=1 \
+  -x LD_LIBRARY_PATH=/opt/nccl/build/lib:/usr/local/cuda/lib64:/opt/amazon/efa/lib:/opt/amazon/openmpi/lib:/opt/amazon/ofi-nccl/lib:$LD_LIBRARY_PATH \
+  --hostfile /etc/mpi/hostfile \
+  -np 16 -N 8 \
+  --mca pml ^cm \
+  --mca btl tcp,self \
+  --bind-to none \
+  /opt/nccl-tests/build/all_reduce_perf -b 8M -e 128M -f 2 -g 1
+```
+
+**Output**
+<img src="img/efa_output.png" alt="alt text" width="700" height="300" />
 ## References
 
 GPU Operator : https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/overview.html
