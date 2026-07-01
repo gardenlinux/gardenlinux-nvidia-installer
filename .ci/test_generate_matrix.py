@@ -16,7 +16,7 @@ SCRIPT = Path(__file__).parent / "generate_matrix.py"
 FIXTURE_YAML = """\
 os_versions:
 - 2150.4.0
-- 1877.10
+- '1877.10'
 kernel_flavour:
 - cloud
 - metal
