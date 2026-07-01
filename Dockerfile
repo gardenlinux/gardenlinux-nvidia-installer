@@ -28,8 +28,6 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
 RUN apt-get install -qq --no-install-recommends -y debian-archive-keyring \
     && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian unstable main" \
         > /etc/apt/sources.list.d/debian-unstable.list \
-    && printf 'Package: *\nPin: release a=unstable\nPin-Priority: -1\n\nPackage: infiniband-diags libibnetdisc5t64 libibmad5 libibumad3\nPin: release a=unstable\nPin-Priority: 500\n' \
-        > /etc/apt/preferences.d/debian-unstable \
     && apt-get update -qq \
     && apt-get install -qq --no-install-recommends -y \
         infiniband-diags\
