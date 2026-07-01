@@ -64,9 +64,11 @@ jobs:
       build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
       manifest_matrix: ${{ steps.set-matrix.outputs.manifest_matrix }}
       driver_versions: ${{ steps.set-matrix.outputs.driver_versions }}
+      gvisor_build_matrix: ${{ steps.set-matrix.outputs.gvisor_build_matrix }}
+      gvisor_manifest_matrix: ${{ steps.set-matrix.outputs.gvisor_manifest_matrix }}
     steps:
       - uses: actions/checkout@v6
-          
+
       - name: Install PyYAML and jq
         run: |
           pip install pyyaml
@@ -78,10 +80,12 @@ jobs:
           MATRIX_JSON=$(python3 .ci/generate_matrix.py)
           echo "build_matrix=$(echo "$MATRIX_JSON" | jq -c '.build')" >> $GITHUB_OUTPUT
           echo "manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.manifest')" >> $GITHUB_OUTPUT
+          echo "gvisor_build_matrix=$(echo "$MATRIX_JSON" | jq -c '.gvisor_build')" >> $GITHUB_OUTPUT
+          echo "gvisor_manifest_matrix=$(echo "$MATRIX_JSON" | jq -c '.gvisor_manifest')" >> $GITHUB_OUTPUT
           # Output unique driver versions as a JSON array
           DRIVER_VERSIONS=$(yq -o=json '.nvidia_drivers' versions.yaml | jq -c '.')
           echo "driver_versions=$DRIVER_VERSIONS" >> $GITHUB_OUTPUT
-          echo "Driver versions: $DRIVER_VERSIONS" 
+          echo "Driver versions: $DRIVER_VERSIONS"
 
   build-runtime-driver-image:
     needs: [generate-matrix, image-folder]
@@ -254,4 +258,87 @@ jobs:
 
           docker manifest create $MANIFEST_TAG $AMD64_IMAGE $ARM64_IMAGE
           docker manifest push $MANIFEST_TAG
+
+  build-gvisor:
+    needs: [generate-matrix, image-folder]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.gvisor_build_matrix) }}
+    env:
+      GL_VERSION: ${{ matrix.os_version }}
+      DRIVER_VERSION: ${{ matrix.driver_version }}
+      KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
+      TARGET_ARCH: ${{ matrix.arch }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Lowercase github.repository
+        run: echo "FOLDER_NAME=${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
+      - name: Extract branch name as lower case
+        shell: bash
+        run: echo BRANCH_FOLDER=$(echo "/${GITHUB_REF#refs/heads/}" | grep -v ^/main$ | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+        id: extract_branch
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push gVisor driver image
+        id: build_gvisor_image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}/gvisor/driver"
+
+          KERNEL_NAME=$(make extract-kernel-name \
+            TARGET_ARCH=$TARGET_ARCH \
+            GL_VERSION=$GL_VERSION \
+            KERNEL_FLAVOR=$KERNEL_FLAVOR)
+
+          echo KERNEL_NAME=$(echo "${KERNEL_NAME}") >> $GITHUB_ENV
+
+          TAG1="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
+          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
+          TAG2="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
+
+          BUILD_IMAGE=true
+
+          # Check if image from previous patch release exists at the old gVisor path
+          if [[ -n "${{ needs.image-folder.outputs.image_folder_old }}" ]]; then
+            BUILD_IMAGE=false
+            OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/gvisor/driver"
+            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG1" 2>/dev/null; then
+              echo "Image $OLD_IMAGE_PATH:$TAG1 already exists, skipping build"
+              docker pull "$OLD_IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
+              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG2"
+              docker push "$IMAGE_PATH:$TAG1"
+              docker push "$IMAGE_PATH:$TAG2"
+            else
+              echo "Image $OLD_IMAGE_PATH:$TAG1 does not exist - triggering a build"
+              BUILD_IMAGE=true
+            fi
+          fi
+          if [[ "$BUILD_IMAGE" == "true" ]]; then
+            make build-gvisor-image \
+              WORKSPACE_DIR="${{ github.workspace }}" \
+              GL_VERSION=$GL_VERSION \
+              DRIVER_VERSION=$DRIVER_VERSION \
+              KERNEL_FLAVOR=$KERNEL_FLAVOR \
+              TARGET_ARCH=$TARGET_ARCH \
+              IMAGE_PATH=${IMAGE_PATH}
+
+            TAG1=$(cat "${{ github.workspace }}/tag1")
+            TAG2=$(cat "${{ github.workspace }}/tag2")
+
+            docker push $IMAGE_PATH:$TAG1
+            docker push $IMAGE_PATH:$TAG2
+          fi
 
