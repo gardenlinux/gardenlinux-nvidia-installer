@@ -2,9 +2,6 @@
 
 These tests use fixture data (no live network calls) to validate the
 version-selection algorithm for gVisor driver pins.
-
-Tests are currently red against the current update_versions.py since
-the gVisor logic has not yet been implemented (issue #9).
 """
 import copy
 import sys

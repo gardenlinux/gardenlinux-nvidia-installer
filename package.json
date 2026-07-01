@@ -2,21 +2,16 @@
   "name": "gardenlinux-nvidia-installer",
   "version": "1.0.0",
   "description": "This component installs NVIDIA kernel modules on Garden Linux nodes at runtime via the NVIDIA GPU Operator. Pre-compiled kernel modules are baked into the image at build time.",
-  "main": "index.js",
   "directories": {
-    "doc": "docs",
-    "test": "tests"
   },
   "scripts": {
-    "sandcastle": "npx tsx .sandcastle/main.mts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "sandcastle": "npx tsx .sandcastle/main.mts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gardenlinux/gardenlinux-nvidia-installer.git"
   },
   "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/gardenlinux/gardenlinux-nvidia-installer/issues"
   },
