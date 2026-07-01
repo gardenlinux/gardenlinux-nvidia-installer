@@ -32,10 +32,10 @@ RUN apt-get install -qq --no-install-recommends -y debian-archive-keyring \
         > /etc/apt/preferences.d/debian-unstable \
     && apt-get update -qq \
     && apt-get install -qq --no-install-recommends -y \
-        infiniband-diags=63.0-1 \
-        libibnetdisc5t64=63.0-1 \
-        libibmad5=63.0-1 \
-        libibumad3=63.0-1 \
+        infiniband-diags\
+        libibnetdisc5t64 \
+        libibmad5 \
+        libibumad3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN /opt/nvidia-installer/download_fabricmanager.sh
