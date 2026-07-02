@@ -1,5 +1,5 @@
-foo
 build
 orig
 out
 /.sandcastle/
+package.json
