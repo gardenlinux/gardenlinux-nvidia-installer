@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add .ci to path so we can import the script as a module
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Fixture: a version.go snippet listing nvproxy-qualified driver versions.
 # Versions listed here are the ones expected to be parsed from the real file.

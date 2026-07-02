@@ -194,53 +194,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}/driver"
-
-          KERNEL_NAME=$(make extract-kernel-name \
-            TARGET_ARCH=$TARGET_ARCH \
-            GL_VERSION=$GL_VERSION \
-            KERNEL_FLAVOR=$KERNEL_FLAVOR)
-    
-          echo KERNEL_NAME=$(echo "${KERNEL_NAME}") >> $GITHUB_ENV
-    
-          TAG1="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
-          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
-          TAG2="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
-
-          BUILD_IMAGE=true
-          
-          # Check if current image exists
-          if [[ -n "${{ needs.image-folder.outputs.image_folder_old }}" ]]; then
-            BUILD_IMAGE=false
-            OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/driver"
-            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG1" 2>/dev/null; then
-              echo "Image $OLD_IMAGE_PATH:$TAG1 already exists, skipping build"
-              echo "Pull from old image path and retag to new image path"
-              docker pull "$OLD_IMAGE_PATH:$TAG1"
-              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
-              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG2"
-              docker push "$IMAGE_PATH:$TAG1"
-              docker push "$IMAGE_PATH:$TAG2"
-            else
-              echo "Image $OLD_IMAGE_PATH:$TAG1 does not exist - triggering a build"
-              BUILD_IMAGE=true
-            fi
-          fi
-          if [[ "$BUILD_IMAGE" == "true" ]]; then
-            make build \
-              WORKSPACE_DIR="${{ github.workspace }}" \
-              GL_VERSION=$GL_VERSION \
-              DRIVER_VERSION=$DRIVER_VERSION \
-              KERNEL_FLAVOR=$KERNEL_FLAVOR \
-              TARGET_ARCH=$TARGET_ARCH \
-              IMAGE_PATH=${IMAGE_PATH}
-
-            TAG1=$(cat "${{ github.workspace }}/tag1")
-            TAG2=$(cat "${{ github.workspace }}/tag2")
-
-            docker push $IMAGE_PATH:$TAG1
-            docker push $IMAGE_PATH:$TAG2
-          fi
+          bash .ci/build_and_push.sh \
+            driver \
+            build \
+            "${{ needs.image-folder.outputs.image_folder }}" \
+            "${{ needs.image-folder.outputs.image_folder_old }}"
 
       - name: Create and push multi-arch manifest
         env:
@@ -295,50 +253,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder }}/gvisor/driver"
-
-          KERNEL_NAME=$(make extract-kernel-name \
-            TARGET_ARCH=$TARGET_ARCH \
-            GL_VERSION=$GL_VERSION \
-            KERNEL_FLAVOR=$KERNEL_FLAVOR)
-
-          echo KERNEL_NAME=$(echo "${KERNEL_NAME}") >> $GITHUB_ENV
-
-          TAG1="$DRIVER_VERSION-$KERNEL_NAME-gardenlinux0"
-          DRIVER_MAJOR_VERS="${DRIVER_VERSION%%.*}"
-          TAG2="$DRIVER_MAJOR_VERS-$KERNEL_NAME-gardenlinux0"
-
-          BUILD_IMAGE=true
-
-          # Check if image from previous patch release exists at the old gVisor path
-          if [[ -n "${{ needs.image-folder.outputs.image_folder_old }}" ]]; then
-            BUILD_IMAGE=false
-            OLD_IMAGE_PATH="${{ env.REGISTRY }}/${{ env.FOLDER_NAME }}${{ env.BRANCH_FOLDER }}${{ needs.image-folder.outputs.image_folder_old }}/gvisor/driver"
-            if docker manifest inspect "$OLD_IMAGE_PATH:$TAG1" 2>/dev/null; then
-              echo "Image $OLD_IMAGE_PATH:$TAG1 already exists, skipping build"
-              docker pull "$OLD_IMAGE_PATH:$TAG1"
-              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG1"
-              docker tag "$OLD_IMAGE_PATH:$TAG1" "$IMAGE_PATH:$TAG2"
-              docker push "$IMAGE_PATH:$TAG1"
-              docker push "$IMAGE_PATH:$TAG2"
-            else
-              echo "Image $OLD_IMAGE_PATH:$TAG1 does not exist - triggering a build"
-              BUILD_IMAGE=true
-            fi
-          fi
-          if [[ "$BUILD_IMAGE" == "true" ]]; then
-            make build-gvisor-image \
-              WORKSPACE_DIR="${{ github.workspace }}" \
-              GL_VERSION=$GL_VERSION \
-              DRIVER_VERSION=$DRIVER_VERSION \
-              KERNEL_FLAVOR=$KERNEL_FLAVOR \
-              TARGET_ARCH=$TARGET_ARCH \
-              IMAGE_PATH=${IMAGE_PATH}
-
-            TAG1=$(cat "${{ github.workspace }}/tag1")
-            TAG2=$(cat "${{ github.workspace }}/tag2")
-
-            docker push $IMAGE_PATH:$TAG1
-            docker push $IMAGE_PATH:$TAG2
-          fi
+          bash .ci/build_and_push.sh \
+            gvisor/driver \
+            build-image \
+            "${{ needs.image-folder.outputs.image_folder }}" \
+            "${{ needs.image-folder.outputs.image_folder_old }}"
 

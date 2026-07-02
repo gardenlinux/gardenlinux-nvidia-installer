@@ -31,8 +31,8 @@ jobs:
         run: pip install pyyaml pytest
 
       - name: Run generate_matrix tests
-        run: pytest .ci/test_generate_matrix.py -v
+        run: pytest .ci/test/test_generate_matrix.py -v
 
       - name: Run update_versions tests
-        run: pytest .ci/test_update_versions.py -v
+        run: pytest .ci/test/test_update_versions.py -v
         if: hashFiles('.ci/test_update_versions.py') != ''

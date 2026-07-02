@@ -1,4 +1,4 @@
-.PHONY: extract-kernel-name build-driver build-image build-gvisor-image build
+.PHONY: extract-kernel-name build-driver build-image build
 WORKSPACE_DIR ?= $(shell pwd)
 KERNEL_FLAVOR ?= cloud
 TARGET_ARCH ?= amd64
@@ -54,28 +54,6 @@ build-driver: check-driver-version check-gl-version extract-kernel-name
 build-image: check-driver-version check-gl-version extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
-	@DOCKER_BUILDKIT=1 docker build \
-           --build-arg GL_VERSION=$(GL_VERSION) \
-           --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
-           --build-arg KERNEL_NAME=$(KERNEL_NAME) \
-           --build-arg TARGET_ARCH=$(TARGET_ARCH) \
-           --platform=linux/${TARGET_ARCH} \
-           -t $(IMAGE_PATH):$(TAG1) \
-           -t $(IMAGE_PATH):$(TAG2) \
-           -f Dockerfile $(WORKSPACE_DIR)
-	@echo $(TAG1) > $(WORKSPACE_DIR)/tag1
-	@echo $(TAG2) > $(WORKSPACE_DIR)/tag2
-
-# build-gvisor-image builds a driver image for use with gVisor (runsc).
-# Callers must pass IMAGE_PATH pointing to the gvisor/driver registry subfolder.
-# DRIVER_VERSION should be the nvproxy-qualified pin, not the mainstream version.
-build-gvisor-image: check-driver-version check-gl-version extract-kernel-name
-	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
-	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
-	@if [ -z "$(IMAGE_PATH)" ]; then \
-		echo "Error: IMAGE_PATH is not set." >&2; \
-		exit 1; \
-	fi
 	@DOCKER_BUILDKIT=1 docker build \
            --build-arg GL_VERSION=$(GL_VERSION) \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \

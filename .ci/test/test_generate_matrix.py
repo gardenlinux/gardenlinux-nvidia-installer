@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-SCRIPT = Path(__file__).parent / "generate_matrix.py"
+SCRIPT = Path(__file__).parent.parent / "generate_matrix.py"
 
 FIXTURE_YAML = """\
 os_versions:
