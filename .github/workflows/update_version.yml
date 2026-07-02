@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install Pip packages
-        run: pip install html2text pyyaml
+        run: pip install html2text pyyaml requests
 
       - name: Update Version
         id: update-version
@@ -22,8 +22,9 @@ jobs:
           # Parse the output for each update type
           GARDENLINUX_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GARDENLINUX_VERSION_UPDATE" | cut -d'=' -f2)
           NVIDIA_DRIVER_VERSION_UPDATE=$(echo "$OUTPUT" | grep "NVIDIA_DRIVER_VERSION_UPDATE" | cut -d'=' -f2)
+          GVISOR_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GVISOR_VERSION_UPDATE" | cut -d'=' -f2)
 
-          echo "has_update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "has_update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' || $GVISOR_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
       - name: Update History
         id: update-history

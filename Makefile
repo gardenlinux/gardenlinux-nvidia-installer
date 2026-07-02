@@ -51,7 +51,7 @@ build-driver: check-driver-version check-gl-version extract-kernel-name
 # Both tarballs are embedded in the image so that the correct one can be selected at runtime.
 # KERNEL_NAME already contains flavour and arch (e.g. 6.12.72-cloud-amd64), so tags do not
 # append KERNEL_FLAVOR or TARGET_ARCH separately.
-build-image: check-driver-version check-gl-version extract-kernel-name 
+build-image: check-driver-version check-gl-version extract-kernel-name
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-$(KERNEL_NAME)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-$(KERNEL_NAME)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
@@ -77,7 +77,7 @@ build-runtime-image:
            -f Dockerfile_Runtime $(WORKSPACE_DIR)
 	@echo $(TAG1) > $(WORKSPACE_DIR)/tag1
 	@echo $(TAG2) > $(WORKSPACE_DIR)/tag2
-	
+
 clean:
 	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-open-*.tar.gz
 	rm -rf $(WORKSPACE_DIR)/out/nvidia/driver-$(DRIVER_VERSION)-proprietary-*.tar.gz
