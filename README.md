@@ -106,6 +106,25 @@ detects the host’s kernel version and builds the required driver modules using
 To enable runtime driver compilation, apply the Helm values provided in helm/gpu-operator-values-runtime.yaml.
 Note: When using the runtime image, please be aware that driver availability may take approximately 4 minutes.
 
+## gVisor (runsc) support
+
+For clusters running workloads inside gVisor sandboxes, driver images are published at a separate `gvisor/driver`
+registry path. These images use nvproxy-qualified driver versions pinned by the gVisor project.
+
+```bash
+helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
+  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.11.0/helm/gpu-operator-gvisor-values.yaml
+```
+
+gVisor driver images are published at:
+
+```
+ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<release>/gvisor/driver:<driver_major>-<kernel_version>-gardenlinux0
+```
+
+The `driver.version` in `gpu-operator-gvisor-values.yaml` tracks the gVisor-pinned major, which may differ from the
+mainstream driver major when the latest mainstream release is not yet qualified by gVisor’s nvproxy.
+
 ## Background
 
 Garden Linux ships without build tools and without accessible kernel sources on the running node. This project solves
