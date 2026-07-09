@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	semver "github.com/Masterminds/semver/v3"
 	"github.com/goccy/go-yaml"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
@@ -67,6 +68,45 @@ func loadVersionsConfig(path string) (*VersionsConfig, error) {
 	}
 
 	return &config, nil
+}
+
+// latestConfig reduces the config to a single combination:
+// highest semver OS version, highest semver driver, cloud flavour, amd64 arch.
+func latestConfig(config *VersionsConfig) (*VersionsConfig, error) {
+	pickMax := func(versions []string) (string, error) {
+		var max *semver.Version
+		var maxRaw string
+		for _, raw := range versions {
+			v, err := semver.NewVersion(raw)
+			if err != nil {
+				return "", fmt.Errorf("cannot parse version %q: %w", raw, err)
+			}
+			if max == nil || v.GreaterThan(max) {
+				max = v
+				maxRaw = raw
+			}
+		}
+		if max == nil {
+			return "", fmt.Errorf("empty version list")
+		}
+		return maxRaw, nil
+	}
+
+	latestOS, err := pickMax(config.OSVersions)
+	if err != nil {
+		return nil, fmt.Errorf("os_versions: %w", err)
+	}
+	latestDriver, err := pickMax(config.NvidiaDrivers)
+	if err != nil {
+		return nil, fmt.Errorf("nvidia_drivers: %w", err)
+	}
+
+	return &VersionsConfig{
+		OSVersions:    []string{latestOS},
+		KernelFlavors: config.KernelFlavors,
+		CPUArch:       config.CPUArch,
+		NvidiaDrivers: []string{latestDriver},
+	}, nil
 }
 
 // buildImageList creates all combinations of images from the config
@@ -168,6 +208,11 @@ func run(cmd *cobra.Command, args []string) error {
 	config, err := loadVersionsConfig(versionsPath)
 	if err != nil {
 		return fmt.Errorf("version config load failed: %w", err)
+	}
+
+	config, err = latestConfig(config)
+	if err != nil {
+		return fmt.Errorf("failed to determine latest config: %w", err)
 	}
 
 	// Build the image list from config
