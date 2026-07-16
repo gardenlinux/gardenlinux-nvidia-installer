@@ -74,7 +74,7 @@ def get_latest_gardenlinux_tags(data):
             else:  # Stop when we get a match, so we avoid also removing new versions at the top
                 break
 
-    filtered_os_versions = [x for x in new_os_versions if x not in ancient_versions]
+    filtered_os_versions = [x for x in new_os_versions if x not in ancient_versions] + ['1592.18'] # remove 1592.18 after gardener stops supporting it 2026-09
 
     if sorted(data['os_versions']) != sorted(filtered_os_versions):
         data['os_versions'] = filtered_os_versions
