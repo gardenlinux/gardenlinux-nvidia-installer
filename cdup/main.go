@@ -70,9 +70,37 @@ func loadVersionsConfig(path string) (*VersionsConfig, error) {
 	return &config, nil
 }
 
-// latestConfig reduces the config to a single combination:
-// highest semver OS version, highest semver driver, cloud flavour, amd64 arch.
+// latestConfig reduces the config to one entry per OS major version (e.g. 2150, 1877)
+// plus the single highest nvidia driver.
 func latestConfig(config *VersionsConfig) (*VersionsConfig, error) {
+	// pickMaxPerMajor returns the highest patch/minor version for each distinct major.
+	pickMaxPerMajor := func(versions []string) ([]string, error) {
+		maxPerMajor := map[uint64]*semver.Version{}
+		rawPerMajor := map[uint64]string{}
+		for _, raw := range versions {
+			v, err := semver.NewVersion(raw)
+			if err != nil {
+				return nil, fmt.Errorf("cannot parse version %q: %w", raw, err)
+			}
+			major := v.Major()
+			if major == 1592 {
+				continue
+			}
+			if cur, ok := maxPerMajor[major]; !ok || v.GreaterThan(cur) {
+				maxPerMajor[major] = v
+				rawPerMajor[major] = raw
+			}
+		}
+		if len(rawPerMajor) == 0 {
+			return nil, fmt.Errorf("empty version list")
+		}
+		result := make([]string, 0, len(rawPerMajor))
+		for _, raw := range rawPerMajor {
+			result = append(result, raw)
+		}
+		return result, nil
+	}
+
 	pickMax := func(versions []string) (string, error) {
 		var max *semver.Version
 		var maxRaw string
@@ -92,7 +120,7 @@ func latestConfig(config *VersionsConfig) (*VersionsConfig, error) {
 		return maxRaw, nil
 	}
 
-	latestOS, err := pickMax(config.OSVersions)
+	latestOSVersions, err := pickMaxPerMajor(config.OSVersions)
 	if err != nil {
 		return nil, fmt.Errorf("os_versions: %w", err)
 	}
@@ -102,7 +130,7 @@ func latestConfig(config *VersionsConfig) (*VersionsConfig, error) {
 	}
 
 	return &VersionsConfig{
-		OSVersions:    []string{latestOS},
+		OSVersions:    latestOSVersions,
 		KernelFlavors: config.KernelFlavors,
 		CPUArch:       config.CPUArch,
 		NvidiaDrivers: []string{latestDriver},
