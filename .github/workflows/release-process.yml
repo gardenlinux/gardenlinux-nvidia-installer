@@ -127,6 +127,12 @@ jobs:
           sed -i "s|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/.*|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/${TAG}|" \
             helm/gpu-operator-values-runtime.yaml
 
+      - name: Update driver.repository in gpu-operator-gvisor-values.yaml
+        run: |
+          TAG="${{ needs.determine-version.outputs.new_tag }}"
+          sed -i "s|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/.*/gvisor|repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/${TAG}/gvisor|" \
+            helm/gpu-operator-gvisor-values.yaml
+
       - name: Update release tag in README.md
         run: |
           TAG="${{ needs.determine-version.outputs.new_tag }}"
@@ -179,7 +185,7 @@ jobs:
           git config user.email "gardenlinux@users.noreply.github.com"
           
           # Check if there are changes to commit
-          git add helm/gpu-operator-values.yaml README*.md release-version.yaml
+          git add helm/gpu-operator-values.yaml helm/gpu-operator-gvisor-values.yaml README*.md release-version.yaml
           if git diff --cached --quiet --exit-code; then
             echo "No changes to commit"
             exit 0
