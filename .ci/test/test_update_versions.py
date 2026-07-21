@@ -153,6 +153,17 @@ class TestUpdateGvisorPins:
         )
         assert changed is False  # already current
 
+    def test_stale_key_removed_and_returns_true(self):
+        """Pins whose key is not in nvidia_drivers are removed and True is returned."""
+        uv = import_update_versions()
+        data = copy.deepcopy(FIXTURE_VERSIONS_YAML)
+        data["gvisor_driver_pins"]["999.00.00"] = "590.48.01"  # stale: not in nvidia_drivers
+
+        changed = uv.update_gvisor_driver_pins(data, FIXTURE_VERSION_GO)
+        assert changed is True
+        assert "999.00.00" not in data["gvisor_driver_pins"]
+        assert data["gvisor_driver_pins"] == FIXTURE_VERSIONS_YAML["gvisor_driver_pins"]
+
     def test_new_mainstream_major_without_qualified_version_warns(self, capsys):
         """A new mainstream major with no qualified gVisor version logs a warning."""
         uv = import_update_versions()

@@ -72,6 +72,12 @@ def update_gvisor_driver_pins(data, version_go_content):
             pins[driver] = best
             changed = True
 
+    nvidia_drivers = set(data.get("nvidia_drivers", []))
+    stale_keys = [k for k in list(pins) if k not in nvidia_drivers]
+    for k in stale_keys:
+        del pins[k]
+        changed = True
+
     return changed
 
 
