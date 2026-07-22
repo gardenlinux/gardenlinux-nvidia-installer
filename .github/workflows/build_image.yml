@@ -95,7 +95,7 @@ jobs:
           submodules: true
 
       - name: Run bats tests
-        run: test/bats/bin/bats dynamic_compilation/load_install_gpu_driver.sh
+        run: test/bats/bin/bats dynamic_compilation/test_resolve_driver_version.bats
 
   build-runtime-driver-image:
     needs: [generate-matrix, image-folder, test-shell]
