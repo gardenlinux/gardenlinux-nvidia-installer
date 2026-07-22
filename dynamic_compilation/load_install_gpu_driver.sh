@@ -3,8 +3,10 @@ echo "nvidia-installer begins"
 set -e
 
 BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
-# shellcheck disable=SC1091
-source "$BIN_DIR"/set_env_vars.sh
+if [ -z "${BATS_TEST_FILENAME:-}" ]; then
+    # shellcheck disable=SC1091
+    source "$BIN_DIR"/set_env_vars.sh
+fi
 LD_ROOT=${LD_ROOT:-/root}
 NVIDIA_ROOT=${NVIDIA_ROOT:-/run/nvidia/driver}
 
@@ -97,31 +99,42 @@ main() {
 
 
 resolve_driver_version() {
-    # If DRIVER_VERSION is not a plain integer, it's already a full version — nothing to do.
-    if ! [[ "${DRIVER_VERSION}" =~ ^[0-9]+$ ]]; then
-        return
-    fi
-
-    local major="${DRIVER_VERSION}"
     local runsc_output
     if ! runsc_output=$(nsenter -t 1 -m -u -n -i /var/bin/containerruntimes/runsc nvproxy list-supported-drivers 2>/dev/null); then
         echo "[INFO] runsc not available or failed - gVisor not enabled; using DRIVER_VERSION=${DRIVER_VERSION} as-is"
         return
     fi
 
-    # Pick the latest semantic version whose major component matches.
     local resolved
-    resolved=$(echo "${runsc_output}" \
-        | grep -E "^${major}\." \
-        | sort -t. -k1,1n -k2,2n -k3,3n \
-        | tail -1)
+    if [[ "${DRIVER_VERSION}" =~ ^[0-9]+$ ]]; then
+        # Plain integer: pick the latest supported version with that major.
+        local major="${DRIVER_VERSION}"
+        resolved=$(echo "${runsc_output}" \
+            | grep -E "^${major}\." \
+            | sort -t. -k1,1n -k2,2n -k3,3n \
+            | tail -1)
 
-    if [ -z "${resolved}" ]; then
-        echo "[ERROR] runsc listed no supported drivers for major version ${major}"
-        exit 1
+        if [ -z "${resolved}" ]; then
+            echo "[ERROR] runsc listed no supported drivers for major version ${major}"
+            exit 1
+        fi
+    else
+        # Full semver: pick the latest supported version with the same major that is <= DRIVER_VERSION.
+        resolved=$(echo "${runsc_output}" \
+            | sort -t. -k1,1n -k2,2n -k3,3n \
+            | awk -F. -v target="${DRIVER_VERSION}" '
+                BEGIN { split(target, t, ".") }
+                $1 == t[1] && ($2 < t[2] || ($2 == t[2] && $3 <= t[3])) { last = $0 }
+                END { print last }
+            ')
+
+        if [ -z "${resolved}" ]; then
+            echo "[ERROR] runsc listed no supported drivers <= ${DRIVER_VERSION}"
+            exit 1
+        fi
     fi
 
-    echo "[INFO] DRIVER_VERSION resolved via runsc: ${major} -> ${resolved}"
+    echo "[INFO] DRIVER_VERSION resolved via runsc: ${DRIVER_VERSION} -> ${resolved}"
     DRIVER_VERSION="${resolved}"
     export DRIVER_VERSION
 }
@@ -305,4 +318,108 @@ post_process() {
     fi
 }
 
-main "${@}"
+if [ -z "${BATS_TEST_FILENAME:-}" ]; then
+    main "${@}"
+fi
+
+# ---------------------------------------------------------------------------
+# Tests — run with:
+#   test/bats/bin/bats dynamic_compilation/load_install_gpu_driver.sh
+# ---------------------------------------------------------------------------
+if [ -n "${BATS_TEST_FILENAME:-}" ]; then
+
+REPO_ROOT="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
+load "${REPO_ROOT}/test/test_helper/bats-support/load"
+load "${REPO_ROOT}/test/test_helper/bats-assert/load"
+
+# Stub nsenter to return controlled output/exit code per test.
+RUNSC_EXIT_CODE=0
+RUNSC_OUTPUT=""
+nsenter() {
+    echo "${RUNSC_OUTPUT}"
+    return "${RUNSC_EXIT_CODE}"
+}
+
+@test "runsc unavailable: integer version is left unchanged" {
+    RUNSC_EXIT_CODE=1
+    DRIVER_VERSION=560
+    resolve_driver_version
+    assert_equal "$DRIVER_VERSION" "560"
+}
+
+@test "runsc unavailable: full semver is left unchanged" {
+    RUNSC_EXIT_CODE=1
+    DRIVER_VERSION=560.35.03
+    resolve_driver_version
+    assert_equal "$DRIVER_VERSION" "560.35.03"
+}
+
+@test "integer: picks latest version matching major" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '560.28.03\n560.35.03\n560.94.02\n570.00.01\n')"
+    DRIVER_VERSION=560
+    resolve_driver_version
+    assert_equal "$DRIVER_VERSION" "560.94.02"
+}
+
+@test "integer: errors when no version matches major" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '570.00.01\n570.86.10\n')"
+    DRIVER_VERSION=560
+    run resolve_driver_version
+    assert_failure
+    assert_output --partial "[ERROR]"
+}
+
+@test "semver: exact match is selected" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '560.28.03\n560.35.03\n560.94.02\n')"
+    DRIVER_VERSION=560.35.03
+    resolve_driver_version
+    assert_equal "$DRIVER_VERSION" "560.35.03"
+}
+
+@test "semver: picks latest supported version below target when no exact match" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '560.28.03\n560.35.03\n560.94.02\n')"
+    DRIVER_VERSION=560.50.00
+    resolve_driver_version
+    assert_equal "$DRIVER_VERSION" "560.35.03"
+}
+
+@test "semver: picks latest when target equals highest supported version" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '560.28.03\n560.35.03\n560.94.02\n')"
+    DRIVER_VERSION=560.94.02
+    resolve_driver_version
+    assert_equal "$DRIVER_VERSION" "560.94.02"
+}
+
+@test "semver: falls back to lower minor when target minor is below all in that major" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '560.28.03\n560.35.03\n')"
+    DRIVER_VERSION=560.10.00
+    run resolve_driver_version
+    assert_failure
+    assert_output --partial "[ERROR]"
+}
+
+@test "semver: errors when only a lower major version is available" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '550.90.07\n560.28.03\n560.35.03\n')"
+    DRIVER_VERSION=560.10.00
+    run resolve_driver_version
+    assert_failure
+    assert_output --partial "[ERROR]"
+}
+
+@test "semver: errors when all supported versions are above target" {
+    RUNSC_EXIT_CODE=0
+    RUNSC_OUTPUT="$(printf '570.00.01\n570.86.10\n')"
+    DRIVER_VERSION=560.35.03
+    run resolve_driver_version
+    assert_failure
+    assert_output --partial "[ERROR]"
+}
+
+fi # end BATS_TEST_FILENAME
