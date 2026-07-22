@@ -265,7 +265,7 @@ jobs:
         run: |
           bash .ci/build_and_push.sh \
             gvisor/driver \
-            build-image \
+            build \
             "${{ needs.image-folder.outputs.image_folder }}" \
             "${{ needs.image-folder.outputs.image_folder_old }}"
 
