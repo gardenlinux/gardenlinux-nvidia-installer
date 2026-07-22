@@ -37,7 +37,13 @@ main() {
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
 
     # ------------------------------------------------------------------------------
-    # 1) Resolve KERNEL_MODULE_TYPE and locate the pre-compiled driver tarball
+    # 1) If DRIVER_VERSION is a plain integer and runsc (i.e. gVisor) is available on the host,
+    #    ask runsc for the latest supported driver with that major version.
+    # ------------------------------------------------------------------------------
+    resolve_driver_version
+
+    # ------------------------------------------------------------------------------
+    # 2) Resolve KERNEL_MODULE_TYPE and locate the pre-compiled driver tarball
     #    embedded in the image under /opt/nvidia-installer/drivers/.
     #    KERNEL_MODULE_TYPE selects which tarball to deploy. Valid values:
     #      "open"        – use open kernel modules
@@ -87,6 +93,37 @@ main() {
     fi
 
     echo "[INFO] NVIDIA driver install/refresh OK for ${DRIVER_NAME}:${DRIVER_VERSION} (${KERNEL_MODULE_TYPE} modules, kernel ${KERNEL_NAME})"
+}
+
+
+resolve_driver_version() {
+    # If DRIVER_VERSION is not a plain integer, it's already a full version — nothing to do.
+    if ! [[ "${DRIVER_VERSION}" =~ ^[0-9]+$ ]]; then
+        return
+    fi
+
+    local major="${DRIVER_VERSION}"
+    local runsc_output
+    if ! runsc_output=$(nsenter -t 1 -m -u -n -i /var/bin/containerruntimes/runsc nvproxy list-supported-drivers 2>/dev/null); then
+        echo "[INFO] runsc not available or failed - gVisor not enabled; using DRIVER_VERSION=${DRIVER_VERSION} as-is"
+        return
+    fi
+
+    # Pick the latest semantic version whose major component matches.
+    local resolved
+    resolved=$(echo "${runsc_output}" \
+        | grep -E "^${major}\." \
+        | sort -t. -k1,1n -k2,2n -k3,3n \
+        | tail -1)
+
+    if [ -z "${resolved}" ]; then
+        echo "[ERROR] runsc listed no supported drivers for major version ${major}"
+        exit 1
+    fi
+
+    echo "[INFO] DRIVER_VERSION resolved via runsc: ${major} -> ${resolved}"
+    DRIVER_VERSION="${resolved}"
+    export DRIVER_VERSION
 }
 
 
