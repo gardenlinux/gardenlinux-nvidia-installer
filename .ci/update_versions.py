@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import re
 import sys
 import warnings
@@ -8,10 +9,15 @@ import html2text
 import requests
 import yaml
 
-GVISOR_VERSION_GO_URL = (
-    "https://raw.githubusercontent.com/google/gvisor/master/"
+GVISOR_VERSION_GO_URL_TEMPLATE = (
+    "https://raw.githubusercontent.com/google/gvisor/{ref}/"
     "pkg/sentry/devices/nvproxy/version.go"
 )
+
+
+def gvisor_version_go_url(gvisor_version=None):
+    ref = f"release-{gvisor_version}" if gvisor_version else "master"
+    return GVISOR_VERSION_GO_URL_TEMPLATE.format(ref=ref)
 
 
 def parse_gvisor_qualified_versions(version_go_content):
@@ -81,7 +87,7 @@ def update_gvisor_driver_pins(data, version_go_content):
     return changed
 
 
-def update_versions():
+def update_versions(gvisor_version=None):
     updates = {
         'gardenlinux': False,
         'nvidia': False,
@@ -92,7 +98,7 @@ def update_versions():
         data = yaml.safe_load(version_file)
         updates['gardenlinux'] = get_latest_gardenlinux_tags(data)
         updates['nvidia'] = update_nvidia_driver_version(data)
-        updates['gvisor'] = _fetch_and_update_gvisor_pins(data)
+        updates['gvisor'] = _fetch_and_update_gvisor_pins(data, gvisor_version)
 
     with open("versions.yaml", 'w') as version_file:
         yaml.dump(data, version_file, default_flow_style=False, sort_keys=False)
@@ -102,9 +108,10 @@ def update_versions():
     print(f"GVISOR_VERSION_UPDATE={'true' if updates['gvisor'] else 'false'}")
 
 
-def _fetch_and_update_gvisor_pins(data):
+def _fetch_and_update_gvisor_pins(data, gvisor_version=None):
+    url = gvisor_version_go_url(gvisor_version)
     try:
-        with urlopen(GVISOR_VERSION_GO_URL) as response:
+        with urlopen(url) as response:
             content = response.read().decode("utf-8", errors="ignore")
         return update_gvisor_driver_pins(data, content)
     except Exception as exc:
@@ -170,7 +177,15 @@ def get_latest_gardenlinux_tags(data):
     return False
 
 def main():
-    update_versions()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--gvisor-version",
+        metavar="VERSION",
+        default=None,
+        help="gVisor release version (e.g. 20250101.0); uses release-VERSION branch instead of master",
+    )
+    args = parser.parse_args()
+    update_versions(gvisor_version=args.gvisor_version)
 
 if __name__ == "__main__":
     main()

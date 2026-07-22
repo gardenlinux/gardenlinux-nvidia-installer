@@ -3,9 +3,9 @@ export INSTALL_DIR=${INSTALL_DIR:-/run/nvidia}
 export DEBUG=${DEBUG:-false}
 export DRIVER_NAME=driver
 # shellcheck disable=SC2155,SC2012
-export DRIVER_VERSION=$(cat /tmp/driver-version)
+export DRIVER_VERSION=$(cat /tmp/driver-version 2>/dev/null || echo "")
 # shellcheck disable=SC2155,SC2012
-export KERNEL_NAME=$(cat /tmp/kernel-name)
+export KERNEL_NAME=$(cat /tmp/kernel-name 2>/dev/null || uname -r)
 export NVIDIA_ROOT="${INSTALL_DIR}/${DRIVER_NAME}"
 export LD_LIBRARY_PATH="${NVIDIA_ROOT}/lib:${NVIDIA_ROOT}/usr/lib/x86_64-linux-gnu"
 

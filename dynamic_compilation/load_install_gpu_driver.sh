@@ -37,7 +37,13 @@ main() {
     NVIDIA_BIN="${NVIDIA_ROOT}/bin"
 
     # ------------------------------------------------------------------------------
-    # 1) Resolve KERNEL_MODULE_TYPE and locate the pre-compiled driver tarball
+    # 1) If DRIVER_VERSION is a plain integer and runsc (i.e. gVisor) is available on the host,
+    #    ask runsc for the latest supported driver with that major version.
+    # ------------------------------------------------------------------------------
+    resolve_driver_version
+
+    # ------------------------------------------------------------------------------
+    # 2) Resolve KERNEL_MODULE_TYPE and locate the pre-compiled driver tarball
     #    embedded in the image under /opt/nvidia-installer/drivers/.
     #    KERNEL_MODULE_TYPE selects which tarball to deploy. Valid values:
     #      "open"        – use open kernel modules
@@ -88,6 +94,10 @@ main() {
 
     echo "[INFO] NVIDIA driver install/refresh OK for ${DRIVER_NAME}:${DRIVER_VERSION} (${KERNEL_MODULE_TYPE} modules, kernel ${KERNEL_NAME})"
 }
+
+
+# shellcheck disable=SC1091
+source "$(dirname "$0")/resolve_driver_version.sh"
 
 
 resolve_kernel_module_type() {

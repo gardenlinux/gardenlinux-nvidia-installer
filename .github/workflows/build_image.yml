@@ -2,7 +2,17 @@ name: Build and Publish Container Images (matrix)
 
 on:
   workflow_call:
+    inputs:
+      gvisor_version:
+        description: 'gVisor release version (e.g. 20250101.0); pins version.go to release-VERSION branch instead of master'
+        required: false
+        type: string
   workflow_dispatch:
+    inputs:
+      gvisor_version:
+        description: 'gVisor release version (e.g. 20250101.0); pins version.go to release-VERSION branch instead of master'
+        required: false
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -71,8 +81,13 @@ jobs:
 
       - name: Install PyYAML and jq
         run: |
-          pip install pyyaml
+          pip install pyyaml html2text requests
           sudo apt-get install -y jq
+
+      - name: Update gVisor driver pins
+        if: ${{ inputs.gvisor_version != '' }}
+        run: |
+          python3 .ci/update_versions.py --gvisor-version "${{ inputs.gvisor_version }}"
 
       - name: Generate build and manifest matrices
         id: set-matrix
@@ -87,8 +102,18 @@ jobs:
           echo "driver_versions=$DRIVER_VERSIONS" >> $GITHUB_OUTPUT
           echo "Driver versions: $DRIVER_VERSIONS"
 
+  test-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Run bats tests
+        run: test/bats/bin/bats dynamic_compilation/test_resolve_driver_version.bats
+
   build-runtime-driver-image:
-    needs: [generate-matrix, image-folder]
+    needs: [generate-matrix, image-folder, test-shell]
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -159,7 +184,7 @@ jobs:
           fi
 
   build:
-    needs: [generate-matrix, image-folder]
+    needs: [generate-matrix, image-folder, test-shell]
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -255,7 +280,7 @@ jobs:
         run: |
           bash .ci/build_and_push.sh \
             gvisor/driver \
-            build-image \
+            build \
             "${{ needs.image-folder.outputs.image_folder }}" \
             "${{ needs.image-folder.outputs.image_folder_old }}"
 
