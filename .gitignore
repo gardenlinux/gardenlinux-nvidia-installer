@@ -1,4 +1,7 @@
-foo
 build
 orig
 out
+/.sandcastle/
+package.json
+.idea/
+**/__pycache__/**
