@@ -39,63 +39,10 @@ jobs:
         id: bump
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          # Find the latest semver release tag
-          LAST_TAG=$(gh release list --repo "${{ github.repository }}" --json tagName \
-            --jq '[.[] | select(.tagName | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | first | .tagName // empty')
-
-          if [[ -z "$LAST_TAG" ]]; then
-            echo "No previous release found, starting at 1.0.0"
-            MAJOR=1; MINOR=0; PATCH=0
-            NEW_TAG="1.0.0"
-            echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          MAJOR=$(echo "$LAST_TAG" | cut -d. -f1)
-          MINOR=$(echo "$LAST_TAG" | cut -d. -f2)
-          PATCH=$(echo "$LAST_TAG" | cut -d. -f3)
-
-          # Collect all commit messages since the last tag
-          COMMITS=$(git log "${LAST_TAG}..HEAD" --format="%s %b")
-
-          # Extract nvidia_drivers and os_versions lists at last tag and HEAD
-          NVIDIA_BEFORE=$(git show "${LAST_TAG}:versions.yaml" 2>/dev/null | \
-            awk '/^nvidia_drivers:/{found=1; next} found && /^[^ -]/{exit} found{print}')
-          NVIDIA_AFTER=$(git show HEAD:versions.yaml | \
-            awk '/^nvidia_drivers:/{found=1; next} found && /^[^ -]/{exit} found{print}')
-
-          OS_BEFORE=$(git show "${LAST_TAG}:versions.yaml" 2>/dev/null | \
-            awk '/^os_versions:/{found=1; next} found && /^[^ -]/{exit} found{print}')
-          OS_AFTER=$(git show HEAD:versions.yaml | \
-            awk '/^os_versions:/{found=1; next} found && /^[^ -]/{exit} found{print}')
-
-          NVIDIA_ADDED=$(diff <(echo "$NVIDIA_BEFORE") <(echo "$NVIDIA_AFTER") | grep -c '^>' || true)
-          OS_ADDED=$(diff <(echo "$OS_BEFORE") <(echo "$OS_AFTER") | grep -c '^>' || true)
-
-          # Detect changes outside of os_versions in versions.yaml
-          VERSIONS_YAML_BEFORE_NO_OS=$(git show "${LAST_TAG}:versions.yaml" 2>/dev/null | \
-             awk '/^os_versions:/{skip=1; next} skip && !/^-/{skip=0} !skip')
-          VERSIONS_YAML_AFTER_NO_OS=$(git show HEAD:versions.yaml | \
-             awk '/^os_versions:/{skip=1; next} skip && !/^-/{skip=0} !skip')
-          VERSIONS_YAML_OTHER_CHANGES=$(diff \
-            <(echo "$VERSIONS_YAML_BEFORE_NO_OS") \
-            <(echo "$VERSIONS_YAML_AFTER_NO_OS") \
-            | grep -c '^>' || true)
-
-          # Count any changed files other than versions.yaml
-          OTHER_FILES_CHANGED=$(git diff --name-only "${LAST_TAG}..HEAD" | grep -cv -e '^versions\.yaml$' -e '^.github\/' -e '^.ci\/' -e '^cdup\/' -e '^docs\/' -e '^history\.yaml$' || true)
-
-          if [[ "$NVIDIA_ADDED" -gt 0 ]] || [[ "$OTHER_FILES_CHANGED" -gt 0 ]] || [[ "$VERSIONS_YAML_OTHER_CHANGES" -gt 0 ]]; then
-            echo "NVIDIA_ADDED: ${NVIDIA_ADDED}, OTHER_FILES_CHANGED: ${OTHER_FILES_CHANGED}, VERSIONS_YAML_OTHER_CHANGES: ${VERSIONS_YAML_OTHER_CHANGES}"
-            MINOR=$((MINOR + 1)); PATCH=0
-          else
-            PATCH=$((PATCH + 1))
-          fi
-
-          NEW_TAG="${MAJOR}.${MINOR}.${PATCH}"
-          echo "Last tag: ${LAST_TAG} → New tag: ${NEW_TAG}"
-          echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
+          source .ci/semver.sh
+          bump_semver
 
   update-files:
     needs: determine-version
@@ -177,26 +124,17 @@ jobs:
       - name: Commit and create PR for updated files
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.determine-version.outputs.new_tag }}
         run: |
-          TAG="${{ needs.determine-version.outputs.new_tag }}"
+          source .ci/git_ops.sh
           BRANCH="release-update/${TAG}"
-          
-          git config user.name "Garden Linux Builder"
-          git config user.email "gardenlinux@users.noreply.github.com"
-          
-          # Check if there are changes to commit
-          git add helm/gpu-operator-values.yaml helm/gpu-operator-values-runtime.yaml helm/gpu-operator-gvisor-values.yaml README*.md release-version.yaml
-          if git diff --cached --quiet --exit-code; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          
-          # Create a new branch and commit changes
-          git checkout -b "${BRANCH}"
-          git commit -m "Update release references for ${TAG}"
-          git push -f origin "${BRANCH}"
-          
-          PR_LINK=$(gh pr create --base main --head ${BRANCH} --title "Update release references for ${TAG}" --body "Automated PR to update release references for version ${TAG}. Merge PR to create GitHub release.")
+          configure_git_identity "Garden Linux Builder" "gardenlinux@users.noreply.github.com"
+          commit_and_push_branch "${BRANCH}" \
+            helm/gpu-operator-values.yaml helm/gpu-operator-values-runtime.yaml \
+            helm/gpu-operator-gvisor-values.yaml README*.md release-version.yaml
+          create_pr "${BRANCH}" main \
+            "Update release references for ${TAG}" \
+            "Automated PR to update release references for version ${TAG}. Merge PR to create GitHub release."
 
   build-image:
     needs: [determine-version, update-files]
