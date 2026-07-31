@@ -1,18 +1,27 @@
-# Compiling and deploying NVIDIA GPU drivers on different Linux distributions
+---
+title: "Working with NVIDIA Drivers"
+description: "Compiling and Deploying NVIDIA GPU Drivers on Different Linux Distributions"
+order: 3 
+tags:
+  - "drivers"
+  - "NVIDIA"
+related_topics:
+  - /explanation/nvidia_installer/building_nvidia_modules.md
+  - /explanation/nvidia_installer/helm_deployment.md
+github_org: gardenlinux
+github_repo: gardenlinux-nvidia-installer
+github_source_path: docs/explanation/nvidia_installer/nvidia_driver_with_custom_kernel.md
+github_target_path: docs/explanation/nvidia_installer/nvidia_driver_with_custom_kernel.md
+---
+
+
+# Compiling and Deploying NVIDIA GPU drivers on different Linux Distributions
 
 This document explains how use NVIDIA GPU drivers with a custom kernel or a non-standard Linux distribution, using
 Garden Linux as the reference OS for all configurations and setup steps.
 
 Some parts of this documentation are already implemented in the repository, and the Garden Linux configurations are
 already in place. This document serves as a reference for the overall approach and as a debugging guide if issues arise.
-
-## Introduction to Garden Linux
-
-Garden Linux is a Debian GNU/Linux derivative that provides small, auditable Linux images for most major cloud
-providers (e.g. AWS, Azure, GCP) and bare-metal machines. It is the recommended Linux distribution for Gardener nodes
-and offers a highly customizable feature set to suit a wide range of use cases.
-
-Garden Linux always supports the latest LTS Linux kernel.
 
 ## Introduction to the GPU Operator
 
@@ -31,6 +40,9 @@ The GPU Operator supports two driver installation modes:
 
 This document uses the second approach: building a custom container image to install NVIDIA drivers into the OS at a
 non-default path. This is particularly useful when the root filesystem is read-only.
+
+If you would like to read more about the NVIDIA GPU operator and how to work with it,
+please read our [Helm Deployment Guide](./helm_deployment.md).
 
 ## NVIDIA Drivers and Open or Proprietary code
 
@@ -97,11 +109,13 @@ cd ./NVIDIA-Linux-<arch>-<driver-version>
 ./nvidia-installer --kernel-module-type=open --kernel-name=<kernel-name> --kernel-install-path=<custom-path>/lib/modules/<kernel-name>
 ```
 
-**Note:**
+::: tip
 
-- kernel-name : Name of the kernel where installer should expect kernel headers inside /usr/lib.
+- `kernel-name` : Name of the kernel where installer should expect kernel headers inside /usr/lib.
 - Make sure kernel headers match the system where the drivers will be installed finally. Otherwise loading driver module
   can result in error.
+
+:::
 
 ### Copy Firmware Files
 
@@ -161,8 +175,10 @@ sed -i 's/LOG_FILE_NAME=.*$/LOG_FILE_NAME=/g' /etc/fabricmanager.cfg
 /usr/bin/nvidia-fabricmanager-start.sh --mode start --fm-config-file /etc/fabricmanager.cfg
 ```
 
-**Note:** Driver download and container image creation are fully automated in this repository for supported Garden Linux
+::: tip
+Driver download and container image creation are fully automated in this repository for supported Garden Linux
 versions.
+:::
 
 # Installing Drivers with the GPU Operator
 
@@ -234,12 +250,12 @@ Coordinates with the GPU driver to initialize and train NVSwitch-to-GPU NVLink i
 Whether NVSwitch or NVLink is used depends on the GPU architecture.
 
 Example: A100 (with NVSwitch):
-<img src="img/a100.png" alt="alt text" width="500" height="500" />
+![A diagram explaining the architecture of an HXG A100 GPU Baseboard which uses NVSwitch](./assets/a100.png)
 
 This can also be confirmed with lspci. TODO: Add snapshot from A100
 
 Example: B200 (with NVLink):
-<img src="img/blackwell_arch.png" alt="alt text" width="500" height="500" />
+![A diagram showing the architecture of an HGX B200/B300 GPU Baseboard which uses NVLink](./assets/blackwell_arch.png)
 
 This can also be confirmed with lspci:
 
@@ -285,8 +301,10 @@ module with DMABuf, the steps below focus on enabling RDMA via DMABuf.
 
 ### Enable Kernel Configuration
 
-**Note:** All of the configurations below can be enabled at once; the corresponding modules will only be loaded based on
+::: tip
+All of the configurations below can be enabled at once; the corresponding modules will only be loaded based on
 the interfaces present.
+:::
 
 - Enable RDMA support in the kernel: see [RDMA Configuration](#rdma-configuration)
 - Enable DMABuf: see [DMABuf Configuration](#dmabuf-configuration)
@@ -317,7 +335,29 @@ lspci | grep -i -E 'nvidia|efa'
 ```
 
 Expected output:
-<img src="img/efa.png" alt="alt text" width="500" height="500" />
+```
+10:1b.0 Ethernet controller: Amazon.com, Inc. Elastic Fabric Adapter (EFA)
+10:1c.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+10:1d.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+20:1b.0 Ethernet controller: Amazon.com, Inc. Elastic Fabric Adapter (EFA)
+20:1c.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+20:1d.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+80:1a.0 Bridge: NVIDIA Corporation GA100 [A100 NVSwitch] (rev a1)
+80:1b.0 Bridge: NVIDIA Corporation GA100 [A100 NVSwitch] (rev a1)
+80:1c.0 Bridge: NVIDIA Corporation GA100 [A100 NVSwitch] (rev a1)
+80:1d.0 Bridge: NVIDIA Corporation GA100 [A100 NVSwitch] (rev a1)
+80:1e.0 Bridge: NVIDIA Corporation GA100 [A100 NVSwitch] (rev a1)
+80:1f.0 Bridge: NVIDIA Corporation GA100 [A100 NVSwitch] (rev a1)
+90:1b.0 Ethernet controller: Amazon.com, Inc. Elastic Fabric Adapter (EFA) 
+90:1c.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+90:1d.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+a0:1b.0 Ethernet controller: Amazon.com, Inc. Elastic Fabric Adapter (EFA)
+a0:1b.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+a0:1b.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+```
+::: details Reference Screenshot
+![Expected EFA Output](./assets/efa.png)
+:::
 
 
 If the EFA device does not appear in the `lspci` output, the AWS instance reservation is likely misconfigured. The EFA
@@ -439,8 +479,7 @@ systemctl restart containerd
 
 ### Dockerfile to Build a Container Image with NCCL, nccl-test, and EFA Support
 
-<details>
-<summary><b>nccl container image</b></summary>
+::: details NCCL Container Image
 
 ```
 FROM nvidia/cuda:12.9.1-devel-ubuntu22.04 AS base
@@ -573,12 +612,11 @@ index fc62d21..f4804f0 100644
  		ret = ofi_hmem_get_dmabuf_fd(
  				efa_mr->peer.iface,
 ```
-</details>
+:::
 
 ### YAML File to Start the NCCL Container
 
-<details>
-<summary><b>Pod Definition</b></summary>
+::: details Pod Configuration File
 
 ```yaml
 apiVersion: kubeflow.org/v2beta1
@@ -740,18 +778,18 @@ spec:
                 path: /run/nvidia/driver
                 type: Directory
 ```
+:::
 
-</details>
-
-**Note:** This test uses host networking in privileged mode, which is less secure. For production use, SR-IOV with the
+::: warning
+This test uses host networking in privileged mode, which is less secure. For production use, SR-IOV with the
 NVIDIA Network Operator is recommended instead.
+:::
 
 ### Basic RDMA Communication Between Nodes
 
 #### RDMA Test Pod Configuration
 
-<details>
-<summary><b>Node1</b></summary>
+::: details Node1
 
 ```yaml
 apiVersion: v1
@@ -791,10 +829,8 @@ spec:
         path: /sys
         type: Directory
 ```
-
-</details>
-<details>
-<summary><b>Node2</b></summary>
+:::
+::: details Node2
 
 ```yaml
 apiVersion: v1
@@ -834,8 +870,7 @@ spec:
         path: /sys
         type: Directory
 ```
-
-</details>
+:::
 
 ##### Start Pods
 
@@ -1053,8 +1088,7 @@ subjects:
 
 #### Configuration File
 
-<details>
-<summary><b>Pod Definition</b></summary>
+::: details Pod Definition File
 
 ```yaml
 apiVersion: kubeflow.org/v2beta1
@@ -1216,11 +1250,12 @@ spec:
                 path: /run/nvidia/driver
                 type: Directory
 ```
+:::
 
-</details>
-
-**Note:** This test uses host networking in privileged mode, which is less secure. For production use, SR-IOV with the
+::: warning
+This test uses host networking in privileged mode, which is less secure. For production use, SR-IOV with the
 NVIDIA Network Operator is recommended instead.
+:::
 
 #### Run the Test Pods
 
@@ -1267,7 +1302,8 @@ mpirun -np 8 -N 8 --bind-to none --map-by slot \
 ```
 
 **Output**
-<img src="img/intra-node-bw.png" alt="alt text" width="700" height="300" />
+
+![Expected Output of the Intra-node Test](./assets/intra-node-bw.png)
 
 **Inter-node test:**
 
@@ -1290,7 +1326,7 @@ mpirun -np 16 -N 8 --bind-to none --map-by slot \
 ```
 
 **Output**
-<img src="img/inter-node-bw.png" alt="alt text" width="700" height="300" />
+![Expected Output of the Inter-node Test](./assets/inter-node-bw.png)
 
 
 #### EFA mpirun test command
@@ -1309,13 +1345,22 @@ mpirun -np 16 -N 8 --bind-to none --map-by slot \
 ```
 
 **Output**
-<img src="img/efa_output.png" alt="alt text" width="700" height="300" />
+![Expected Output of the EFA mpirun Test](./assets/efa_output.png)
+
 ## References
 
 GPU Operator : https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/overview.html
+
 Fabric Manager : https://docs.nvidia.com/datacenter/tesla/fabric-manager-user-guide/index.html
-Dynamo/Grove :
-https://developer.nvidia.com/blog/streamline-complex-ai-inference-on-kubernetes-with-nvidia-grove/
-https://github.com/ai-dynamo/dynamo/blob/main/docs/kubernetes/README.md
+
+Dynamo/Grove : 
+- https://developer.nvidia.com/blog/streamline-complex-ai-inference-on-kubernetes-with-nvidia-grove/
+- https://github.com/ai-dynamo/dynamo/blob/main/docs/kubernetes/README.md
+
 RDMA : https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-operator-rdma.html
+
 Soft RoCE : https://enterprise-support.nvidia.com/s/article/howto-configure-soft-roce
+
+# Related Topics
+
+<RelatedTopics />
