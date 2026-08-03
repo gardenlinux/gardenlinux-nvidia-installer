@@ -28,25 +28,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          source .ci/semver.sh
+          source .ci/release_branches.sh
           release_tag=$(cat release-version.yaml)
-          
-          MAJOR=$(echo "$release_tag" | cut -d. -f1)
-          MINOR=$(echo "$release_tag" | cut -d. -f2)
-          PATCH=$(echo "$release_tag" | cut -d. -f3)
-          
-          # Create the release with the new tag and generate release notes based on the commits since the last release
+          parse_semver "${release_tag}"
           gh release create "${release_tag}" \
             --title "${release_tag}" \
             --generate-notes
-          
-          # Merge main into the <major>.<minor> branch to update the release branch with the latest changes from main
-          release_branch="${MAJOR}.${MINOR}"
-          git checkout -B "${release_branch}" origin/"${release_branch}" || git checkout -b "${release_branch}"
-          git merge main --no-edit
-          git push origin "${release_branch}"
-          
-          # Merge main into the <major> branch to update the release branch with the latest changes from main
-          release_branch="${MAJOR}"
-          git checkout -B "${release_branch}" origin/"${release_branch}" || git checkout -b "${release_branch}"
-          git merge main --no-edit
-          git push origin "${release_branch}"
+          update_release_branches "${MAJOR}" "${MINOR}"
