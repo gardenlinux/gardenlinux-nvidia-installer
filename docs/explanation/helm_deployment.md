@@ -1,0 +1,100 @@
+---
+title: "Deploying NVIDIA GPU Operator with Helm"
+description: "Learn how to Deploy the NVIDIA GPU Operator using Helm"
+order: 2 
+github_org: gardenlinux
+github_repo: gardenlinux-nvidia-installer
+github_source_path: docs/explanation/helm_deployment.md
+github_target_path: docs/explanation/nvidia_installer/helm_deployment.md
+---
+
+# Deploying NVIDIA GPU Operator with Helm
+
+```bash
+helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
+  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.15.0/helm/gpu-operator-values.yaml
+```
+
+Built images are published at:
+
+```
+ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<release>/driver:<driver_major>-<kernel_version>-gardenlinux0
+```
+
+For example: `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.15.0/driver:590-6.12.72-cloud-amd64-gardenlinux0`
+
+If you have built the images yourself, override the registry and image name:
+
+```bash
+helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
+  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.15.0/helm/gpu-operator-values.yaml \
+  --set driver.repository=$REGISTRY/$FOLDER \
+  --set driver.image=$IMAGE
+```
+
+## Kernel module type selection at runtime
+
+The `KERNEL_MODULE_TYPE` environment variable controls which pre-compiled tarball the container downloads:
+
+| Value              | Behaviour                                       |
+|--------------------|-------------------------------------------------|
+| `auto` *(default)* | Detects the correct type at runtime (see below) |
+| `open`             | Always use open kernel modules                  |
+| `proprietary`      | Always use proprietary kernel modules           |
+
+In `auto` mode the container picks the module type based on two checks:
+
+1. **Driver version** — driver branches older than 560 ship proprietary modules only.
+2. **GPU architecture** — NVIDIA open kernel modules require Turing (2018) or newer. GPUs from the Maxwell (e.g. M40),
+   Pascal (e.g. P100), or Volta (e.g. V100) architectures are only supported by the proprietary modules. The container
+   detects this at runtime by reading PCI device IDs from the host.
+
+Set `KERNEL_MODULE_TYPE` explicitly as a container environment variable when deploying via the GPU Operator to override
+the auto-detection.
+
+::: warning
+With Garden Linux versions 1592.14 and earlier, only proprietary kernel modules will work. This is
+handled by the "auto" logic only in releases 1.2.1 and later.
+:::
+
+
+## Supported versions
+
+```bash
+python3 list_versions.py
+```
+
+Example output:
+
+<!-- list_versions_output_start -->
+```
+
+Supported OS ↔ Driver Versions
+---------------------------------------------
+OS 1592.14: 590.48.01, 580.159.04, 580.159.03, 580.126.20, 570.211.01, 570.195.03, 565.57.01, 550.163.01
+OS 1592.15: 590.48.01, 580.159.04, 580.159.03, 580.126.20, 580.126.09, 580.105.08, 570.211.01, 570.195.03
+OS 1592.16: 590.48.01, 580.159.04, 580.159.03, 580.126.20, 580.126.16, 580.126.09, 570.211.01
+OS 1592.17: 590.48.01, 580.126.20, 570.211.01
+OS 1592.18: 590.48.01, 580.167.08, 580.159.04, 580.159.03, 580.126.20, 570.211.01
+OS 1877.15: 590.48.01, 580.173.02, 580.167.08, 580.159.04, 580.159.03, 570.211.01
+OS 1877.16: 590.48.01, 580.173.02, 580.167.08, 580.159.04, 580.159.03, 570.211.01
+OS 1877.17: 590.48.01, 580.173.02, 580.167.08, 580.159.04, 580.159.03, 570.211.01
+OS 1877.19: 590.48.01, 580.173.02, 580.167.08, 580.159.04, 570.211.01
+OS 1877.20: 590.48.01, 580.173.02, 570.211.01
+OS 2150.3.0: 590.48.01, 580.173.02, 580.167.08, 580.159.04, 580.159.03, 570.211.01
+OS 2150.4.0: 590.48.01, 580.173.02, 580.167.08, 580.159.04, 570.211.01
+OS 2150.5.0: 590.48.01, 580.173.02, 580.167.08, 570.211.01
+OS 2150.6.0: 590.48.01, 580.173.02, 570.211.01
+OS 2150.7.0: 590.48.01, 580.173.02, 570.211.01
+
+
+Lifecycle for Driver and supported GL version depends on Garden Linux Release and Driver Release
+
+Refer below links for Garden Linux and driver releases
+
+Garden Linux Release: https://github.com/gardenlinux/gardenlinux/releases
+
+Driver Release: https://www.nvidia.com/en-us/drivers/ --> Select Data Center/Tesla
+```
+<!-- list_versions_output_end -->
+
