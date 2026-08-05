@@ -4,8 +4,8 @@ description: "Learn how to Deploy the NVIDIA GPU Operator using Helm"
 order: 2 
 github_org: gardenlinux
 github_repo: gardenlinux-nvidia-installer
-github_source_path: docs/explanation/helm_deployment.md
-github_target_path: docs/explanation/nvidia_installer/helm_deployment.md
+github_source_path: docs/how-to/helm_deployment.md
+github_target_path: docs/how-to/nvidia_installer/helm_deployment.md
 ---
 
 # Deploying NVIDIA GPU Operator with Helm

@@ -2,7 +2,7 @@
 title: "Building NVIDIA Kernel Modules"
 description: "Learn how to build NVIDIA kernel modules using the Garden Linux NVIDIA Installer."
 order: 1 
-github_target_path: "docs/explanation/nvidia_installer/building_nvidia_modules.md"
+github_target_path: docs/how-to/nvidia_installer/building_nvidia_modules.md
 github_org: gardenlinux
 github_repo: gardenlinux-nvidia-installer
 github_source_path: docs/how-to/building_nvidia_modules.md
