@@ -1,10 +1,10 @@
 ---
 title: "NVIDIA Installer"
 description: "Learn how to install NVIDIA kernel modules in Garden Linux."
-github_target_path: "docs/explanation/nvidia_installer/index.md"
+github_target_path: "docs/how-to/nvidia_installer/index.md"
 github_org: gardenlinux
 github_repo: gardenlinux-nvidia-installer
-github_source_path: docs/explanation/index.md
+github_source_path: docs/how-to/index.md
 ---
 # Garden Linux NVIDIA Installer 
 
@@ -60,7 +60,7 @@ to GitHub Releases, and downloaded by the installer container at runtime immedia
 ## Development
 
 For instructions on building the driver tarballs and container images locally and working with the build system, 
-see [Building NVIDIA Kernel Modules](/how-to/building_nvidia_modules.md) guide.
+see [Building NVIDIA Kernel Modules](./building_nvidia_modules.md) guide.
 
 ## Disclaimer
 

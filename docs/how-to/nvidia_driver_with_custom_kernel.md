@@ -6,12 +6,12 @@ tags:
   - "drivers"
   - "NVIDIA"
 related_topics:
-  - /explanation/nvidia_installer/building_nvidia_modules.md
-  - /explanation/nvidia_installer/helm_deployment.md
+  - /how-to/nvidia_installer/building_nvidia_modules.md
+  - /how-to/nvidia_installer/helm_deployment.md
 github_org: gardenlinux
 github_repo: gardenlinux-nvidia-installer
-github_source_path: docs/explanation/nvidia_installer/nvidia_driver_with_custom_kernel.md
-github_target_path: docs/explanation/nvidia_installer/nvidia_driver_with_custom_kernel.md
+github_source_path: docs/how-to/nvidia_installer/nvidia_driver_with_custom_kernel.md
+github_target_path: docs/how-to/nvidia_installer/nvidia_driver_with_custom_kernel.md
 ---
 
 
