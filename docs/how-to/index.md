@@ -23,7 +23,7 @@ version updates are applied automatically via CI; major driver version bumps are
 
 ## Runtime Driver compilation
 
-This project also supprts compilation of kernel during runtime. With this feature, the operator automatically 
+This project also supports compilation of kernel during runtime. With this feature, the operator automatically 
 detects the host’s kernel version and builds the required driver modules using the host’s kernel headers.
 To enable runtime driver compilation, apply the Helm values provided in helm/gpu-operator-values-runtime.yaml.
 
