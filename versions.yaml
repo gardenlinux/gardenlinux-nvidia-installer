@@ -38,3 +38,7 @@ gvisor_driver_pins:
   590.48.01: 590.48.01
   570.211.01: 570.195.03
   580.173.02: 580.173.02
+excluded_combinations:
+  - os_version_min: "2150.8.0"
+    driver_version_prefix: "570"
+    reason: "GL 2150.8+ ships kernel 6.18.41+ with changed pci_resize_resource signature; 570.x is incompatible (issue #344)"

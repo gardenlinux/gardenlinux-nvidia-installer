@@ -7,6 +7,25 @@ import sys
 with open("versions.yaml") as f:
     data = yaml.safe_load(f)
 
+exclusions = data.get("excluded_combinations", [])
+
+
+def _ver_tuple(v):
+    return tuple(int(x) for x in str(v).split("."))
+
+
+def is_excluded(os_version, driver_version):
+    for rule in exclusions:
+        os_min = rule.get("os_version_min")
+        drv_pfx = rule.get("driver_version_prefix", "")
+        if os_min and _ver_tuple(os_version) < _ver_tuple(os_min):
+            continue
+        if drv_pfx and not str(driver_version).startswith(drv_pfx):
+            continue
+        return True
+    return False
+
+
 # build_matrix: one entry per (os_version, arch, kernel_flavour, driver).
 # Each image embeds both open and proprietary tarballs; kernel_type is no longer
 # a separate matrix dimension.
@@ -23,6 +42,7 @@ build_matrix = [
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
+    if not is_excluded(os_version, driver)
 ]
 
 # manifest_matrix: one entry per (os_version, kernel_flavour, driver) — no arch, no kernel_type.
@@ -38,6 +58,7 @@ manifest_matrix = [
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
+    if not is_excluded(os_version, driver)
 ]
 
 # gvisor_build_matrix: same dimensions as build_matrix but uses pinned driver
@@ -65,6 +86,7 @@ gvisor_build_matrix = [
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
+    if not is_excluded(os_version, driver)
 ]
 
 gvisor_manifest_matrix = [
@@ -79,6 +101,7 @@ gvisor_manifest_matrix = [
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
+    if not is_excluded(os_version, driver)
 ]
 
 print(
