@@ -109,11 +109,11 @@ compile_kernel_type() {
     find /tmp/nvidia -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
 
     echo "Copy supported-gpus and license files"
-    local NVIDIA_DIR="/tmp/nvidia/NVIDIA-Linux-$ARCH_TYPE-$DRIVER_VERSION"
-    mkdir -p "$OUTDIR"/License/supported-gpus
-    cp -a "$NVIDIA_DIR"/supported-gpus/supported-gpus.json "$OUTDIR"/License/supported-gpus/
-    cp -a "$NVIDIA_DIR"/supported-gpus/LICENSE "$OUTDIR"/License/supported-gpus/
-    cp -a "$NVIDIA_DIR"/LICENSE "$OUTDIR"/License
+    local NVIDIA_DIR="/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}"
+    mkdir -p "${OUTDIR}/License/supported-gpus"
+    cp -a "${NVIDIA_DIR}/supported-gpus/supported-gpus.json "${OUTDIR}/License/supported-gpus/"
+    cp -a "${NVIDIA_DIR}/supported-gpus/LICENSE" "${OUTDIR}/License/supported-gpus/"
+    cp -a "${NVIDIA_DIR}/LICENSE" "${OUTDIR}/License"
     
     echo "Archiving assets"
     # Archive library .so files
