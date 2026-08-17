@@ -73,7 +73,7 @@ setup() {
         case "$*" in
             "add file-a.yaml file-b.yaml") ;;
             "diff --cached --quiet --exit-code") return 1 ;;
-            "checkout -b release-update/1.2.0") ;;
+            "checkout -B release-update/1.2.0") ;;
             "commit -m Update release references for release-update/1.2.0") ;;
             "push -f origin release-update/1.2.0") PUSH_CALLED=true ;;
             *) ;;
