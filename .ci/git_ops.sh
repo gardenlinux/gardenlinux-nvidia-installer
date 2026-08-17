@@ -26,17 +26,22 @@ commit_and_push_branch() {
         echo "No changes to commit"
         return 0
     fi
-    git checkout -b "$branch"
+    git checkout -B "$branch"
     git commit -m "Update release references for $branch"
     git push -f origin "$branch"
 }
 
 # create_pr BRANCH BASE TITLE BODY
-# Creates a GitHub PR from BRANCH into BASE.
+# Creates a GitHub PR from BRANCH into BASE, or updates the existing one.
 create_pr() {
     local branch="$1"
     local base="$2"
     local title="$3"
     local body="$4"
-    gh pr create --base "$base" --head "$branch" --title "$title" --body "$body"
+    if gh pr view "$branch" --json state -q '.state' 2>/dev/null | grep -q "OPEN"; then
+        echo "PR from $branch already exists, updating"
+        gh pr edit "$branch" --title "$title" --body "$body"
+    else
+        gh pr create --base "$base" --head "$branch" --title "$title" --body "$body"
+    fi
 }

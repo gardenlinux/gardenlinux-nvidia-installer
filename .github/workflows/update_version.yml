@@ -37,7 +37,6 @@ jobs:
         run: |
           source .ci/git_ops.sh
           configure_git_identity "Garden Linux Builder" "gardenlinux@users.noreply.github.com"
-          git checkout -b update-version
           commit_and_push_branch "update-version" versions.yaml history.yaml
           create_pr "update-version" main "Update versions" "automated update"
         env:
