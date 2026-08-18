@@ -1,4 +1,5 @@
 os_versions:
+- 2150.9.0
 - 2150.8.0
 - 2150.7.0
 - 2150.6.0
@@ -8,6 +9,7 @@ os_versions:
 - 2150.2.0
 - 2150.1.0
 - 2150.0.0
+- '1877.21'
 - '1877.20'
 - '1877.19'
 - '1877.17'
@@ -22,8 +24,6 @@ os_versions:
 - '1877.8'
 - '1877.7'
 - '1877.6'
-- '1877.5'
-- '1877.4'
 - '1592.18'
 kernel_flavour:
 - cloud
@@ -32,13 +32,14 @@ cpu_arch:
 - amd64
 nvidia_drivers:
 - 590.48.01
-- 580.173.02
+- 580.178.04
 - 570.211.01
 gvisor_driver_pins:
   590.48.01: 590.48.01
   570.211.01: 570.195.03
-  580.173.02: 580.173.02
+  580.178.04: 580.173.02
 excluded_combinations:
-  - os_version_min: "2150.8.0"
-    driver_version_prefix: "570"
-    reason: "GL 2150.8+ ships kernel 6.18.41+ with changed pci_resize_resource signature; 570.x is incompatible (issue #344)"
+- os_version_min: 2150.8.0
+  driver_version_prefix: '570'
+  reason: 'GL 2150.8+ ships kernel 6.18.41+ with changed pci_resize_resource signature;
+    570.x is incompatible (issue #344)'
