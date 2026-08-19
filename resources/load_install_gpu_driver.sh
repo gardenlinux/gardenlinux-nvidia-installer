@@ -184,9 +184,6 @@ _has_older_kernel() {
 # -D: include domain in BDF; -d 10de:: NVIDIA vendor; -n: numeric IDs
 # awk filters to PCI class 0300 (VGA) and 0302 (3D controller), excluding
 # other NVIDIA functions like audio (0403) that share the same vendor ID.
-# Uses nsenter to read the host PCI bus rather than the container's view.
-_lspci_nvidia_gpus() {
-    nsenter -t 1 -m -u -n -i -- lspci -D -d 10de: -n 2>/dev/null | awk '/030[02]/'
 # The container is privileged with host sysfs mounted, so lspci sees host PCI devices directly.
 _lspci_nvidia_gpus() {
     lspci -D -d 10de: -n 2>/dev/null | awk '/030[02]/'
