@@ -1,7 +1,13 @@
 name: Release process
 
 on:
-  pull_request:
+  # pull_request_target runs in the context of the BASE repository, granting
+  # write access even when the merged PR originated from a fork.
+  #
+  # Security: safe because (1) types: [closed] + merged==true means only
+  # maintainer-approved merges trigger execution, (2) checkout uses the base
+  # branch (main), never the PR head — no untrusted fork code is executed.
+  pull_request_target:
     branches: [main]
     types: [closed]
     paths-ignore:
@@ -16,6 +22,7 @@ on:
     # Don't trigger on documentation changes
       - 'docs/**'
       - '*.md'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -25,7 +32,8 @@ permissions:
 
 jobs:
   determine-version:
-    if: github.event.pull_request.merged == true # Only run if the PR was merged - needed to avoid creating a release for every PR that is closed without merging
+    # Only run if manually dispatched or if the PR was actually merged (not just closed without merging)
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump.outputs.new_tag }}
