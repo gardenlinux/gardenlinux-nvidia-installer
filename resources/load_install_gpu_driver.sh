@@ -43,6 +43,7 @@ main() {
     # ------------------------------------------------------------------------------
     resolve_kernel_module_type
     locate_driver_tarball
+    set_nvidia_iommu_passthrough
 
     # Stage new contents into a temporary directory
     rm -rf /run/nvidia/.staging-driver || true
@@ -179,23 +180,26 @@ _has_older_kernel() {
 }
 
 
+# Emits one line per NVIDIA GPU on the host as: "<BDF> <class> <vendor>:<devid>"
+# -D: include domain in BDF; -d 10de:: NVIDIA vendor; -n: numeric IDs
+# awk filters to PCI class 0300 (VGA) and 0302 (3D controller), excluding
+# other NVIDIA functions like audio (0403) that share the same vendor ID.
+# The container is privileged with host sysfs mounted, so lspci sees host PCI devices directly.
+_lspci_nvidia_gpus() {
+    lspci -D -d 10de: -n 2>/dev/null | awk '/030[02]/'
+}
+
 # Returns 0 (true) if any NVIDIA GPU on the host has a PCI device ID below 0x1E00,
 # which indicates a pre-Turing architecture (Maxwell, Pascal, or Volta).
 # Turing (TU102+) and all newer architectures start at device ID 0x1E00.
-# lspci is called via nsenter so it reads the host PCI bus, not the container's view.
 _has_pre_turing_gpu() {
     local dev_id
-    # List NVIDIA GPUs (vendor 10de, PCI class 0300 VGA or 0302 3D controller).
-    # -d 10de: selects NVIDIA vendor; -n prints numeric IDs; awk extracts the device ID field.
     while IFS= read -r dev_id; do
         # dev_id is a 4-digit hex string, e.g. "1db1". Compare numerically against 0x1E00.
         if [ $(( 16#${dev_id} )) -lt $(( 16#1E00 )) ]; then
             return 0
         fi
-    done < <(nsenter -t 1 -m -u -n -i -- \
-        lspci -d 10de: -n 2>/dev/null \
-        | awk '{ print $3 }' \
-        | cut -d: -f2)
+    done < <(_lspci_nvidia_gpus | awk '{ print $3 }' | cut -d: -f2)
     return 1
 }
 
@@ -215,6 +219,27 @@ locate_driver_tarball() {
     export DRIVER_TARBALL_PATH
 }
 
+
+set_nvidia_iommu_passthrough() {
+    # Switch IOMMU group type to 'identity' (passthrough) for NVIDIA GPU devices before
+    # modules are loaded. Without this, GPUs in strict 'DMA' IOMMU groups can trigger
+    # IO_PAGE_FAULTs during modprobe and fail to get /dev/nvidia* nodes.
+    # https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-kernel-iommu_groups
+    local bdf type_path
+    while IFS= read -r bdf; do
+        type_path="/sys/bus/pci/devices/${bdf}/iommu_group/type"
+        [ -f "${type_path}" ] || continue
+        local current
+        current=$(cat "${type_path}")
+        if [ "${current}" != "identity" ]; then
+            if echo identity > "${type_path}" 2>/dev/null; then
+                echo "[INFO] IOMMU group for ${bdf}: ${current} -> identity"
+            else
+                echo "[WARN] Could not set IOMMU passthrough for ${bdf} (current: ${current})"
+            fi
+        fi
+    done < <(_lspci_nvidia_gpus | awk '{print $1}')
+}
 
 install() {
     local DRIVER_NAME=$1
