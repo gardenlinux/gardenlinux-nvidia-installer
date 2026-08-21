@@ -148,8 +148,7 @@ def get_latest_gardenlinux_tags(data):
     response = requests.get(url)
 
     if response.status_code != 200:
-        print("Failed to fetch tags:", response.status_code, file=__import__('sys').stderr)
-        return False
+        raise RuntimeError(f"Failed to fetch tags: {response.status_code}")
 
     tags = [tag['name'] for tag in response.json()]
     new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
