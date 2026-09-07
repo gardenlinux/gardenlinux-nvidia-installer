@@ -37,7 +37,7 @@ nvidia_drivers:
 gvisor_driver_pins:
   590.48.01: 590.48.01
   570.211.01: 570.195.03
-  580.178.04: 580.173.02
+  580.178.04: 580.178.04
 excluded_combinations:
 - os_version_min: 2150.8.0
   driver_version_prefix: '570'
