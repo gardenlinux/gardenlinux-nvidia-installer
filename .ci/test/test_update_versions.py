@@ -1,10 +1,12 @@
-"""Tests for gVisor pin-update logic in update_versions.py.
+"""Tests for gVisor pin-update logic and deprecation logic in update_versions.py.
 
 These tests use fixture data (no live network calls) to validate the
-version-selection algorithm for gVisor driver pins.
+version-selection algorithm for gVisor driver pins and the OS version
+deprecation lifecycle.
 """
 import copy
 import sys
+from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -179,3 +181,105 @@ class TestUpdateGvisorPins:
                 uv.update_gvisor_driver_pins(data, FIXTURE_VERSION_GO)
             except (ValueError, KeyError):
                 pass  # acceptable: a clear error is also acceptable per the spec
+
+
+class TestDeprecationHelpers:
+    """Tests for deprecation helper functions."""
+
+    def test_latest_per_major(self):
+        uv = import_update_versions()
+        versions = ["2150.1.0", "2150.9.0", "2150.3.0", "1877.10", "1877.23"]
+        result = uv._latest_per_major(versions)
+        assert result == {"2150": "2150.9.0", "1877": "1877.23"}
+
+
+class TestGetLatestGardenlinuxTagsDeprecation:
+    """Tests for the deprecation lifecycle in get_latest_gardenlinux_tags."""
+
+    def _make_data(self, active, deprecated=None):
+        return {
+            "os_versions": list(active),
+            "deprecated_os_versions": list(deprecated or []),
+            "nvidia_drivers": ["590.48.01"],
+        }
+
+    def _mock_tags_response(self, uv, tags):
+        """Patch requests.get to return a fake tag list."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = [{"name": t} for t in tags]
+        return patch.object(uv.requests, "get", return_value=mock_resp)
+
+    def test_new_version_deprecates_old_latest(self):
+        """When a new version appears, the old latest moves to deprecated."""
+        uv = import_update_versions()
+        data = self._make_data(["2150.8.0", "1877.22"])
+        today = date(2026, 9, 10)
+
+        with self._mock_tags_response(uv, ["2150.9.0", "2150.8.0", "1877.23", "1877.22"]):
+            changed = uv.get_latest_gardenlinux_tags(data, today=today)
+
+        assert changed is True
+        assert set(str(v) for v in data["os_versions"]) == {"2150.9.0", "1877.23"}
+        dep_versions = {str(e["version"]) for e in data["deprecated_os_versions"]}
+        assert "2150.8.0" in dep_versions
+        assert "1877.22" in dep_versions
+
+    def test_expired_versions_are_removed(self):
+        """Versions past their expiry date are dropped entirely."""
+        uv = import_update_versions()
+        data = self._make_data(
+            ["2150.9.0"],
+            [{"version": "2150.8.0", "expires": "2026-01-01"}],
+        )
+        today = date(2026, 9, 10)
+
+        with self._mock_tags_response(uv, ["2150.9.0", "2150.8.0"]):
+            changed = uv.get_latest_gardenlinux_tags(data, today=today)
+
+        dep_versions = {str(e["version"]) for e in data["deprecated_os_versions"]}
+        assert "2150.8.0" not in dep_versions
+
+    def test_existing_deprecation_expiry_preserved(self):
+        """Already-deprecated versions keep their original expiry date."""
+        uv = import_update_versions()
+        original_expiry = "2027-06-01"
+        data = self._make_data(
+            ["2150.9.0"],
+            [{"version": "2150.8.0", "expires": original_expiry}],
+        )
+        today = date(2026, 9, 10)
+
+        with self._mock_tags_response(uv, ["2150.9.0", "2150.8.0"]):
+            uv.get_latest_gardenlinux_tags(data, today=today)
+
+        dep_entry = next(e for e in data["deprecated_os_versions"] if str(e["version"]) == "2150.8.0")
+        assert dep_entry["expires"] == original_expiry
+
+    def test_no_change_returns_false(self):
+        """Returns False when tags haven't changed."""
+        uv = import_update_versions()
+        data = self._make_data(
+            ["2150.9.0"],
+            [{"version": "2150.8.0", "expires": "2027-03-10"}],
+        )
+        today = date(2026, 9, 10)
+
+        with self._mock_tags_response(uv, ["2150.9.0", "2150.8.0"]):
+            changed = uv.get_latest_gardenlinux_tags(data, today=today)
+
+        assert changed is False
+
+    def test_multiple_new_versions_only_latest_is_active(self):
+        """When several new versions appear at once, only the latest per major is active."""
+        uv = import_update_versions()
+        data = self._make_data(["2150.5.0"])
+        today = date(2026, 9, 10)
+
+        with self._mock_tags_response(uv, ["2150.9.0", "2150.8.0", "2150.7.0", "2150.6.0", "2150.5.0"]):
+            changed = uv.get_latest_gardenlinux_tags(data, today=today)
+
+        assert changed is True
+        assert data["os_versions"] == ["2150.9.0"]
+        dep_versions = {str(e["version"]) for e in data["deprecated_os_versions"]}
+        assert dep_versions == {"2150.8.0", "2150.7.0", "2150.6.0", "2150.5.0"}
