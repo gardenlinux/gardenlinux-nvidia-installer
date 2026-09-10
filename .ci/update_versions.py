@@ -3,11 +3,14 @@ import argparse
 import re
 import sys
 import warnings
+from datetime import date, timedelta
 from urllib.request import urlopen
 
 import html2text
 import requests
 import yaml
+
+DEPRECATION_PERIOD_DAYS = 180
 
 GVISOR_VERSION_GO_URL_TEMPLATE = (
     "https://raw.githubusercontent.com/google/gvisor/{ref}/"
@@ -143,38 +146,77 @@ def update_nvidia_driver_version(data):
                         has_update = True
     return has_update
 
-def get_latest_gardenlinux_tags(data):
+def _ver_tuple(v):
+    return tuple(int(x) for x in str(v).split("."))
+
+
+def _latest_per_major(versions):
+    """Return a dict mapping each major version to its highest version string."""
+    best = {}
+    for v in versions:
+        major = str(v).split(".")[0]
+        if major not in best or _ver_tuple(v) > _ver_tuple(best[major]):
+            best[major] = v
+    return best
+
+
+def _all_os_versions(data):
+    """Return the set of all OS version strings (active + deprecated)."""
+    versions = {str(v) for v in data.get("os_versions", [])}
+    for entry in data.get("deprecated_os_versions", []):
+        versions.add(str(entry["version"]))
+    return versions
+
+
+def get_latest_gardenlinux_tags(data, today=None):
+    if today is None:
+        today = date.today()
+
     url = f"https://api.github.com/repos/gardenlinux/gardenlinux/tags"
     response = requests.get(url)
 
     if response.status_code != 200:
-        print("Failed to fetch tags:", response.status_code, file=__import__('sys').stderr)
+        print("Failed to fetch tags:", response.status_code, file=sys.stderr)
         return False
 
     tags = [tag['name'] for tag in response.json()]
-    new_os_versions = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
+    available = [tag for tag in tags if re.fullmatch(r'\d+\.\d+(\.\d+)?', tag)]
 
-    # Any older versions of Garden Linux removed from the old versions file should not appear in the new versions file
-    major_versions = {}
-    for tag in new_os_versions:
-        major = tag.split('.')[0]
-        major_versions.setdefault(major, []).append(tag)
+    # Only consider versions we already track or that are newer than our current latest per major.
+    # This prevents adding ancient versions (e.g. 1592.1) that we never built.
+    known = _all_os_versions(data)
+    current_latest = _latest_per_major(known)
+    candidates = [
+        v for v in available
+        if v in known or _ver_tuple(v) > _ver_tuple(current_latest.get(v.split(".")[0], "0"))
+    ]
 
-    # For each major version group, remove versions older than the oldest one tracked in data
-    ancient_versions = []
-    for major, versions in major_versions.items():
-        for i in reversed(versions):
-            if i not in data['os_versions']:
-                ancient_versions.append(i)
-            else:  # Stop when we get a match, so we avoid also removing new versions at the top
-                break
+    # Latest per major -> active; everything else -> deprecated
+    latest = set(_latest_per_major(candidates).values())
+    expiry = (today + timedelta(days=DEPRECATION_PERIOD_DAYS)).isoformat()
 
-    filtered_os_versions = [x for x in new_os_versions if x not in ancient_versions] + ['1592.18'] # remove 1592.18 after gardener stops supporting it 2026-09
+    # Build new deprecated list: preserve existing expiry dates, add new entries
+    old_expiry = {str(e["version"]): e["expires"] for e in data.get("deprecated_os_versions", [])}
+    new_deprecated = []
+    for v in candidates:
+        if v in latest:
+            continue
+        dep_expiry = old_expiry.get(v, expiry)
+        if date.fromisoformat(dep_expiry) > today:
+            new_deprecated.append({"version": v, "expires": dep_expiry})
 
-    if sorted(data['os_versions']) != sorted(filtered_os_versions):
-        data['os_versions'] = filtered_os_versions
-        return True
-    return False
+    new_deprecated.sort(key=lambda e: _ver_tuple(e["version"]), reverse=True)
+    new_active = sorted(latest, key=_ver_tuple, reverse=True)
+
+    # Check if anything changed
+    changed = (
+        [str(v) for v in data.get("os_versions", [])] != new_active
+        or data.get("deprecated_os_versions", []) != new_deprecated
+    )
+    if changed:
+        data["os_versions"] = new_active
+        data["deprecated_os_versions"] = new_deprecated
+    return changed
 
 def main():
     parser = argparse.ArgumentParser()
