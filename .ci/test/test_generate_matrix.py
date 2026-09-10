@@ -7,16 +7,26 @@ import itertools
 import json
 import subprocess
 import sys
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
 
 SCRIPT = Path(__file__).parent.parent / "generate_matrix.py"
 
-FIXTURE_YAML = """\
+# Expiry far in the future so deprecated versions are always included in tests
+FUTURE_EXPIRY = (date.today() + timedelta(days=365)).isoformat()
+PAST_EXPIRY = (date.today() - timedelta(days=1)).isoformat()
+
+FIXTURE_YAML = f"""\
 os_versions:
 - 2150.4.0
 - '1877.10'
+deprecated_os_versions:
+- version: 2150.3.0
+  expires: '{FUTURE_EXPIRY}'
+- version: '1877.9'
+  expires: '{FUTURE_EXPIRY}'
 kernel_flavour:
 - cloud
 - metal
@@ -30,7 +40,8 @@ gvisor_driver_pins:
   570.211.01: 570.195.03
 """
 
-FIXTURE_OS_VERSIONS = ["2150.4.0", "1877.10"]
+FIXTURE_OS_VERSIONS = ["2150.4.0", "1877.10", "2150.3.0", "1877.9"]
+FIXTURE_ACTIVE_OS_VERSIONS = ["2150.4.0", "1877.10"]
 FIXTURE_KERNEL_FLAVOURS = ["cloud", "metal"]
 FIXTURE_CPU_ARCHES = ["amd64"]
 FIXTURE_NVIDIA_DRIVERS = ["590.48.01", "570.211.01"]
@@ -122,7 +133,7 @@ def test_gvisor_entries_carry_image_subfolder(versions_yaml):
 
 
 def test_mainstream_build_output_unchanged(versions_yaml):
-    """Mainstream build matrix must be unaffected by gVisor changes."""
+    """Mainstream build matrix must include active and non-expired deprecated versions."""
     matrix = run_matrix(versions_yaml)
 
     expected_build = [
@@ -169,3 +180,76 @@ gvisor_driver_pins:
     assert result.returncode != 0, (
         "Expected non-zero exit when gvisor_driver_pins is missing an entry for a mainstream driver"
     )
+
+
+def test_expired_deprecated_versions_excluded(tmp_path):
+    """Deprecated versions past their expiry date must not appear in the build matrix."""
+    yaml_with_expired = f"""\
+os_versions:
+- 2150.4.0
+deprecated_os_versions:
+- version: 2150.3.0
+  expires: '{PAST_EXPIRY}'
+kernel_flavour:
+- cloud
+cpu_arch:
+- amd64
+nvidia_drivers:
+- 590.48.01
+gvisor_driver_pins:
+  590.48.01: 590.48.01
+"""
+    (tmp_path / "versions.yaml").write_text(yaml_with_expired)
+
+    matrix = run_matrix(tmp_path)
+    os_versions_in_build = {e["os_version"] for e in matrix["build"]["include"]}
+    assert "2150.3.0" not in os_versions_in_build, (
+        "Expired deprecated version should not appear in build matrix"
+    )
+    assert "2150.4.0" in os_versions_in_build
+
+
+def test_non_expired_deprecated_versions_included(tmp_path):
+    """Deprecated versions not yet expired must appear in the build matrix."""
+    yaml_with_active_deprecated = f"""\
+os_versions:
+- 2150.4.0
+deprecated_os_versions:
+- version: 2150.3.0
+  expires: '{FUTURE_EXPIRY}'
+kernel_flavour:
+- cloud
+cpu_arch:
+- amd64
+nvidia_drivers:
+- 590.48.01
+gvisor_driver_pins:
+  590.48.01: 590.48.01
+"""
+    (tmp_path / "versions.yaml").write_text(yaml_with_active_deprecated)
+
+    matrix = run_matrix(tmp_path)
+    os_versions_in_build = {e["os_version"] for e in matrix["build"]["include"]}
+    assert "2150.3.0" in os_versions_in_build
+    assert "2150.4.0" in os_versions_in_build
+
+
+def test_no_deprecated_section_still_works(tmp_path):
+    """generate_matrix.py handles versions.yaml without deprecated_os_versions."""
+    yaml_no_deprecated = """\
+os_versions:
+- 2150.4.0
+kernel_flavour:
+- cloud
+cpu_arch:
+- amd64
+nvidia_drivers:
+- 590.48.01
+gvisor_driver_pins:
+  590.48.01: 590.48.01
+"""
+    (tmp_path / "versions.yaml").write_text(yaml_no_deprecated)
+
+    matrix = run_matrix(tmp_path)
+    os_versions_in_build = {e["os_version"] for e in matrix["build"]["include"]}
+    assert "2150.4.0" in os_versions_in_build
