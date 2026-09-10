@@ -3,11 +3,19 @@ import itertools
 import yaml
 import json
 import sys
+from datetime import date
 
 with open("versions.yaml") as f:
     data = yaml.safe_load(f)
 
 exclusions = data.get("excluded_combinations", [])
+
+# Combine active and non-expired deprecated OS versions for the build matrix.
+today = date.today()
+all_os_versions = list(data["os_versions"])
+for entry in data.get("deprecated_os_versions", []):
+    if date.fromisoformat(entry["expires"]) > today:
+        all_os_versions.append(entry["version"])
 
 
 def _ver_tuple(v):
@@ -37,7 +45,7 @@ build_matrix = [
         "kernel_flavour": flavour,
     }
     for os_version, arch, flavour, driver in itertools.product(
-        data["os_versions"],
+        all_os_versions,
         data["cpu_arch"],
         data["kernel_flavour"],
         data["nvidia_drivers"],
@@ -54,7 +62,7 @@ manifest_matrix = [
         "kernel_flavour": flavour,
     }
     for os_version, flavour, driver in itertools.product(
-        data["os_versions"],
+        all_os_versions,
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
@@ -81,7 +89,7 @@ gvisor_build_matrix = [
         "image_subfolder": "gvisor",
     }
     for os_version, arch, flavour, driver in itertools.product(
-        data["os_versions"],
+        all_os_versions,
         data["cpu_arch"],
         data["kernel_flavour"],
         data["nvidia_drivers"],
@@ -97,7 +105,7 @@ gvisor_manifest_matrix = [
         "image_subfolder": "gvisor",
     }
     for os_version, flavour, driver in itertools.product(
-        data["os_versions"],
+        all_os_versions,
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
