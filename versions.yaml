@@ -48,4 +48,4 @@ excluded_combinations:
   reason: 'GL 1877.21 PCI kernel interface doesn't fit to 570.195.03'
 - os_version_min: 1877.21
   driver_version_prefix: '570.195.01'
-  reason: 'GL 1877.21 PCI kernel interface doesn't fit to 570.195.01'
+  reason: 'GL 1877.21 PCI kernel interface doesn't fit to 570.211.01'
