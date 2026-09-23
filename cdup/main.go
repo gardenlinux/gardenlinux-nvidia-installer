@@ -174,14 +174,12 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 
 	parentDir := filepath.Dir(pwd)
 
-	fmt.Print("xxxxx%s", parentDir)
-
 	// Build the docker command
 	image := fmt.Sprintf("ghcr.io/gardenlinux/gardenlinux/kmodbuild:%s-%s", targetArch, glVersion)
 
 	cmd := exec.Command("docker", "run", "--rm",
 		"-v", parentDir+":/workspace",
-		"-w", "/workspace",
+		"-w", "/workspace/gardenlinux-nvidia-installer",
 		image,
 		path,
 		kernelFlavor,
@@ -232,7 +230,7 @@ func main() {
 
 func run(cmd *cobra.Command, args []string) error {
 
-	versionsPath := filepath.Join("..", "versions.yaml")
+	versionsPath := filepath.Join(".", "versions.yaml")
 
 	// Load the configuration
 	config, err := loadVersionsConfig(versionsPath)
