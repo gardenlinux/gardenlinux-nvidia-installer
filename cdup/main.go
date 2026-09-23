@@ -19,7 +19,7 @@ var version string
 var commit string
 
 const (
-	uploadRepo        = "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases"
+	uploadRepo        = "europe-docker.pkg.dev/sap-se-gcp-k8s-delivery/releases-internal"
 	nvidiaRepo        = "github.com/gardenlinux/gardenlinux-nvidia-installer"
 	nvidiaRepoIdx     = "github.com/gardenlinux/gardenlinux-nvidia-installer-idx"
 	componentProvider = "SAP SE"
@@ -281,7 +281,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	ociCfg := map[string]any{
 		"config":     "gardenlinux",
-		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases",
+		"repository": "europe-docker.pkg.dev/sap-se-gcp-k8s-delivery/releases-internal",
 		"path":       "driver",
 	}
 
@@ -299,7 +299,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	ociCfg = map[string]any{
 		"config":     "gardenlinux",
-		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases",
+		"repository": "europe-docker.pkg.dev/sap-se-gcp-k8s-delivery/releases-internal",
 		"path":       "idx",
 	}
 

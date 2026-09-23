@@ -66,7 +66,7 @@ func (p *oci) GetLatestTag(ctx context.Context) (string, error) {
 	}
 
 	if len(tags) == 0 {
-		return "", errors.New("no tags found in repository")
+		return "1.0.0", nil
 	}
 	// Parse and sort semantic versions
 	var versions []*semver.Version
