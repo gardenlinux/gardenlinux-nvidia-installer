@@ -19,7 +19,7 @@ var version string
 var commit string
 
 const (
-	uploadRepo        = "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases"
+	uploadRepo        = "europe-docker.pkg.dev/sap-se-gcp-k8s-delivery/releases-internal"
 	nvidiaRepo        = "github.com/gardenlinux/gardenlinux-nvidia-installer"
 	nvidiaRepoIdx     = "github.com/gardenlinux/gardenlinux-nvidia-installer-idx"
 	componentProvider = "SAP SE"
@@ -174,12 +174,14 @@ func extractKernelName(path string, targetArch, glVersion, kernelFlavor string) 
 
 	parentDir := filepath.Dir(pwd)
 
+	fmt.Print("xxxxx%s", parentDir)
+
 	// Build the docker command
 	image := fmt.Sprintf("ghcr.io/gardenlinux/gardenlinux/kmodbuild:%s-%s", targetArch, glVersion)
 
 	cmd := exec.Command("docker", "run", "--rm",
 		"-v", parentDir+":/workspace",
-		"-w", "/workspace/gardenlinux-nvidia-installer",
+		"-w", "/workspace",
 		image,
 		path,
 		kernelFlavor,
@@ -230,7 +232,7 @@ func main() {
 
 func run(cmd *cobra.Command, args []string) error {
 
-	versionsPath := filepath.Join(".", "versions.yaml")
+	versionsPath := filepath.Join("..", "versions.yaml")
 
 	// Load the configuration
 	config, err := loadVersionsConfig(versionsPath)
@@ -281,7 +283,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	ociCfg := map[string]any{
 		"config":     "gardenlinux",
-		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases",
+		"repository": "europe-docker.pkg.dev/sap-se-gcp-k8s-delivery/releases-internal",
 		"path":       "driver",
 	}
 
@@ -299,7 +301,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	ociCfg = map[string]any{
 		"config":     "gardenlinux",
-		"repository": "europe-docker.pkg.dev/sap-se-gcp-gardenlinux/releases",
+		"repository": "europe-docker.pkg.dev/sap-se-gcp-k8s-delivery/releases-internal",
 		"path":       "idx",
 	}
 
