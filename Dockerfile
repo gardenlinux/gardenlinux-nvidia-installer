@@ -34,6 +34,7 @@ RUN apt-get install -qq --no-install-recommends -y debian-archive-keyring \
     && apt-get install -qq --no-install-recommends -y \
         infiniband-diags\
         libibverbs1 \
+        libnl-3-200 \
         libibnetdisc5t64 \
         libibmad5 \
         libibumad3 \
