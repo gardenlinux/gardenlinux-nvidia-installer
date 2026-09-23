@@ -28,10 +28,11 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
 RUN apt-get install -qq --no-install-recommends -y debian-archive-keyring \
     && echo "deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg] http://deb.debian.org/debian unstable main" \
         > /etc/apt/sources.list.d/debian-unstable.list \
-    && printf 'Package: *\nPin: release a=unstable\nPin-Priority: -1\n\nPackage: infiniband-diags libibverbs1 libibnetdisc5t64 libibmad5 libibumad3\nPin: release a=unstable\nPin-Priority: 1001\n' \
+    && printf 'Package: *\nPin: release a=unstable\nPin-Priority: -1\n\nPackage: infiniband-diags libibverbs1 libibnetdisc5t64 libnl-3-200 libnl-route-3-200 ibibmad5 libibumad3\nPin: release a=unstable\nPin-Priority: 1001\n' \
         > /etc/apt/preferences.d/debian-unstable \
     && apt-get update -qq \
     && apt-get install -qq --no-install-recommends -y \
+        libnl-route-3-200 \
         infiniband-diags\
         libibverbs1 \
         libnl-3-200 \
