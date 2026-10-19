@@ -167,6 +167,7 @@ jobs:
     env:
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
+      NVIDIA_FS_VERSION: ${{ matrix.nvidia_fs_version }}
       KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
       TARGET_ARCH: ${{ matrix.arch }}
 
@@ -226,6 +227,7 @@ jobs:
     env:
       GL_VERSION: ${{ matrix.os_version }}
       DRIVER_VERSION: ${{ matrix.driver_version }}
+      NVIDIA_FS_VERSION: ${{ matrix.nvidia_fs_version }}
       KERNEL_FLAVOR: ${{ matrix.kernel_flavour }}
       TARGET_ARCH: ${{ matrix.arch }}
 

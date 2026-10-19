@@ -32,6 +32,8 @@ cpu_arch:
 nvidia_drivers:
 - 590.48.01
 - 580.178.04
+nvidia_fs_versions:
+- 13.4.1
 gvisor_driver_pins:
   590.48.01: 590.48.01
   580.178.04: 580.178.04

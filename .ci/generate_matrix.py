@@ -11,16 +11,24 @@ def _ver_tuple(v):
     return tuple(int(x) for x in str(v).split("."))
 
 
+nvidia_fs_versions = data.get("nvidia_fs_versions", [])
+nvidia_fs_version = str(nvidia_fs_versions[0]) if nvidia_fs_versions else None
+
+def with_nvidia_fs(entry):
+    if nvidia_fs_version:
+        entry["nvidia_fs_version"] = nvidia_fs_version
+    return entry
+
 # build_matrix: one entry per (os_version, arch, kernel_flavour, driver).
 # Each image embeds both open and proprietary tarballs; kernel_type is no longer
 # a separate matrix dimension.
 build_matrix = [
-    {
+    with_nvidia_fs({
         "os_version": os_version,
         "driver_version": driver,
         "arch": arch,
         "kernel_flavour": flavour,
-    }
+    })
     for os_version, arch, flavour, driver in itertools.product(
         data["os_versions"],
         data["cpu_arch"],
@@ -56,13 +64,13 @@ for driver in data["nvidia_drivers"]:
         sys.exit(1)
 
 gvisor_build_matrix = [
-    {
+    with_nvidia_fs({
         "os_version": os_version,
         "driver_version": gvisor_pins[driver],
         "arch": arch,
         "kernel_flavour": flavour,
         "image_subfolder": "gvisor",
-    }
+    })
     for os_version, arch, flavour, driver in itertools.product(
         data["os_versions"],
         data["cpu_arch"],

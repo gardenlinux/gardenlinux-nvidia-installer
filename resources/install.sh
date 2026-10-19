@@ -49,6 +49,11 @@ modprobe -d "$INSTALL_DIR/$DRIVER_NAME" nvidia "${NVIDIA_MODULE_PARAMS[@]}"; rc=
 modprobe -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-uvm "${NVIDIA_UVM_MODULE_PARAMS[@]}"; rc=$?
 [ $rc -ne 0 ] && { echo "[ERROR] modprobe nvidia-uvm failed: $rc"; exit 1; }
 
+if [ -f "$INSTALL_DIR/$DRIVER_NAME/lib/modules/$(uname -r)/nvidia-fs.ko" ]; then
+    modprobe -d "$INSTALL_DIR/$DRIVER_NAME" nvidia-fs; rc=$?
+    [ $rc -ne 0 ] && echo "[WARN] modprobe nvidia-fs failed: $rc (GPUDirect Storage unavailable)"
+fi
+
 # Ensure device nodes exist on the host (idempotent, preferred over manual mknod)
 # -u: create /dev/nvidia-uvm
 # -m Load the NVIDIA modeset kernel module and create its device file
