@@ -7,7 +7,7 @@ kernel modules are baked into the image at build time.
 
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
-  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.20.0/helm/gpu-operator-values.yaml
+  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.21.0/helm/gpu-operator-values.yaml
 ```
 
 Built images are published at:
@@ -16,13 +16,13 @@ Built images are published at:
 ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<release>/driver:<driver_major>-<kernel_version>-gardenlinux0
 ```
 
-For example: `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.20.0/driver:590-6.12.72-cloud-amd64-gardenlinux0`
+For example: `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.21.0/driver:590-6.12.72-cloud-amd64-gardenlinux0`
 
 If you have built the images yourself, override the registry and image name:
 
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
-  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.20.0/helm/gpu-operator-values.yaml \
+  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.21.0/helm/gpu-operator-values.yaml \
   --set driver.repository=$REGISTRY/$FOLDER \
   --set driver.image=$IMAGE
 ```
@@ -69,16 +69,16 @@ OS 1592.15: 590.48.01, 580.159.04, 580.159.03, 580.126.20, 580.126.09, 580.105.0
 OS 1592.16: 590.48.01, 580.159.04, 580.159.03, 580.126.20, 580.126.16, 580.126.09, 570.211.01
 OS 1592.17: 590.48.01, 580.126.20, 570.211.01
 OS 1592.18: 590.48.01, 580.178.04, 580.173.02, 580.167.08, 580.159.04, 580.159.03, 580.126.20, 570.211.01
-OS 1877.22: 590.48.01, 580.178.04, 570.211.01
-OS 1877.23: 590.48.01, 580.178.04, 570.211.01
-OS 1877.24: 590.48.01, 580.178.04
-OS 1877.25: 590.48.01, 580.178.04
-OS 1877.26: 590.48.01, 580.178.04
-OS 2150.10.0: 590.48.01, 580.178.04, 570.211.01
-OS 2150.11.0: 590.48.01, 580.178.04
-OS 2150.12.0: 590.48.01, 580.178.04
-OS 2150.8.0: 590.48.01, 580.178.04, 580.173.02, 570.211.01
-OS 2150.9.0: 590.48.01, 580.178.04, 570.211.01
+OS 1877.22: 590.48.01, 580.196.07, 580.178.04, 570.211.01
+OS 1877.23: 590.48.01, 580.196.07, 580.178.04, 570.211.01
+OS 1877.24: 590.48.01, 580.196.07, 580.178.04
+OS 1877.25: 590.48.01, 580.196.07, 580.178.04
+OS 1877.26: 590.48.01, 580.196.07, 580.178.04
+OS 2150.10.0: 590.48.01, 580.196.07, 580.178.04, 570.211.01
+OS 2150.11.0: 590.48.01, 580.196.07, 580.178.04
+OS 2150.12.0: 590.48.01, 580.196.07, 580.178.04
+OS 2150.8.0: 590.48.01, 580.196.07, 580.178.04, 580.173.02, 570.211.01
+OS 2150.9.0: 590.48.01, 580.196.07, 580.178.04, 570.211.01
 
 
 Lifecycle for Driver and supported GL version depends on Garden Linux Release and Driver Release
@@ -113,7 +113,7 @@ registry path. These images use nvproxy-qualified driver versions pinned by the 
 
 ```bash
 helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
-  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.20.0/helm/gpu-operator-gvisor-values.yaml
+  --values https://raw.githubusercontent.com/gardenlinux/gardenlinux-nvidia-installer/refs/tags/1.21.0/helm/gpu-operator-gvisor-values.yaml
 ```
 
 gVisor driver images are published at:
