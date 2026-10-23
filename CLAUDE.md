@@ -15,7 +15,7 @@ All builds require environment variables set beforehand:
 ```bash
 export GL_VERSION=1877.3
 export DRIVER_VERSION=590.48.01
-export NVIDIA_FS_VERSION=13.4.1
+export NVIDIA_FS_VERSION=2.30.2
 export KERNEL_TYPE=proprietary      # or 'open'
 export TARGET_ARCH=amd64            # or 'arm64' (default: amd64)
 export KERNEL_FLAVOR=cloud          # or 'metal' (default: cloud)

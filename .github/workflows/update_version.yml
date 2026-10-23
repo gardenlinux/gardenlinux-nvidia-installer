@@ -22,9 +22,10 @@ jobs:
           # Parse the output for each update type
           GARDENLINUX_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GARDENLINUX_VERSION_UPDATE" | cut -d'=' -f2)
           NVIDIA_DRIVER_VERSION_UPDATE=$(echo "$OUTPUT" | grep "NVIDIA_DRIVER_VERSION_UPDATE" | cut -d'=' -f2)
+          NVIDIA_FS_VERSION_UPDATE=$(echo "$OUTPUT" | grep "NVIDIA_FS_VERSION_UPDATE" | cut -d'=' -f2)
           GVISOR_VERSION_UPDATE=$(echo "$OUTPUT" | grep "GVISOR_VERSION_UPDATE" | cut -d'=' -f2)
 
-          echo "has_update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' || $GVISOR_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          echo "has_update=$([[ $GARDENLINUX_VERSION_UPDATE == 'true' || $NVIDIA_DRIVER_VERSION_UPDATE == 'true' || $NVIDIA_FS_VERSION_UPDATE == 'true' || $GVISOR_VERSION_UPDATE == 'true' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
       - name: Update History
         id: update-history
@@ -37,7 +38,7 @@ jobs:
         run: |
           source .ci/git_ops.sh
           configure_git_identity "Garden Linux Builder" "gardenlinux@users.noreply.github.com"
-          commit_and_push_branch "update-version" versions.yaml history.yaml
+          commit_and_push_branch "update-version" versions.yaml history.yaml tests/values.yaml
           create_pr "update-version" main "Update versions" "automated update"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

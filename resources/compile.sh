@@ -130,39 +130,28 @@ compile_kernel_type() {
 }
 
 
-# extract_nvidia_fs_source downloads the nvidia-fs local-repo .deb and extracts
-# the kernel module source into /tmp/nvidia-fs/src. The local-repo .deb is a
-# wrapper that contains a second inner .deb (nvidia-fs-dkms) with the actual
-# source under /usr/src/nvidia-fs-<version>/.
+# extract_nvidia_fs_source downloads the nvidia-fs redist tarball from NVIDIA's
+# redistribution index and extracts the kernel module source into /tmp/nvidia-fs/src.
 #
-# nvidia-fs source is not available as plain source — NVIDIA only ships it inside
-# this local-repo package, which is free to use once extracted.
+# NVIDIA_FS_VERSION must be the full version (e.g. 2.30.2), matching the tarball at:
+# https://developer.download.nvidia.com/compute/nvidia-fs/redist/nvidia_fs/linux-x86_64/
+# The source tree inside is at src/nvidia-fs-<major.minor>/ (no patch component).
 extract_nvidia_fs_source() {
-    local DEB_URL="https://developer.download.nvidia.com/compute/nvidia-fs/${NVIDIA_FS_VERSION}/local_installers/nvidia-fs-local-repo-ubuntu2204-${NVIDIA_FS_VERSION}_1.0-1_amd64.deb"
+    local TARBALL_URL="https://developer.download.nvidia.com/compute/nvidia-fs/redist/nvidia_fs/linux-x86_64/nvidia_fs-linux-x86_64-${NVIDIA_FS_VERSION}-archive.tar.xz"
     local WORK_DIR="/tmp/nvidia-fs"
 
     echo "Extracting nvidia-fs ${NVIDIA_FS_VERSION} source"
 
     mkdir -p "${WORK_DIR}"
-    wget -qO "${WORK_DIR}/local-repo.deb" "${DEB_URL}"
+    wget -qO "${WORK_DIR}/nvidia-fs.tar.xz" "${TARBALL_URL}"
 
-    # The outer .deb sets up a local apt repo. Extract it to get at the inner .deb.
-    dpkg-deb --extract "${WORK_DIR}/local-repo.deb" "${WORK_DIR}/local-repo"
+    # Strip the top-level archive dir; source lands at src/nvidia-fs-<major.minor>/
+    tar xf "${WORK_DIR}/nvidia-fs.tar.xz" -C "${WORK_DIR}" --strip-components=1
 
-    local INNER_DEB
-    INNER_DEB=$(find "${WORK_DIR}/local-repo" -name "nvidia-fs-dkms_*.deb" | head -1)
-    if [ -z "${INNER_DEB}" ]; then
-        echo "[ERROR] nvidia-fs-dkms inner deb not found inside local-repo"
-        exit 1
-    fi
-
-    # The inner .deb contains the kernel module source under /usr/src/nvidia-fs-<version>/
-    dpkg-deb --extract "${INNER_DEB}" "${WORK_DIR}/src"
-
-    local GDS_INNER_VERSION
-    GDS_INNER_VERSION=$(basename "${INNER_DEB}" | sed 's/nvidia-fs-dkms_\([^_]*\)_.*/\1/')
+    local MAJOR_MINOR
+    MAJOR_MINOR=$(echo "${NVIDIA_FS_VERSION}" | cut -d. -f1-2)
     # Export so callers know the exact source directory
-    NVIDIA_FS_SRC_DIR="${WORK_DIR}/src/usr/src/nvidia-fs-${GDS_INNER_VERSION}"
+    NVIDIA_FS_SRC_DIR="${WORK_DIR}/src/nvidia-fs-${MAJOR_MINOR}"
 }
 
 # compile_nvidia_fs builds nvidia-fs.ko against the already-compiled nvidia.ko.
@@ -184,7 +173,7 @@ compile_nvidia_fs() {
         exit 1
     fi
     local NVIDIA_KO="/tmp/nvidia-fs/nvidia.ko"
-    tar xzf "${OPEN_TARBALL}" -C /tmp/nvidia-fs --strip-components=3 \
+    tar xzf "${OPEN_TARBALL}" -C /tmp/nvidia-fs --strip-components=4 \
         "driver/lib/modules/${KERNEL_NAME}/nvidia.ko"
 
     # Build nv.symvers from the compiled nvidia.ko so the kernel build system
@@ -192,7 +181,7 @@ compile_nvidia_fs() {
     nm -o "${NVIDIA_KO}" \
         | awk '/(__crc_nvidia_p2p_|T nvidia_p2p_)/ {
             gsub(/\.\//, "", $1); gsub(/\.ko[^:]*/, "", $1)
-            if ($2 ~ /^__crc_/) { printf "0x%s\t%s\t%s\tEXPORT_SYMBOL\t\n", $1, gensub(/__crc_/,"","1",$2), $1 }
+            if ($2 ~ /^__crc_/) { sym = $2; sub(/__crc_/, "", sym); printf "0x%s\t%s\t%s\tEXPORT_SYMBOL\t\n", $1, sym, $1 }
             else                 { printf "0x0\t%s\t%s\tEXPORT_SYMBOL\t\n", $3, $1 }
           }' > "${NVIDIA_FS_SRC_DIR}/nv.symvers"
     cp "${NVIDIA_FS_SRC_DIR}/nv.symvers" "${NVIDIA_FS_SRC_DIR}/Module.symvers"
@@ -205,6 +194,11 @@ compile_nvidia_fs() {
         echo "[ERROR] nv-p2p.h not found — NVIDIA driver .run must be extracted first"
         exit 1
     fi
+
+    # nvidia-fs's configure script probes the kernel headers and generates
+    # config-host.h, which is required by several source files.
+    echo "Configuring nvidia-fs ${NVIDIA_FS_VERSION} for kernel ${KERNEL_NAME}"
+    (cd "${NVIDIA_FS_SRC_DIR}" && ./configure "${KERNEL_NAME}")
 
     echo "Compiling nvidia-fs ${NVIDIA_FS_VERSION} for kernel ${KERNEL_NAME}"
 

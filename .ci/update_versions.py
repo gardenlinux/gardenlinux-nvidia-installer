@@ -91,6 +91,7 @@ def update_versions(gvisor_version=None):
     updates = {
         'gardenlinux': False,
         'nvidia': False,
+        'nvidia_fs': False,
         'gvisor': False,
     }
 
@@ -98,13 +99,18 @@ def update_versions(gvisor_version=None):
         data = yaml.safe_load(version_file)
         updates['gardenlinux'] = get_latest_gardenlinux_tags(data)
         updates['nvidia'] = update_nvidia_driver_version(data)
+        updates['nvidia_fs'] = update_nvidia_fs_version(data)
         updates['gvisor'] = _fetch_and_update_gvisor_pins(data, gvisor_version)
 
     with open("versions.yaml", 'w') as version_file:
         yaml.dump(data, version_file, default_flow_style=False, sort_keys=False)
 
+    if updates['nvidia_fs']:
+        _sync_nvidia_fs_test_values(data['nvidia_fs_versions'][0])
+
     print(f"GARDENLINUX_VERSION_UPDATE={'true' if updates['gardenlinux'] else 'false'}")
     print(f"NVIDIA_DRIVER_VERSION_UPDATE={'true' if updates['nvidia'] else 'false'}")
+    print(f"NVIDIA_FS_VERSION_UPDATE={'true' if updates['nvidia_fs'] else 'false'}")
     print(f"GVISOR_VERSION_UPDATE={'true' if updates['gvisor'] else 'false'}")
 
 
@@ -175,6 +181,48 @@ def get_latest_gardenlinux_tags(data):
         data['os_versions'] = filtered_os_versions
         return True
     return False
+
+def update_nvidia_fs_version(data):
+    """Update nvidia_fs_versions in data with the latest version from NVIDIA's redist index.
+
+    Replaces the single tracked version when a newer one is available.
+    Returns True if the version changed.
+    """
+    url = "https://developer.download.nvidia.com/compute/nvidia-fs/redist/nvidia_fs/linux-x86_64/"
+    with urlopen(url) as response:
+        html_data = html2text.html2text(response.read().decode('utf-8', errors='ignore'))
+
+    # Filenames look like: nvidia_fs-linux-x86_64-2.30.2-archive.tar.xz
+    version_pattern = re.compile(r'nvidia_fs-linux-x86_64-(\d+\.\d+\.\d+)-archive\.tar\.xz')
+    versions = version_pattern.findall(html_data)
+    if not versions:
+        print("Warning: no nvidia-fs versions found in redist index", file=sys.stderr)
+        return False
+
+    def ver(s):
+        return tuple(int(x) for x in s.split("."))
+
+    latest = max(versions, key=ver)
+    current_list = data.get('nvidia_fs_versions', [])
+    current = current_list[0] if current_list else None
+
+    if current == latest:
+        return False
+
+    data['nvidia_fs_versions'] = [latest]
+    return True
+
+
+def _sync_nvidia_fs_test_values(version):
+    """Update nvidiaFsVersion in tests/values.yaml to match versions.yaml."""
+    path = "tests/values.yaml"
+    with open(path, 'r') as f:
+        content = f.read()
+    updated = re.sub(r'(?m)^nvidiaFsVersion:.*$', f'nvidiaFsVersion: "{version}"', content)
+    if updated != content:
+        with open(path, 'w') as f:
+            f.write(updated)
+
 
 def main():
     parser = argparse.ArgumentParser()

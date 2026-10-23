@@ -1,3 +1,5 @@
+nvidiaFsVersion: "2.30.2"
+
 # Test configuration
 test:
   enabled: true
