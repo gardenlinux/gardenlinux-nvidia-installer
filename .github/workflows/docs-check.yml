@@ -1,0 +1,21 @@
+name: Documentation Quality Check
+
+# Thin caller for the documentation CI orchestrator in gardenlinux/docs.
+#
+# All documentation-path logic and the notify/commit-lock decision live in
+# gardenlinux/docs/.github/workflows/aggregated-repo-docs.yml, which uses
+# repos-config.json as the single source of truth for documentation paths.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, closed]
+  push:
+    branches: [main]
+
+jobs:
+  docs:
+    uses: gardenlinux/docs/.github/workflows/aggregated-repo-docs.yml@main
+    with:
+      repo: gardenlinux-nvidia-installer
+    secrets: inherit
