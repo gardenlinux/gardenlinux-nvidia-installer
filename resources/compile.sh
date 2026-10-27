@@ -104,6 +104,9 @@ compile_kernel_type() {
             ;;
     esac
 
+    if [[ -n "$NVIDIA_FS_VERSION" && "$KERNEL_TYPE" == "open" ]]; then
+        compile_nvidia_fs
+    fi
     echo "Copy GSP Firmware binary"
     mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
     find /tmp/nvidia -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
@@ -138,7 +141,7 @@ compile_kernel_type() {
 # The source tree inside is at src/nvidia-fs-<major.minor>/ (no patch component).
 extract_nvidia_fs_source() {
     local TARBALL_URL="https://developer.download.nvidia.com/compute/nvidia-fs/redist/nvidia_fs/linux-x86_64/nvidia_fs-linux-x86_64-${NVIDIA_FS_VERSION}-archive.tar.xz"
-    local WORK_DIR="/tmp/nvidia-fs"
+    local WORK_DIR="/tmp/nvidia/nvidia-fs"
 
     echo "Extracting nvidia-fs ${NVIDIA_FS_VERSION} source"
 
@@ -165,16 +168,7 @@ extract_nvidia_fs_source() {
 compile_nvidia_fs() {
     extract_nvidia_fs_source
 
-    # Pull nvidia.ko out of the already-built open tarball for symbol extraction.
-    # (open and proprietary nvidia.ko are identical for the p2p symbols we need.)
-    local OPEN_TARBALL="/out/nvidia/driver-${DRIVER_VERSION}-open-${KERNEL_NAME}.tar.gz"
-    if [ ! -f "${OPEN_TARBALL}" ]; then
-        echo "[ERROR] ${OPEN_TARBALL} not found — compile_kernel_type must run first"
-        exit 1
-    fi
-    local NVIDIA_KO="/tmp/nvidia-fs/nvidia.ko"
-    tar xzf "${OPEN_TARBALL}" -C /tmp/nvidia-fs --strip-components=4 \
-        "driver/lib/modules/${KERNEL_NAME}/nvidia.ko"
+    local NVIDIA_KO="${OUTDIR}/lib/modules/${KERNEL_NAME}/nvidia.ko"
 
     # Build nv.symvers from the compiled nvidia.ko so the kernel build system
     # can resolve nvidia_p2p_* symbol versions without a live loaded module.
@@ -220,23 +214,10 @@ compile_nvidia_fs() {
     fi
     echo "nvidia-fs compiled successfully"
 
-    # Inject nvidia-fs.ko into both driver tarballs (open and proprietary).
-    # We unpack, add the .ko, and repack since .tar.gz doesn't support append.
-    for KERNEL_TYPE in open proprietary; do
-        local TARBALL="/out/nvidia/driver-${DRIVER_VERSION}-${KERNEL_TYPE}-${KERNEL_NAME}.tar.gz"
-        local UNPACK_DIR="/tmp/nvidia-fs-inject-${KERNEL_TYPE}"
-        mkdir -p "${UNPACK_DIR}"
-        tar xzf "${TARBALL}" -C "${UNPACK_DIR}"
-        cp "${NVIDIA_FS_SRC_DIR}/nvidia-fs.ko" "${UNPACK_DIR}/driver/lib/modules/${KERNEL_NAME}/"
-        tar czf "${TARBALL}" -C "${UNPACK_DIR}" driver
-        rm -rf "${UNPACK_DIR}"
-        echo "Injected nvidia-fs.ko into ${TARBALL}"
-    done
+    # Inject nvidia-fs.ko into open driver tarballs (open since GPU Direct storage is supported only with open kernel module).
+    cp "${NVIDIA_FS_SRC_DIR}/nvidia-fs.ko" "${OUTDIR}/lib/modules/${KERNEL_NAME}/"
+    echo "Injected nvidia-fs.ko into ${OUTDIR}/lib/modules/${KERNEL_NAME}/"
 }
 
 compile_kernel_type open
 compile_kernel_type proprietary
-
-if [ -n "$NVIDIA_FS_VERSION" ]; then
-    compile_nvidia_fs
-fi
