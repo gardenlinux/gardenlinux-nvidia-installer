@@ -70,7 +70,9 @@ main() {
     # 2) Run install(): 
     #    We also pass NVIDIA_BIN so probes can find tools easily inside this pod.
     # ------------------------------------------------------------------------------
-    cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}"
+    # nvidia-installer places nvidia-modprobe in usr/bin; other utilities land in bin
+    # directly. usr/bin may be absent or empty on some builds, so don't fail under set -e.
+    cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}" 2>/dev/null || true
 
     install "$DRIVER_NAME" "$NVIDIA_BIN"
 
