@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repo builds and packages NVIDIA GPU drivers for Garden Linux, enabling GPU support in Kubernetes clusters via the [NVIDIA GPU Operator](https://github.com/NVIDIA/gpu-operator). Drivers are compiled at build time inside Garden Linux developer containers and packaged into production images that the GPU Operator installs at runtime.
+This repo builds and packages NVIDIA GPU drivers for Garden Linux, enabling GPU support in Kubernetes clusters via the [NVIDIA GPU Operator](https://github.com/NVIDIA/gpu-operator). Two deployment modes exist: **precompiled** (driver compiled at CI time, embedded in image) and **runtime compilation** (driver compiled on the node at container startup from a `.run` package downloaded off the internet).
 
 **Image registry:** `ghcr.io/gardenlinux/gardenlinux-nvidia-installer/{kernel_type}/driver`
 
@@ -55,12 +55,25 @@ Linting: ShellCheck is run differentially on changed shell scripts in CI (`diffe
 - Final image is multi-stage with a scratch base
 
 ### Runtime (Kubernetes)
-The container entrypoint `nvidia-driver` script (executed by GPU Operator):
-1. Checks for already-loaded kernel modules
-2. Extracts driver archive to `/run/nvidia/driver`
-3. Configures library loader via `resources/install.sh`
-4. Optionally installs Fabric Manager (`resources/download_fabricmanager.sh`)
-5. Verifies installation with `nvidia-smi`
+
+The container entrypoint `nvidia-driver` runs `load_install_gpu_driver.sh`, then `install_containerd_path_dropin.sh`, then `install_fabricmanager.sh`.
+
+**Two deployment modes, selected by `usePrecompiled` in the Helm values:**
+
+**Precompiled mode** (`usePrecompiled: true`, `Dockerfile`, `gpu-operator-values.yaml`):
+- `resources/load_install_gpu_driver.sh` resolves `KERNEL_MODULE_TYPE` (open/proprietary/auto), locates the pre-compiled tarball embedded at `/opt/nvidia-installer/drivers/`, extracts it to `/run/nvidia/driver`, then runs `resources/install.sh` to load kernel modules and call `nvidia-modprobe`.
+
+**Runtime compilation mode** (`usePrecompiled: false`, `Dockerfile_Runtime`, `gpu-operator-values-runtime.yaml` / `gpu-operator-gvisor-values.yaml`):
+- `Dockerfile_Runtime` copies `resources/*` then **overwrites** `compile.sh` and `load_install_gpu_driver.sh` with the `dynamic_compilation/` versions. The `resources/` versions of those two files are unused in this mode.
+- `dynamic_compilation/load_install_gpu_driver.sh` orchestrates the full flow:
+  1. Guards against already-loaded modules (`lsmod` via nsenter)
+  2. `resolve_driver_version`: if `DRIVER_VERSION` is a plain integer (e.g. `580`) and `runsc` is on the host, calls `runsc nvproxy list-supported-drivers` to resolve the latest patch version (e.g. `580.178.04`) — required for gVisor compatibility
+  3. `resolve_kernel_module_type`: chooses open/proprietary based on driver major version (≥560 → open) and GPU architecture (pre-Turing → proprietary regardless)
+  4. Calls `dynamic_compilation/compile.sh`, which: installs kernel headers from the Garden Linux package repo, downloads `NVIDIA-Linux-{arch}-{version}.run` from `$BASE_URL`, extracts and runs `nvidia-installer --utility-prefix=/run/nvidia/{version}/driver`, then stages output to `/run/nvidia/.staging-driver/`
+  5. Promotes staging to `/run/nvidia/driver/`
+  6. Copies utilities to pod `/usr/bin` so the startup probe can find `nvidia-smi`
+  7. Runs `resources/install.sh` to load modules via `modprobe -d` and call `nvidia-modprobe`
+  8. Final `nvidia-smi` verification
 
 ### Version Management
 - `versions.yaml` — declarative matrix of supported GL versions × architectures × kernel flavors/types × NVIDIA driver versions
@@ -72,14 +85,18 @@ The container entrypoint `nvidia-driver` script (executed by GPU Operator):
 
 ### Key Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `resources/compile.sh` | Downloads NVIDIA driver, compiles modules, archives output |
-| `resources/extract_kernel_name.sh` | Detects kernel name from kmodbuild container |
-| `resources/load_install_gpu_driver.sh` | Runtime installer executed by GPU Operator |
-| `resources/set_env_vars.sh` | Sets environment variables for container runtime |
-| `resources/download_fabricmanager.sh` | Downloads optional Fabric Manager |
-| `nvidia-driver` | Container entrypoint (GPU Operator compatibility) |
+| Script | Mode | Purpose |
+|--------|------|---------|
+| `resources/compile.sh` | Precompiled (CI) | Downloads NVIDIA driver, compiles modules, archives output |
+| `resources/load_install_gpu_driver.sh` | Precompiled | Extracts embedded tarball, loads modules |
+| `resources/install.sh` | Both | Loads kernel modules via `modprobe -d`, calls `nvidia-modprobe` to create device nodes |
+| `resources/extract_kernel_name.sh` | Precompiled (CI) | Detects kernel name from kmodbuild container |
+| `resources/set_env_vars.sh` | Both | Sets `NVIDIA_ROOT`, `KERNEL_NAME`, `ARCH_TYPE`, etc. |
+| `resources/download_fabricmanager.sh` | Both | Downloads optional Fabric Manager |
+| `dynamic_compilation/compile.sh` | Runtime | Installs kernel headers, downloads `.run`, compiles with `nvidia-installer`, stages output |
+| `dynamic_compilation/load_install_gpu_driver.sh` | Runtime | Orchestrates the full runtime compilation + install flow (overwrites `resources/` version) |
+| `dynamic_compilation/resolve_driver_version.sh` | Runtime | Resolves major driver version to full patch version via `runsc nvproxy list-supported-drivers` |
+| `nvidia-driver` | Both | Container entrypoint (GPU Operator compatibility) |
 
 ### CI/CD Workflows (`.github/workflows/`)
 
@@ -106,6 +123,8 @@ Image tags (three per build):
 - **`make build` vs `make build-image`**: If no pre-compiled tarball exists in `out/nvidia/` for the target GL version, run `make build` (not `make build-image`) to compile + package. `make build-image` alone will fail if the tarball is missing.
 - **Mixed-kernel clusters**: During GL version upgrades, different nodes may run different kernels. The GPU Operator creates one DaemonSet per kernel version — both the old and new kernel images may need to be pushed.
 - **B200 node recovery**: After a cluster node replacement, the B200 node may stay `NotReady` for 10–20+ minutes before NFD labels it and the GPU Operator creates a driver DaemonSet for it.
+- **`acpi_video` symbols missing on headless nodes (GardenLinux 6.18+, open modules)**: `nvidia-modeset.ko` (open kernel modules) hard-depends on `acpi_video_register_backlight` / `__acpi_video_get_backlight_type` exported by the `video` module (`CONFIG_ACPI_VIDEO=m`). On headless cloud VMs the module exists on disk but is never auto-loaded. `compile.sh` pre-loads it via `nsenter -t 1 -m -- modprobe wmi && modprobe video` before calling `nvidia-installer`. Both calls are `|| true` so kernels with `acpi_video` built-in are unaffected.
+- **`usr/bin` copy in `load_install_gpu_driver.sh` is non-fatal**: `nvidia-installer` places `nvidia-smi` and other utilities in `$NVIDIA_BIN` (`/run/nvidia/driver/bin/`) via `--utility-prefix`, but only places `nvidia-modprobe` in `$NVIDIA_USR_BIN` (`/run/nvidia/driver/usr/bin/`). The `cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}"` step is guarded with `2>/dev/null || true` because `usr/bin/` can be empty; without this guard the script exits under `set -e` before copying anything to `/usr/bin`, leaving the startup probe without `nvidia-smi`.
 
 # Coding guidelines
 
