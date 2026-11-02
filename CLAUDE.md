@@ -30,6 +30,12 @@ export KERNEL_FLAVOR=cloud          # or 'metal' (default: cloud)
 
 ## Testing
 
+Unit tests use [bats](https://github.com/bats-core/bats-core). Helpers live in `test/test_helper/` (bats-support, bats-assert).
+
+```bash
+test/bats/bin/bats dynamic_compilation/<test-file>.bats
+```
+
 Integration tests run on real Gardener clusters with GPU nodes (see `tests/`):
 
 ```bash
@@ -37,7 +43,7 @@ helm install gpu-test ./tests -n gpu-test
 helm test gpu-test -n gpu-test --timeout 3m
 ```
 
-Linting: ShellCheck is run differentially on changed shell scripts in CI (`differential-shellcheck.yml`).
+Linting: ShellCheck runs locally via pre-commit (`.pre-commit-config.yaml`) and differentially in CI (`differential-shellcheck.yml`). Activate the local hook once with `pre-commit install` (requires `pip install pre-commit`).
 
 ## Architecture
 
@@ -183,3 +189,7 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Commit When a Ticket Is Done
+
+When you finish an implementation ticket, create a git commit before reporting completion. Include only the files the ticket required — no unrelated changes.
