@@ -61,9 +61,16 @@ kubectl rollout status statefulset/driver-cache \
 # 2. Cross-copy TLS secret into gpu-operator namespace
 # ---------------------------------------------------------------------------
 echo "=== Copying TLS secret to gpu-operator namespace ==="
+# Rename keys to valid bash identifiers so secretEnv can inject them directly.
+# ca.crt → DRIVER_CACHE_CA_PEM, client.crt → DRIVER_CACHE_CERT_PEM, client.key → DRIVER_CACHE_KEY_PEM
 kubectl get secret driver-cache-tls -n nvidia-driver-cache -o json \
     | jq 'del(.metadata.creationTimestamp,.metadata.resourceVersion,.metadata.uid,.metadata.managedFields)
-          | .metadata.namespace = "gpu-operator"' \
+          | .metadata.namespace = "gpu-operator"
+          | .data = {
+              "DRIVER_CACHE_CA_PEM":   .data["ca.crt"],
+              "DRIVER_CACHE_CERT_PEM": .data["client.crt"],
+              "DRIVER_CACHE_KEY_PEM":  .data["client.key"]
+            }' \
     | kubectl apply -f -
 
 # ---------------------------------------------------------------------------
@@ -79,11 +86,19 @@ helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
 # 4. Wait for the first driver pod (cold miss — compiles the driver)
 # ---------------------------------------------------------------------------
 echo "=== Waiting for first driver pod (cold miss — up to 35 min) ==="
+# The GPU Operator controller creates the driver DaemonSet asynchronously after
+# the ClusterPolicy is reconciled; kubectl wait exits immediately with an error
+# if no matching pods exist yet.  Poll until at least one pod appears, then wait.
+DEADLINE=$(( $(date +%s) + 35*60 ))
+until kubectl get pods -n gpu-operator -l app=nvidia-driver-daemonset --no-headers 2>/dev/null | grep -q .; do
+    [[ $(date +%s) -lt ${DEADLINE} ]] || { echo "ERROR: timed out waiting for driver pod to appear" >&2; exit 1; }
+    sleep 10
+done
 kubectl wait pod \
     -n gpu-operator \
     -l app=nvidia-driver-daemonset \
     --for=condition=Ready \
-    --timeout=35m
+    --timeout=$(( DEADLINE - $(date +%s) ))s
 
 # ---------------------------------------------------------------------------
 # 5. Assert [CACHE] miss and nvidia-smi
