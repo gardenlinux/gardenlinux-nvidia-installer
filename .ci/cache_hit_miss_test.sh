@@ -112,11 +112,15 @@ kubectl exec -n gpu-operator "${FIRST_POD}" -c nvidia-driver-ctr -- nvidia-smi
 echo "PASS: cold miss + nvidia-smi OK"
 
 # ---------------------------------------------------------------------------
-# 6. Delete the pod; wait for replacement (cache hit — pulls from registry)
+# 6. Restart the DaemonSet; wait for replacement (cache hit — pulls from registry)
 # ---------------------------------------------------------------------------
-echo "=== Deleting ${FIRST_POD} to trigger cache-hit run ==="
-kubectl delete pod -n gpu-operator "${FIRST_POD}"
-kubectl wait pod -n gpu-operator "${FIRST_POD}" --for=delete --timeout=2m
+# Use rollout restart rather than kubectl delete pod so the k8s-driver-manager
+# init container runs first: it evicts GPU workloads and unloads kernel modules
+# before nvidia-driver-ctr starts, which is the production upgrade code path and
+# allows the lsmod guard in load_install_gpu_driver.sh to pass cleanly.
+echo "=== Rolling restart of driver DaemonSet to trigger cache-hit run ==="
+kubectl rollout restart daemonset/nvidia-driver-daemonset -n gpu-operator
+kubectl wait pod -n gpu-operator "${FIRST_POD}" --for=delete --timeout=5m
 
 echo "=== Waiting for replacement driver pod (cache hit — up to 10 min) ==="
 kubectl wait pod \
