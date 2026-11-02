@@ -42,16 +42,15 @@ fi
 echo "=== Installing driver-cache chart ==="
 helm upgrade --install driver-cache "${REPO_ROOT}/helm/driver-cache" \
     -n nvidia-driver-cache \
-    --create-namespace \
-    --set storage.volumeType=vmware
+    --create-namespace
 
-# On Cinder-backed clusters the PVC becomes Bound as soon as the PV is
-# provisioned, but the underlying block device can still be in "creating"
-# state for several more minutes.  Kubernetes retries the CSI attach until
-# it succeeds, so we just need to wait long enough for the full round-trip:
-# Cinder volume ready → CSI attach → kubelet mount → container start.
-# kubectl rollout status waits for the pod to be Ready, which covers all of
-# those steps. Use a 15 min timeout to accommodate slow Cinder provisioning.
+# The PVC becomes Bound as soon as the PV is provisioned, but the underlying
+# block device can still be in "creating" state for several more minutes.
+# Kubernetes retries the CSI attach until it succeeds, so we just need to
+# wait long enough for the full round-trip: volume ready → CSI attach →
+# kubelet mount → container start.  kubectl rollout status waits for the pod
+# to be Ready, which covers all of those steps.  Use a 15 min timeout to
+# accommodate slow provisioning.
 echo "=== Waiting for driver-cache pod to be Ready (up to 15 min) ==="
 kubectl rollout status statefulset/driver-cache \
     -n nvidia-driver-cache \

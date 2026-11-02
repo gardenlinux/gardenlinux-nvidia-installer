@@ -21,7 +21,8 @@ The chart generates a self-signed CA and client certificate on first install and
 | `image.repository` | `registry` | Registry image (distribution v2) |
 | `image.tag` | `2` | Image tag |
 | `storage.size` | `20Gi` | PVC capacity |
-| `storage.storageClass` | `""` | StorageClass; empty = cluster default |
+| `storage.storageClass` | `""` | StorageClass name; empty = cluster default |
+| `storage.volumeType` | `""` | Cinder volume type (e.g. `vmware`); when set, creates a dedicated StorageClass with that type. Empty = use StorageClass default |
 | `networkPolicy.gpuOperatorNamespace` | `gpu-operator` | Source namespace allowed ingress on port 5000 |
 
 ## mTLS and client credentials
