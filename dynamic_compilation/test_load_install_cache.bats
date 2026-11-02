@@ -1,4 +1,5 @@
 #!/usr/bin/env bats
+# shellcheck disable=SC2030,SC2031  # bats @test blocks run in subshells; variable-locality warnings are expected
 #
 # Tests for the cache wiring inside _run_cache_or_compile() in
 # dynamic_compilation/load_install_gpu_driver.sh

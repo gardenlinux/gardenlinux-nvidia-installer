@@ -1,4 +1,5 @@
 #!/usr/bin/env bats
+# shellcheck disable=SC2317  # bats setup()/test functions confuse shellcheck's reachability analysis
 #
 # Tests for cache.sh: compute_cache_tag, verify_artifact, pull_from_cache,
 # push_to_cache, wait_for_cache_on_compile_fail
