@@ -40,9 +40,22 @@ fi
 echo "=== Installing driver-cache chart ==="
 helm upgrade --install driver-cache "${REPO_ROOT}/helm/driver-cache" \
     -n nvidia-driver-cache \
-    --create-namespace \
-    --wait \
-    --timeout 5m
+    --create-namespace
+
+# Wait for the PVC to be Bound before Helm --wait tries to schedule the pod.
+# On Cinder-backed clusters the volume can stay in "creating" for several
+# minutes; Kubernetes will retry the attach but emit FailedAttachVolume warnings
+# until the volume is available. Polling the PVC first avoids that race.
+echo "=== Waiting for PVC driver-cache to be Bound (up to 10 min) ==="
+kubectl wait pvc driver-cache \
+    -n nvidia-driver-cache \
+    --for=jsonpath='{.status.phase}'=Bound \
+    --timeout=10m
+
+echo "=== Waiting for driver-cache pod to be Ready ==="
+kubectl rollout status deployment/driver-cache \
+    -n nvidia-driver-cache \
+    --timeout=5m
 
 # ---------------------------------------------------------------------------
 # 2. Cross-copy TLS secret into gpu-operator namespace
