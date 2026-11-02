@@ -117,13 +117,13 @@ push_to_cache() {
 
     local attempt
     for attempt in 1 2; do
-        if timeout 30 oras push "${ref}" \
+        if ( cd "${tmpdir}" && timeout 30 oras push "${ref}" \
             "${tls_args[@]}" \
             --annotation "kernel.release=${kernel_release}" \
             --annotation "driver.version=${driver_version}" \
             --annotation "kernel.module.type=${kernel_module_type}" \
             --annotation "arch=${arch}" \
-            "${archive}:application/vnd.oci.image.layer.v1.tar+gzip"; then
+            "driver.tar.gz:application/vnd.oci.image.layer.v1.tar+gzip" ); then
             break
         fi
         echo "[WARN] push_to_cache: attempt ${attempt} failed for ${ref}" >&2
