@@ -112,8 +112,25 @@ kubectl exec -n gpu-operator "${FIRST_POD}" -c nvidia-driver-ctr -- nvidia-smi
 echo "PASS: cold miss + nvidia-smi OK"
 
 # ---------------------------------------------------------------------------
-# 6. Restart the DaemonSet; wait for replacement (cache hit — pulls from registry)
+# 6. Wait for the push to land, then restart the DaemonSet
 # ---------------------------------------------------------------------------
+# The cold-miss pod pushes the compiled driver to the cache as a fire-and-forget
+# background job.  Wait for a successful PUT to appear in the registry pod's log
+# before triggering the rollout; otherwise the replacement pod may start its pull
+# before the push completes and will recompile instead of hitting the cache.
+CACHE_TAG=$(kubectl logs -n gpu-operator "${FIRST_POD}" -c nvidia-driver-ctr \
+    | grep -oP '(?<=\[CACHE\] miss key=)\S+')
+echo "=== Waiting for cache push to land (tag: ${CACHE_TAG}) ==="
+REGISTRY_POD=$(kubectl get pods -n nvidia-driver-cache -l app.kubernetes.io/name=driver-cache \
+    -o jsonpath='{.items[0].metadata.name}')
+PUSH_DEADLINE=$(( $(date +%s) + 5*60 ))
+until kubectl logs -n nvidia-driver-cache "${REGISTRY_POD}" -c registry 2>/dev/null \
+        | grep -q "\"http.request.method\":\"PUT\".*\"vars.reference\":\"${CACHE_TAG}\".*\"http.response.status\":201"; do
+    [[ $(date +%s) -lt ${PUSH_DEADLINE} ]] || { echo "ERROR: timed out waiting for cache push" >&2; exit 1; }
+    sleep 5
+done
+echo "Cache push confirmed."
+
 # Use rollout restart rather than kubectl delete pod so the k8s-driver-manager
 # init container runs first: it evicts GPU workloads and unloads kernel modules
 # before nvidia-driver-ctr starts, which is the production upgrade code path and
