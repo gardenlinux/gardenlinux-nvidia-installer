@@ -70,6 +70,7 @@ build-runtime-image:
 	$(eval TAG1 := "$(DRIVER_MAJOR_VERS)-gardenlinux0")
 	$(eval TAG2 := "$(DRIVER_VERSION)-gardenlinux0")
 	@DOCKER_BUILDKIT=1 docker build \
+           --pull --no-cache \
            --build-arg DRIVER_VERSION=$(DRIVER_VERSION) \
            --platform=linux/amd64 \
            -t $(IMAGE_PATH):$(TAG1) \
