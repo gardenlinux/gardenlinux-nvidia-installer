@@ -11,15 +11,29 @@ driver:
   env:
     - name: DRIVER_CACHE_REGISTRY
       value: "driver-cache.nvidia-driver-cache.svc.cluster.local:5000"
+    # mTLS credentials from 'driver-cache-tls' (gpu-operator namespace).
+    # Secret is cross-copied there by the CI cache-hit-miss-test job; valueFrom
+    # is used because secretEnv injects keys with dots, which are invalid bash names.
+    - name: DRIVER_CACHE_CA_PEM
+      valueFrom:
+        secretKeyRef:
+          name: driver-cache-tls
+          key: ca.crt
+    - name: DRIVER_CACHE_CERT_PEM
+      valueFrom:
+        secretKeyRef:
+          name: driver-cache-tls
+          key: client.crt
+    - name: DRIVER_CACHE_KEY_PEM
+      valueFrom:
+        secretKeyRef:
+          name: driver-cache-tls
+          key: client.key
     # Uncomment to tune cache polling behaviour (defaults shown):
     # - name: DRIVER_CACHE_COMPILE_FAIL_POLL_INTERVAL
     #   value: "30"
     # - name: DRIVER_CACHE_COMPILE_FAIL_WAIT_SECS
     #   value: "600"
-  # mTLS credentials for the in-cluster driver-cache registry.
-  # Secret 'driver-cache-tls' created by the driver-cache chart (nvidia-driver-cache namespace).
-  # Keys: ca.crt (CA cert), client.crt (client cert), client.key (client key).
-  secretEnv: "driver-cache-tls"
 node-feature-discovery:
   worker:
     config:

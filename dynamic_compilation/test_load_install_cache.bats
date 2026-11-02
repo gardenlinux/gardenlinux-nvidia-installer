@@ -195,3 +195,50 @@ teardown() {
     assert_failure
     assert_output --partial "[CACHE] compile-failed key=560.35.03-open-amd64-6.1.0-1-cloud-amd64 — fallback-timeout"
 }
+
+# ---------------------------------------------------------------------------
+# _setup_cache_tls: PEM env vars → temp cert files
+# ---------------------------------------------------------------------------
+
+@test "_setup_cache_tls: no-op when DRIVER_CACHE_REGISTRY is unset" {
+    unset DRIVER_CACHE_REGISTRY
+    export DRIVER_CACHE_CA_PEM="fake-ca"
+    _setup_cache_tls
+    assert [ -z "${DRIVER_CACHE_CA_FILE:-}" ]
+}
+
+@test "_setup_cache_tls: no-op when no PEM vars are set" {
+    export DRIVER_CACHE_REGISTRY="registry.example.com/cache"
+    unset DRIVER_CACHE_CA_PEM DRIVER_CACHE_CERT_PEM DRIVER_CACHE_KEY_PEM
+    _setup_cache_tls
+    assert [ -z "${DRIVER_CACHE_CA_FILE:-}" ]
+    assert [ -z "${DRIVER_CACHE_CERT_FILE:-}" ]
+    assert [ -z "${DRIVER_CACHE_KEY_FILE:-}" ]
+}
+
+@test "_setup_cache_tls: writes CA PEM to file and sets DRIVER_CACHE_CA_FILE" {
+    export DRIVER_CACHE_REGISTRY="registry.example.com/cache"
+    export DRIVER_CACHE_CA_PEM="-----BEGIN CERTIFICATE-----
+fake-ca-content
+-----END CERTIFICATE-----"
+    unset DRIVER_CACHE_CERT_PEM DRIVER_CACHE_KEY_PEM
+    _setup_cache_tls
+    assert [ -n "${DRIVER_CACHE_CA_FILE:-}" ]
+    assert [ -f "${DRIVER_CACHE_CA_FILE}" ]
+    run grep -c "fake-ca-content" "${DRIVER_CACHE_CA_FILE}"
+    assert_success
+}
+
+@test "_setup_cache_tls: writes all three PEM vars to separate files" {
+    export DRIVER_CACHE_REGISTRY="registry.example.com/cache"
+    export DRIVER_CACHE_CA_PEM="ca-pem"
+    export DRIVER_CACHE_CERT_PEM="cert-pem"
+    export DRIVER_CACHE_KEY_PEM="key-pem"
+    _setup_cache_tls
+    assert [ -f "${DRIVER_CACHE_CA_FILE}" ]
+    assert [ -f "${DRIVER_CACHE_CERT_FILE}" ]
+    assert [ -f "${DRIVER_CACHE_KEY_FILE}" ]
+    # Files must be in the same temp directory
+    assert_equal "$(dirname "${DRIVER_CACHE_CA_FILE}")" "$(dirname "${DRIVER_CACHE_CERT_FILE}")"
+    assert_equal "$(dirname "${DRIVER_CACHE_CA_FILE}")" "$(dirname "${DRIVER_CACHE_KEY_FILE}")"
+}

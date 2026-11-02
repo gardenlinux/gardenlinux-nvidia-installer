@@ -61,6 +61,7 @@ main() {
     mkdir -p /run/nvidia/.staging-driver /run/nvidia/driver
 
     chmod +x "${BIN_DIR}/compile.sh"
+    _setup_cache_tls
     _run_cache_or_compile
 
     rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
@@ -283,6 +284,28 @@ log() {
 post_process() {
     if ${DEBUG}; then
         sleep infinity
+    fi
+}
+
+
+# ORAS requires cert paths on disk; GPU Operator's valueFrom.secretKeyRef injects
+# PEM content as env vars, so materialise them into a temp dir once before cache use.
+_setup_cache_tls() {
+    [[ -n "${DRIVER_CACHE_REGISTRY:-}" ]] || return 0
+    [[ -n "${DRIVER_CACHE_CA_PEM:-}${DRIVER_CACHE_CERT_PEM:-}${DRIVER_CACHE_KEY_PEM:-}" ]] || return 0
+    local _tls_dir
+    _tls_dir=$(mktemp -d)
+    if [[ -n "${DRIVER_CACHE_CA_PEM:-}" ]]; then
+        printf '%s\n' "${DRIVER_CACHE_CA_PEM}" > "${_tls_dir}/ca.crt"
+        export DRIVER_CACHE_CA_FILE="${_tls_dir}/ca.crt"
+    fi
+    if [[ -n "${DRIVER_CACHE_CERT_PEM:-}" ]]; then
+        printf '%s\n' "${DRIVER_CACHE_CERT_PEM}" > "${_tls_dir}/client.crt"
+        export DRIVER_CACHE_CERT_FILE="${_tls_dir}/client.crt"
+    fi
+    if [[ -n "${DRIVER_CACHE_KEY_PEM:-}" ]]; then
+        printf '%s\n' "${DRIVER_CACHE_KEY_PEM}" > "${_tls_dir}/client.key"
+        export DRIVER_CACHE_KEY_FILE="${_tls_dir}/client.key"
     fi
 }
 
