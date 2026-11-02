@@ -193,3 +193,5 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## 5. Commit When a Ticket Is Done
 
 When you finish an implementation ticket, create a git commit before reporting completion. Include only the files the ticket required — no unrelated changes.
+
+Sign every commit: `git commit -s` appends `Signed-off-by: Name <email>` automatically — required for PRs to merge.
