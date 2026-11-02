@@ -199,7 +199,16 @@ The `cache-hit-miss-test` job in `.github/workflows/test_installer.yml` verifies
 
 The job is part of the weekday CI schedule (`0 18 * * 1-5`) and runs after the existing `test` job (precompiled mode). It requires the Gardener cluster secrets (`CLUSTER_SERVER`, `CLUSTER_CA_DISCOVERY_URL`) to be present in the repository.
 
-**Triggering manually:**
+**Running locally:**
+
+```sh
+export KUBECONFIG=/path/to/kubeconfig.yaml
+.ci/cache_hit_miss_test.sh
+```
+
+Add `--skip-cleanup` to leave the chart and namespace behind on pass (useful for inspection). Cleanup always runs on failure regardless.
+
+**Triggering in CI:**
 
 ```sh
 gh workflow run test_installer.yml --ref <branch>
