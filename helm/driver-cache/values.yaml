@@ -6,6 +6,10 @@ storage:
   size: 20Gi
   # Leave empty to use the cluster default StorageClass.
   storageClass: ""
+  # Set to request a specific Cinder volume type (e.g. "vmware").
+  # When set, the chart creates a dedicated StorageClass with this type.
+  # Leave empty to use the StorageClass default.
+  volumeType: ""
 
 networkPolicy:
   gpuOperatorNamespace: gpu-operator

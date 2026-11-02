@@ -11,6 +11,8 @@ spec:
   resources:
     requests:
       storage: {{ .Values.storage.size }}
-  {{- if .Values.storage.storageClass }}
+  {{- if .Values.storage.volumeType }}
+  storageClassName: {{ include "driver-cache.name" . }}
+  {{- else if .Values.storage.storageClass }}
   storageClassName: {{ .Values.storage.storageClass }}
   {{- end }}
