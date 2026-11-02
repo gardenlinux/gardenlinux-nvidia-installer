@@ -42,20 +42,17 @@ helm upgrade --install driver-cache "${REPO_ROOT}/helm/driver-cache" \
     -n nvidia-driver-cache \
     --create-namespace
 
-# Wait for the PVC to be Bound before Helm --wait tries to schedule the pod.
-# On Cinder-backed clusters the volume can stay in "creating" for several
-# minutes; Kubernetes will retry the attach but emit FailedAttachVolume warnings
-# until the volume is available. Polling the PVC first avoids that race.
-echo "=== Waiting for PVC driver-cache to be Bound (up to 10 min) ==="
-kubectl wait pvc driver-cache \
-    -n nvidia-driver-cache \
-    --for=jsonpath='{.status.phase}'=Bound \
-    --timeout=10m
-
-echo "=== Waiting for driver-cache pod to be Ready ==="
+# On Cinder-backed clusters the PVC becomes Bound as soon as the PV is
+# provisioned, but the underlying block device can still be in "creating"
+# state for several more minutes.  Kubernetes retries the CSI attach until
+# it succeeds, so we just need to wait long enough for the full round-trip:
+# Cinder volume ready → CSI attach → kubelet mount → container start.
+# kubectl rollout status waits for the pod to be Ready, which covers all of
+# those steps. Use a 15 min timeout to accommodate slow Cinder provisioning.
+echo "=== Waiting for driver-cache pod to be Ready (up to 15 min) ==="
 kubectl rollout status deployment/driver-cache \
     -n nvidia-driver-cache \
-    --timeout=5m
+    --timeout=15m
 
 # ---------------------------------------------------------------------------
 # 2. Cross-copy TLS secret into gpu-operator namespace
