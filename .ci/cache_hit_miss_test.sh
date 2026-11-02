@@ -40,7 +40,8 @@ fi
 echo "=== Installing driver-cache chart ==="
 helm upgrade --install driver-cache "${REPO_ROOT}/helm/driver-cache" \
     -n nvidia-driver-cache \
-    --create-namespace
+    --create-namespace \
+    --set storage.volumeType=vmware
 
 # On Cinder-backed clusters the PVC becomes Bound as soon as the PV is
 # provisioned, but the underlying block device can still be in "creating"
