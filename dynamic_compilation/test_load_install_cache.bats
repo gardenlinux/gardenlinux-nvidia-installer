@@ -149,11 +149,11 @@ teardown() {
     assert_equal "${_COMPILED}" "1"
 }
 
-@test "cache miss: _CACHE_REF is set to registry:tag" {
+@test "cache miss: _CACHE_REF is set to registry/driver:tag" {
     DRIVER_CACHE_REGISTRY="registry.example.com/cache"
     PULL_EXIT_CODE=1
     _run_cache_or_compile
-    assert_equal "${_CACHE_REF}" "registry.example.com/cache:560.35.03-open-amd64-6.1.0-1-cloud-amd64"
+    assert_equal "${_CACHE_REF}" "registry.example.com/cache/driver:560.35.03-open-amd64-6.1.0-1-cloud-amd64"
 }
 
 # ---------------------------------------------------------------------------

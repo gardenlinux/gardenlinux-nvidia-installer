@@ -325,7 +325,7 @@ _run_cache_or_compile() {
     source "${_SCRIPT_DIR}/cache.sh"
     local _tag
     _tag=$(compute_cache_tag "${KERNEL_NAME}" "${DRIVER_VERSION}" "${KERNEL_MODULE_TYPE}" "${ARCH_TYPE}")
-    _CACHE_REF="${DRIVER_CACHE_REGISTRY}:${_tag}"
+    _CACHE_REF="${DRIVER_CACHE_REGISTRY}/driver:${_tag}"
 
     if pull_from_cache "${_CACHE_REF}"; then
         echo "[CACHE] hit key=${_tag}"
