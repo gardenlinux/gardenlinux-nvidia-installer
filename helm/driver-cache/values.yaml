@@ -1,0 +1,28 @@
+image:
+  repository: registry
+  tag: "2"
+
+storage:
+  size: 20Gi
+  # Leave empty to use the cluster default StorageClass.
+  storageClass: ""
+
+networkPolicy:
+  gpuOperatorNamespace: gpu-operator
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+resources: {}
