@@ -8,6 +8,18 @@ driver:
   usePrecompiled: false
   version: 610
   repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.23.0
+  env:
+    - name: DRIVER_CACHE_REGISTRY
+      value: "driver-cache.nvidia-driver-cache.svc.cluster.local:5000"
+    # Uncomment to tune cache polling behaviour (defaults shown):
+    # - name: DRIVER_CACHE_COMPILE_FAIL_POLL_INTERVAL
+    #   value: "30"
+    # - name: DRIVER_CACHE_COMPILE_FAIL_WAIT_SECS
+    #   value: "600"
+  # mTLS credentials for the in-cluster driver-cache registry.
+  # Secret 'driver-cache-tls' created by the driver-cache chart (nvidia-driver-cache namespace).
+  # Keys: ca.crt (CA cert), client.crt (client cert), client.key (client key).
+  secretEnv: "driver-cache-tls"
 node-feature-discovery:
   worker:
     config:
