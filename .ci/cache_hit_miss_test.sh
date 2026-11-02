@@ -23,6 +23,8 @@ cleanup() {
     echo "=== Cleanup ==="
     helm uninstall gpu-operator -n gpu-operator 2>/dev/null || true
     helm uninstall driver-cache -n nvidia-driver-cache 2>/dev/null || true
+    # StatefulSet volumeClaimTemplates are not deleted by helm uninstall.
+    kubectl delete pvc -n nvidia-driver-cache --all --ignore-not-found
     kubectl delete secret driver-cache-tls -n gpu-operator --ignore-not-found
     kubectl delete namespace nvidia-driver-cache --ignore-not-found
 }
@@ -51,7 +53,7 @@ helm upgrade --install driver-cache "${REPO_ROOT}/helm/driver-cache" \
 # kubectl rollout status waits for the pod to be Ready, which covers all of
 # those steps. Use a 15 min timeout to accommodate slow Cinder provisioning.
 echo "=== Waiting for driver-cache pod to be Ready (up to 15 min) ==="
-kubectl rollout status deployment/driver-cache \
+kubectl rollout status statefulset/driver-cache \
     -n nvidia-driver-cache \
     --timeout=15m
 

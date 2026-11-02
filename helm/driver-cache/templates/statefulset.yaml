@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: driver-cache
   namespace: {{ .Release.Namespace }}
@@ -7,8 +7,7 @@ metadata:
     {{- include "driver-cache.labels" . | nindent 4 }}
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
+  serviceName: driver-cache-headless
   selector:
     matchLabels:
       {{- include "driver-cache.selectorLabels" . | nindent 6 }}
@@ -49,9 +48,6 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        - name: registry-data
-          persistentVolumeClaim:
-            claimName: driver-cache
         - name: registry-config
           configMap:
             name: driver-cache-config
@@ -67,3 +63,19 @@ spec:
                 path: server.key
         - name: tmp
           emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: registry-data
+        labels:
+          {{- include "driver-cache.labels" . | nindent 10 }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.storage.size }}
+        {{- if .Values.storage.volumeType }}
+        storageClassName: {{ include "driver-cache.name" . }}
+        {{- else if .Values.storage.storageClass }}
+        storageClassName: {{ .Values.storage.storageClass }}
+        {{- end }}
