@@ -125,7 +125,7 @@ REGISTRY_POD=$(kubectl get pods -n nvidia-driver-cache -l app.kubernetes.io/name
     -o jsonpath='{.items[0].metadata.name}')
 PUSH_DEADLINE=$(( $(date +%s) + 5*60 ))
 until kubectl logs -n nvidia-driver-cache "${REGISTRY_POD}" -c registry 2>/dev/null \
-        | grep -q "\"http.request.method\":\"PUT\".*\"vars.reference\":\"${CACHE_TAG}\".*\"http.response.status\":201"; do
+        | grep -q "\"PUT\".*\"/v2/driver/manifests/${CACHE_TAG}\".*201"; do
     [[ $(date +%s) -lt ${PUSH_DEADLINE} ]] || { echo "ERROR: timed out waiting for cache push" >&2; exit 1; }
     sleep 5
 done

@@ -80,8 +80,8 @@ pull_from_cache() {
         return 1
     fi
 
-    mkdir -p "${staging_dir}"
-    if ! tar -xzf "${archive}" -C "${staging_dir}"; then
+    mkdir -p "${staging_dir}/driver"
+    if ! tar -xzf "${archive}" -C "${staging_dir}/driver"; then
         echo "[ERROR] pull_from_cache: failed to extract archive to ${staging_dir}" >&2
         rm -rf "${tmpdir}"
         return 1
