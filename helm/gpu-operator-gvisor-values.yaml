@@ -6,8 +6,8 @@ toolkit:
 driver:
   imagePullPolicy: Always
   usePrecompiled: true
-  version: 590
-  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.19.0/gvisor
+  version: 610
+  repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.24.0/gvisor
 node-feature-discovery:
   worker:
     config:

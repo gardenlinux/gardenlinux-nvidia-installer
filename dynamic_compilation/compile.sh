@@ -62,6 +62,14 @@ export IGNORE_MISSING_MODULE_SYMVERS=1
 # shellcheck disable=SC2164
 cd NVIDIA-Linux-"$ARCH_TYPE"-"$DRIVER_VERSION"
 
+# nvidia-modeset.ko (open modules) requires acpi_video symbols exported by the
+# video module (CONFIG_ACPI_VIDEO=m). On headless cloud nodes the module exists
+# on disk but is never auto-loaded. nsenter into the host mount namespace so
+# modprobe can find /lib/modules on the host (not the container). Non-fatal:
+# kernels with acpi_video built-in or already loaded will simply no-op.
+nsenter -t 1 -m -- modprobe wmi 2>/dev/null || true
+nsenter -t 1 -m -- modprobe video 2>/dev/null || true
+
 case $ARCH_TYPE in
   x86_64)
     if ./nvidia-installer \

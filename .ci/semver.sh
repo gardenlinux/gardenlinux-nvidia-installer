@@ -46,7 +46,7 @@ count_added() {
 _versions_yaml_without_os_versions() {
     local ref="$1"
     { git show "${ref}:versions.yaml" 2>/dev/null || true; } \
-        | awk '/^os_versions:/{skip=1; next} skip && !/^  -/{skip=0} !skip'
+        | awk '/^os_versions:/{skip=1; next} skip && /^[a-z]/{skip=0} !skip'
 }
 
 # bump_semver

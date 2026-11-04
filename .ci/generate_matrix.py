@@ -77,6 +77,7 @@ gvisor_build_matrix = [
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
+    if gvisor_pins[driver] is not None
 ]
 
 gvisor_manifest_matrix = [
@@ -91,6 +92,7 @@ gvisor_manifest_matrix = [
         data["kernel_flavour"],
         data["nvidia_drivers"],
     )
+    if gvisor_pins[driver] is not None
 ]
 
 print(
