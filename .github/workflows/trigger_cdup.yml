@@ -1,4 +1,4 @@
-name: Trigger cdup on release
+name: Trigger cdup(Component Descriptor upload used for Vulnerability Scan) on release
 
 on:
   release:
