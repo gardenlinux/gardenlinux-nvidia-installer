@@ -60,7 +60,8 @@ kubectl rollout status statefulset/driver-cache \
 # 2. Cross-copy TLS secret into gpu-operator namespace
 # ---------------------------------------------------------------------------
 echo "=== Copying TLS secret to gpu-operator namespace ==="
-# Rename keys to valid bash identifiers so secretEnv can inject them directly.
+# Rename keys to valid bash identifiers matching the valueFrom.secretKeyRef.key
+# entries in gpu-operator-values-runtime.yaml.
 # ca.crt → DRIVER_CACHE_CA_PEM, client.crt → DRIVER_CACHE_CERT_PEM, client.key → DRIVER_CACHE_KEY_PEM
 kubectl get secret driver-cache-tls -n nvidia-driver-cache -o json \
     | jq 'del(.metadata.creationTimestamp,.metadata.resourceVersion,.metadata.uid,.metadata.managedFields)

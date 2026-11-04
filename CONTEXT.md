@@ -41,7 +41,7 @@ _Avoid_: retry wait, compile retry (it is passive — no recompile during the wa
 **Registry mTLS**: The Driver Cache's authentication mechanism — mutual TLS (`distribution` strict client-cert verification) with a single uniform **Client Identity** shared by all driver pods, granting both pull and push. The NetworkPolicy becomes defense-in-depth rather than the sole authorization boundary. Blocks only certless attackers; a compromised node holding the write-capable cert can still poison the cache (left to the integrity decision).
 _Avoid_: basic auth, token auth, per-node identity
 
-**Client Identity**: The single client certificate all driver pods present to the Driver Cache under Registry mTLS. Uniform (not per-node) because `distribution` cannot scope a cert to pull-only and every pod is a pusher (Write-back); delivered via the GPU Operator `driver.secretEnv`.
+**Client Identity**: The single client certificate all driver pods present to the Driver Cache under Registry mTLS. Uniform (not per-node) because `distribution` cannot scope a cert to pull-only and every pod is a pusher (Write-back); delivered via `driver.env[].valueFrom.secretKeyRef` (optional) entries in `gpu-operator-values-runtime.yaml`.
 _Avoid_: pull credential, push credential (there is one identity for both)
 
 **Artifact Integrity**: The assurance that a pulled Driver Cache artifact is uncorrupted in transit and storage. Provided automatically by OCI content-addressing — `distribution` stores every layer by sha256 digest and ORAS verifies it on pull. Does not cover artifacts pushed by a node with a valid Client Identity that is malfunctioning or compromised.
