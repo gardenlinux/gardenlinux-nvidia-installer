@@ -2,6 +2,7 @@
 
 FROM ghcr.io/gardenlinux/gardenlinux:latest AS packager
 ARG DRIVER_VERSION
+ARG TARGETARCH
 
 ARG BASE_URL=https://us.download.nvidia.com/tesla
 ENV BASE_URL=${BASE_URL}
@@ -18,6 +19,18 @@ RUN apt-get update -qq && apt-get install -qq --no-install-recommends -y \
     xz-utils \
     wget \
     && rm -rf /var/lib/apt/lists/*
+
+RUN set -eu; \
+    case "${TARGETARCH}" in \
+      amd64) _sha256="66fb0ad7206f3f6fa77ed5b552049d364ccf4b50b1684554f731f76302b52ca0" ;; \
+      arm64) _sha256="b84269e78dfc2d5329a4aab373da3200de95e6c138338cf6c66c10c0a3f248c1" ;; \
+      *) echo "unsupported arch: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    wget -q "https://github.com/oras-project/oras/releases/download/v1.3.6/oras_1.3.6_linux_${TARGETARCH}.tar.gz" \
+         -O /tmp/oras.tar.gz; \
+    echo "${_sha256}  /tmp/oras.tar.gz" | sha256sum --check; \
+    tar -xzf /tmp/oras.tar.gz -C /usr/local/bin oras; \
+    rm /tmp/oras.tar.gz
 
 RUN echo "${DRIVER_VERSION}" > /tmp/driver-version
 

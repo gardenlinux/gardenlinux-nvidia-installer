@@ -3,6 +3,7 @@ echo "nvidia-installer begins"
 set -e
 
 BIN_DIR=${BIN_DIR:-/opt/nvidia-installer}
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 source "$BIN_DIR"/set_env_vars.sh
 LD_ROOT=${LD_ROOT:-/root}
@@ -59,15 +60,15 @@ main() {
     rm -rf /run/nvidia/.staging-driver || true
     mkdir -p /run/nvidia/.staging-driver /run/nvidia/driver
 
-    chmod +x /opt/nvidia-installer/compile.sh
+    chmod +x "${BIN_DIR}/compile.sh"
+    _setup_cache_tls
+    _run_cache_or_compile
 
-    /opt/nvidia-installer/compile.sh "$KERNEL_MODULE_TYPE" "$DRIVER_VERSION" "$NVIDIA_BIN"
- 
     rm -rf /run/nvidia/driver/* /run/nvidia/driver/.[!.]* /run/nvidia/driver/..?* 2>/dev/null || true
     cp -a /run/nvidia/.staging-driver/. /run/nvidia/
 
     # ------------------------------------------------------------------------------
-    # 2) Run install(): 
+    # 2) Run install():
     #    We also pass NVIDIA_BIN so probes can find tools easily inside this pod.
     # ------------------------------------------------------------------------------
     # nvidia-installer places nvidia-modprobe in usr/bin; other utilities land in bin
@@ -75,6 +76,12 @@ main() {
     cp "${NVIDIA_USR_BIN}"/* "${NVIDIA_BIN}" 2>/dev/null || true
 
     install "$DRIVER_NAME" "$NVIDIA_BIN"
+
+    # Push compiled driver to cache fire-and-forget (compiled path only)
+    if [[ -n "${_CACHE_REF:-}" && "${_COMPILED:-0}" -eq 1 ]]; then
+        push_to_cache "${_CACHE_REF}" "/run/nvidia/driver" \
+            "${KERNEL_NAME}" "${DRIVER_VERSION}" "${KERNEL_MODULE_TYPE}" "${ARCH_TYPE}" &
+    fi
 
     # ------------------------------------------------------------------------------
     # 3) Make the CLI tools available INSIDE THIS POD (not the host) for probes.
@@ -99,7 +106,7 @@ main() {
 
 
 # shellcheck disable=SC1091
-source "$(dirname "$0")/resolve_driver_version.sh"
+source "${_SCRIPT_DIR}/resolve_driver_version.sh"
 
 
 resolve_kernel_module_type() {
@@ -280,4 +287,58 @@ post_process() {
     fi
 }
 
-main "${@}"
+
+# ORAS requires cert paths on disk; GPU Operator's valueFrom.secretKeyRef injects
+# PEM content as env vars, so materialise them into a temp dir once before cache use.
+_setup_cache_tls() {
+    [[ -n "${DRIVER_CACHE_REGISTRY:-}" ]] || return 0
+    [[ -n "${DRIVER_CACHE_CA_PEM:-}${DRIVER_CACHE_CERT_PEM:-}${DRIVER_CACHE_KEY_PEM:-}" ]] || return 0
+    local _tls_dir
+    _tls_dir=$(mktemp -d)
+    if [[ -n "${DRIVER_CACHE_CA_PEM:-}" ]]; then
+        printf '%s\n' "${DRIVER_CACHE_CA_PEM}" > "${_tls_dir}/ca.crt"
+        export DRIVER_CACHE_CA_FILE="${_tls_dir}/ca.crt"
+    fi
+    if [[ -n "${DRIVER_CACHE_CERT_PEM:-}" ]]; then
+        printf '%s\n' "${DRIVER_CACHE_CERT_PEM}" > "${_tls_dir}/client.crt"
+        export DRIVER_CACHE_CERT_FILE="${_tls_dir}/client.crt"
+    fi
+    if [[ -n "${DRIVER_CACHE_KEY_PEM:-}" ]]; then
+        printf '%s\n' "${DRIVER_CACHE_KEY_PEM}" > "${_tls_dir}/client.key"
+        export DRIVER_CACHE_KEY_FILE="${_tls_dir}/client.key"
+    fi
+}
+
+
+# Sets _COMPILED=1 if compile.sh ran and succeeded (triggers push after install).
+# Sets _CACHE_REF to the full OCI ref when DRIVER_CACHE_REGISTRY is set.
+_run_cache_or_compile() {
+    _COMPILED=0
+    _CACHE_REF=""
+
+    if [[ -z "${DRIVER_CACHE_REGISTRY:-}" ]]; then
+        "${BIN_DIR}/compile.sh" "$KERNEL_MODULE_TYPE" "$DRIVER_VERSION" "$NVIDIA_BIN"
+        return
+    fi
+
+    # shellcheck disable=SC1091
+    source "${_SCRIPT_DIR}/cache.sh"
+    local _tag
+    _tag=$(compute_cache_tag "${KERNEL_NAME}" "${DRIVER_VERSION}" "${KERNEL_MODULE_TYPE}" "${ARCH_TYPE}")
+    _CACHE_REF="${DRIVER_CACHE_REGISTRY}/driver:${_tag}"
+
+    if pull_from_cache "${_CACHE_REF}"; then
+        echo "[CACHE] hit key=${_tag}"
+    elif "${BIN_DIR}/compile.sh" "$KERNEL_MODULE_TYPE" "$DRIVER_VERSION" "$NVIDIA_BIN"; then
+        echo "[CACHE] miss key=${_tag} — compiled"
+        _COMPILED=1
+    elif wait_for_cache_on_compile_fail "${_CACHE_REF}"; then
+        echo "[CACHE] compile-failed key=${_tag} — fallback-hit"
+    else
+        echo "[CACHE] compile-failed key=${_tag} — fallback-timeout"
+        exit 1
+    fi
+}
+
+
+[[ "${BASH_SOURCE[0]}" != "${0}" ]] || main "${@}"

@@ -8,6 +8,37 @@ driver:
   usePrecompiled: false
   version: 610
   repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.24.0
+  env:
+    - name: DRIVER_CACHE_REGISTRY
+      value: "driver-cache.nvidia-driver-cache.svc.cluster.local:5000"
+    # mTLS credentials from 'driver-cache-tls' (gpu-operator namespace).
+    # optional: true lets the driver DaemonSet start even when the Secret does not
+    # exist yet (e.g. before the cache is deployed). Missing PEM vars cause
+    # _setup_cache_tls() to skip file materialisation, producing a cache miss that
+    # falls back to on-node compilation — no DaemonSet is blocked.
+    - name: DRIVER_CACHE_CA_PEM
+      valueFrom:
+        secretKeyRef:
+          name: driver-cache-tls
+          key: DRIVER_CACHE_CA_PEM
+          optional: true
+    - name: DRIVER_CACHE_CERT_PEM
+      valueFrom:
+        secretKeyRef:
+          name: driver-cache-tls
+          key: DRIVER_CACHE_CERT_PEM
+          optional: true
+    - name: DRIVER_CACHE_KEY_PEM
+      valueFrom:
+        secretKeyRef:
+          name: driver-cache-tls
+          key: DRIVER_CACHE_KEY_PEM
+          optional: true
+  # Uncomment to tune cache polling behaviour (defaults shown):
+  # - name: DRIVER_CACHE_COMPILE_FAIL_POLL_INTERVAL
+  #   value: "30"
+  # - name: DRIVER_CACHE_COMPILE_FAIL_WAIT_SECS
+  #   value: "600"
 node-feature-discovery:
   worker:
     config:
