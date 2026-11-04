@@ -33,6 +33,9 @@ nvidia_drivers:
 - 610.57.04
 - 595.112.07
 - 590.48.01
+- 580.178.04
+nvidia_fs_versions:
+- 2.30.2
 gvisor_driver_pins:
   610.57.04: 610.57.04
   595.112.07: null
