@@ -10,9 +10,13 @@ on:
         description: 'Commit of the Tag'
         required: true
         type: string
+  workflow_run:
+    workflows: ["Create GitHub release"]
+    types: [completed]
 
 jobs:
   cdup:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +27,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.version_input }}
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.event.inputs.version_input }}
+
+      - name: Resolve version and commit
+        id: resolve
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "version=$(cat release-version.yaml)" >> "$GITHUB_OUTPUT"
+            echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.inputs.version_input }}" >> "$GITHUB_OUTPUT"
+            echo "commit=${{ github.event.inputs.commit_input }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout release tag
+        if: github.event_name == 'workflow_run'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.resolve.outputs.version }}
+
       - name: Download dependencies
         run: |
           cd cdup
@@ -43,4 +65,4 @@ jobs:
           go build -o cdup
       - name: Run cdup
         run: |
-          ./cdup/cdup -v ${{ github.event.inputs.version_input }} -c ${{ github.event.inputs.commit_input }}
+          ./cdup/cdup -v ${{ steps.resolve.outputs.version }} -c ${{ steps.resolve.outputs.commit }}
