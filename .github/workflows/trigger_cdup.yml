@@ -1,22 +1,30 @@
 name: Trigger cdup(Component Descriptor upload used for Vulnerability Scan) on release
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Create GitHub release"]
+    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
   trigger-cdup:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
       - name: Trigger cdup workflow
         run: |
+          release_tag=$(cat release-version.yaml)
           gh workflow run cdup.yml \
-            --ref ${{ github.event.release.tag_name }} \
-            --field version_input=${{ github.event.release.tag_name }} \
-            --field commit_input=${{ github.event.release.target_commitish }}
+            --ref "${release_tag}" \
+            --field version_input="${release_tag}" \
+            --field commit_input=$(git rev-parse HEAD)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
