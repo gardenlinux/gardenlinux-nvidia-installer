@@ -142,17 +142,6 @@ compile_nvidia_fs() {
     tar xf "$work_dir/nvidia-fs.tar.xz" -C "$work_dir" --strip-components=1
 
     local src_dir="$work_dir/src/nvidia-fs-$major_minor"
-    local nvidia_ko="$OUTDIR/lib/modules/$KERNEL_NAME/nvidia.ko"
-
-    # Build nv.symvers from the compiled nvidia.ko so the kernel build system
-    # can resolve nvidia_p2p_* symbol versions without a live loaded module.
-    nm -o "$nvidia_ko" \
-        | awk '/(__crc_nvidia_p2p_|T nvidia_p2p_)/ {
-            gsub(/\.\//, "", $1); gsub(/\.ko[^:]*/, "", $1)
-            if ($2 ~ /^__crc_/) { sym = $2; sub(/__crc_/, "", sym); printf "0x%s\t%s\t%s\tEXPORT_SYMBOL\t\n", $1, sym, $1 }
-            else                 { printf "0x0\t%s\t%s\tEXPORT_SYMBOL\t\n", $3, $1 }
-          }' > "$src_dir/nv.symvers"
-    cp "$src_dir/nv.symvers" "$src_dir/Module.symvers"
 
     local nvidia_src_dir
     nvidia_src_dir=$(find "$DRIVER_SRC_DIR" -name "nv-p2p.h" | head -1 | xargs dirname)
@@ -164,11 +153,14 @@ compile_nvidia_fs() {
     echo "Configuring nvidia-fs $fs_version for kernel $KERNEL_NAME"
     (cd "$src_dir" && ./configure "$KERNEL_NAME")
 
+    # NVIDIA's open nvidia.ko is built without CONFIG_MODVERSIONS, so it exports
+    # nvidia_p2p_* with no symbol CRCs. Build nvidia-fs without supplying symbol
+    # versions (no KBUILD_EXTRA_SYMBOLS); KBUILD_MODPOST_WARN=1 downgrades the
+    # missing-version warning so the symbols resolve by name against nvidia.ko.
     echo "Compiling nvidia-fs $fs_version"
     KCPPFLAGS="-DCONFIG_NVFS_STATS=y -DGDS_VERSION=$(cat "$src_dir/GDS_VERSION") -DNVFS_BATCH_SUPPORT=y" \
     CONFIG_NVFS_BATCH_SUPPORT=y \
     CONFIG_NVFS_STATS=y \
-    KBUILD_EXTRA_SYMBOLS="$src_dir/nv.symvers" \
     make -j"$(nproc)" \
         -C "/lib/modules/$KERNEL_NAME/build" \
         M="$src_dir" \

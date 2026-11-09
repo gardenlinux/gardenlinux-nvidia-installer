@@ -159,26 +159,14 @@ extract_nvidia_fs_source() {
 
 # compile_nvidia_fs builds nvidia-fs.ko against the already-compiled nvidia.ko.
 #
-# nvidia-fs depends on nvidia_p2p_* symbols from nvidia.ko. Normally this is
-# resolved by modinfo on a running system, but in the build container we extract
-# the symbol versions directly from the compiled nvidia.ko using nm.
+# NVIDIA's open nvidia.ko is built without CONFIG_MODVERSIONS, so it exports
+# nvidia_p2p_* with no symbol CRCs. nvidia-fs is therefore built without symbol
+# versions; the nvidia_p2p_* symbols resolve by name against nvidia.ko.
 #
 # Must run after compile_kernel_type (open + proprietary) since it reads nvidia.ko
 # from the finished open tarball and then injects nvidia-fs.ko into both tarballs.
 compile_nvidia_fs() {
     extract_nvidia_fs_source
-
-    local NVIDIA_KO="${OUTDIR}/lib/modules/${KERNEL_NAME}/nvidia.ko"
-
-    # Build nv.symvers from the compiled nvidia.ko so the kernel build system
-    # can resolve nvidia_p2p_* symbol versions without a live loaded module.
-    nm -o "${NVIDIA_KO}" \
-        | awk '/(__crc_nvidia_p2p_|T nvidia_p2p_)/ {
-            gsub(/\.\//, "", $1); gsub(/\.ko[^:]*/, "", $1)
-            if ($2 ~ /^__crc_/) { sym = $2; sub(/__crc_/, "", sym); printf "0x%s\t%s\t%s\tEXPORT_SYMBOL\t\n", $1, sym, $1 }
-            else                 { printf "0x0\t%s\t%s\tEXPORT_SYMBOL\t\n", $3, $1 }
-          }' > "${NVIDIA_FS_SRC_DIR}/nv.symvers"
-    cp "${NVIDIA_FS_SRC_DIR}/nv.symvers" "${NVIDIA_FS_SRC_DIR}/Module.symvers"
 
     # nv-p2p.h is needed by nvidia-fs; it lives in the kernel source tree that
     # the NVIDIA .run installer unpacked into /tmp/nvidia/.
@@ -196,10 +184,13 @@ compile_nvidia_fs() {
 
     echo "Compiling nvidia-fs ${NVIDIA_FS_VERSION} for kernel ${KERNEL_NAME}"
 
+    # No KBUILD_EXTRA_SYMBOLS: nvidia.ko carries no symbol CRCs, so supplying
+    # fabricated ones here would stamp nvidia-fs.ko with versions nvidia.ko
+    # cannot satisfy. KBUILD_MODPOST_WARN=1 downgrades the missing-version
+    # warning so the build succeeds and symbols resolve by name.
     KCPPFLAGS="-DCONFIG_NVFS_STATS=y -DGDS_VERSION=$(cat "${NVIDIA_FS_SRC_DIR}/GDS_VERSION") -DNVFS_BATCH_SUPPORT=y" \
     CONFIG_NVFS_BATCH_SUPPORT=y \
     CONFIG_NVFS_STATS=y \
-    KBUILD_EXTRA_SYMBOLS="${NVIDIA_FS_SRC_DIR}/nv.symvers" \
     make -j"$(nproc)" \
         -C "/lib/modules/${KERNEL_NAME}/build" \
         M="${NVIDIA_FS_SRC_DIR}" \
