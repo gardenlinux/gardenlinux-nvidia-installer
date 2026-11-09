@@ -32,7 +32,6 @@ cpu_arch:
 nvidia_drivers:
 - 615.71.10
 - 595.112.07
-- 590.48.01
 - 580.196.07
 nvidia_fs_versions:
 - 2.30.2
