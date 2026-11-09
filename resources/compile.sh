@@ -107,9 +107,13 @@ compile_kernel_type() {
     if [[ -n "$NVIDIA_FS_VERSION" && "$KERNEL_TYPE" == "open" ]]; then
         compile_nvidia_fs
     fi
-    echo "Copy GSP Firmware binary"
+    # Stage all firmware the driver ships (GSP images + GPU microcode/ucodes).
+    # Copying only gsp_*.bin omits ucodes_*.bin, which newer GPUs need to init —
+    # without it nvidia.ko fails probe (RmInitAdapter failed) and never exports
+    # its symbols. Scope to the driver's firmware/ dir to avoid installer cruft.
+    echo "Copy driver firmware"
     mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
-    find /tmp/nvidia -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
+    find "/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}/firmware" -type f -name '*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
 
     echo "Copy supported-gpus and license files"
     local NVIDIA_DIR="/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}"

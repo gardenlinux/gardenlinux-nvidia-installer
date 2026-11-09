@@ -182,9 +182,13 @@ compile_nvidia_fs() {
 copy_artifacts() {
     local host_out_dir="/run/nvidia/.staging-driver/driver"
 
-    echo "Copying GSP firmware binary"
+    # Stage all firmware the driver ships (GSP images + GPU microcode/ucodes).
+    # Copying only gsp_*.bin omits ucodes_*.bin, which newer GPUs need to init —
+    # without it nvidia.ko fails probe (RmInitAdapter failed) and never exports
+    # its symbols. Scope to the driver's firmware/ dir to avoid installer cruft.
+    echo "Copying driver firmware"
     mkdir -p "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/"
-    find "$COMPILE_DIR" -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
+    find "$DRIVER_SRC_DIR/firmware" -type f -name '*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
 
     mkdir -p "$host_out_dir/usr/lib/$ARCH_TYPE-linux-gnu" "$host_out_dir/usr/bin"
     cp -a /usr/lib/"$ARCH_TYPE"-linux-gnu/*nvidia* /usr/lib/"$ARCH_TYPE"-linux-gnu/*cuda* "$host_out_dir/usr/lib/$ARCH_TYPE-linux-gnu"
