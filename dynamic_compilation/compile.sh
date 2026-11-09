@@ -109,8 +109,27 @@ compile_nvidia() {
 }
 
 
+# read_nvidia_fs_version reads the pinned nvidia-fs version from versions.yaml,
+# which is copied into the image next to this script. Used as a fallback when
+# NVIDIA_FS_VERSION is not set. versions.yaml holds a single-item list:
+#   nvidia_fs_versions:
+#   - 2.30.2
+read_nvidia_fs_version() {
+    local versions_file="/opt/nvidia-installer/versions.yaml"
+    awk '
+        /^nvidia_fs_versions:/ { in_block=1; next }
+        in_block && /^[[:space:]]*-/ { gsub(/[-[:space:]]/, ""); print; exit }
+    ' "$versions_file"
+}
+
+
 compile_nvidia_fs() {
-    local fs_version="$NVIDIA_FS_VERSION"
+    local fs_version="${NVIDIA_FS_VERSION:-$(read_nvidia_fs_version)}"
+    if [ -z "$fs_version" ]; then
+        echo "[ERROR] Could not determine an nvidia-fs version"
+        exit 1
+    fi
+
     local major_minor
     major_minor=$(echo "$fs_version" | cut -d. -f1-2)
 
@@ -187,7 +206,10 @@ mkdir -p "$COMPILE_DIR"
 install_kernel_headers
 download_driver
 compile_nvidia
-if [[ -n "$NVIDIA_FS_VERSION" && "$KERNEL_MODULE_TYPE" == "open" ]]; then
+# Build nvidia-fs (GDS) only for open modules, and only when explicitly requested:
+# either by pinning NVIDIA_FS_VERSION or by setting ENABLE_GDS=true (which falls
+# back to the version pinned in versions.yaml).
+if [[ "$KERNEL_MODULE_TYPE" == "open" && ( -n "$NVIDIA_FS_VERSION" || "$ENABLE_GDS" == "true" ) ]]; then
     compile_nvidia_fs
 fi
 copy_artifacts

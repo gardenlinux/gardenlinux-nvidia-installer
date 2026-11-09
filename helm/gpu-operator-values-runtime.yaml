@@ -6,8 +6,13 @@ toolkit:
 driver:
   imagePullPolicy: Always
   usePrecompiled: false
-  version: 610
+  version: 615
   repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.25.0
+  env:
+    # Build nvidia-fs (GPUDirect Storage) at runtime. The version is read from
+    # versions.yaml baked into the image; set NVIDIA_FS_VERSION here to override.
+    - name: ENABLE_GDS
+      value: "true"
 node-feature-discovery:
   worker:
     config:
