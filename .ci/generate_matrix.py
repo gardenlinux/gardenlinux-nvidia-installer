@@ -12,11 +12,13 @@ def _ver_tuple(v):
 
 
 nvidia_fs_versions = data.get("nvidia_fs_versions", [])
-nvidia_fs_version = str(nvidia_fs_versions[0]) if nvidia_fs_versions else None
+if not nvidia_fs_versions:
+    print("Error: nvidia_fs_versions is missing or empty in versions.yaml", file=sys.stderr)
+    sys.exit(1)
+nvidia_fs_version = str(nvidia_fs_versions[0])
 
 def with_nvidia_fs(entry):
-    if nvidia_fs_version:
-        entry["nvidia_fs_version"] = nvidia_fs_version
+    entry["nvidia_fs_version"] = nvidia_fs_version
     return entry
 
 # build_matrix: one entry per (os_version, arch, kernel_flavour, driver).

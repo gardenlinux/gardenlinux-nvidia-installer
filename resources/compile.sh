@@ -163,12 +163,8 @@ extract_nvidia_fs_source() {
 
 # compile_nvidia_fs builds nvidia-fs.ko against the already-compiled nvidia.ko.
 #
-# NVIDIA's open nvidia.ko is built without CONFIG_MODVERSIONS, so it exports
-# nvidia_p2p_* with no symbol CRCs. nvidia-fs is therefore built without symbol
-# versions; the nvidia_p2p_* symbols resolve by name against nvidia.ko.
-#
-# Must run after compile_kernel_type (open + proprietary) since it reads nvidia.ko
-# from the finished open tarball and then injects nvidia-fs.ko into both tarballs.
+# Must run after compile_kernel_type (open) since it needs the driver source tree
+# and the Module.symvers produced by nvidia-installer.
 compile_nvidia_fs() {
     extract_nvidia_fs_source
 
