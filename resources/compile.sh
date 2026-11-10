@@ -181,17 +181,23 @@ compile_nvidia_fs() {
         exit 1
     fi
 
+    # The nvidia-installer writes Module.symvers alongside the compiled nvidia.ko,
+    # containing the real CRCs for nvidia_p2p_* (including relative/PIE CRCs that
+    # nm cannot extract). Pass it via KBUILD_EXTRA_SYMBOLS so nvidia-fs.ko gets
+    # matching symbol versions and insmod does not reject it with err -22.
+    local NVIDIA_SYMVERS
+    NVIDIA_SYMVERS=$(find "/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}" -name "Module.symvers" | head -1)
+    if [ -z "${NVIDIA_SYMVERS}" ]; then
+        echo "[ERROR] Module.symvers not found in driver source — nvidia-installer must run first"
+        exit 1
+    fi
+
     # nvidia-fs's configure script probes the kernel headers and generates
     # config-host.h, which is required by several source files.
     echo "Configuring nvidia-fs ${NVIDIA_FS_VERSION} for kernel ${KERNEL_NAME}"
     (cd "${NVIDIA_FS_SRC_DIR}" && ./configure "${KERNEL_NAME}")
 
     echo "Compiling nvidia-fs ${NVIDIA_FS_VERSION} for kernel ${KERNEL_NAME}"
-
-    # No KBUILD_EXTRA_SYMBOLS: nvidia.ko carries no symbol CRCs, so supplying
-    # fabricated ones here would stamp nvidia-fs.ko with versions nvidia.ko
-    # cannot satisfy. KBUILD_MODPOST_WARN=1 downgrades the missing-version
-    # warning so the build succeeds and symbols resolve by name.
     KCPPFLAGS="-DCONFIG_NVFS_STATS=y -DGDS_VERSION=$(cat "${NVIDIA_FS_SRC_DIR}/GDS_VERSION") -DNVFS_BATCH_SUPPORT=y" \
     CONFIG_NVFS_BATCH_SUPPORT=y \
     CONFIG_NVFS_STATS=y \
@@ -200,7 +206,7 @@ compile_nvidia_fs() {
         M="${NVIDIA_FS_SRC_DIR}" \
         KVER="${KERNEL_NAME}" \
         NVIDIA_SRC_DIR="${NVIDIA_SRC_DIR}" \
-        KBUILD_MODPOST_WARN=1 \
+        KBUILD_EXTRA_SYMBOLS="${NVIDIA_SYMVERS}" \
         modules
 
     if [ ! -f "${NVIDIA_FS_SRC_DIR}/nvidia-fs.ko" ]; then
