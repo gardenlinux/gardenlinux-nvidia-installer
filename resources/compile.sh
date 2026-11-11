@@ -104,9 +104,16 @@ compile_kernel_type() {
             ;;
     esac
 
-    echo "Copy GSP Firmware binary"
+    if [[ -n "$NVIDIA_FS_VERSION" && "$KERNEL_TYPE" == "open" ]]; then
+        compile_nvidia_fs
+    fi
+    # Stage all firmware the driver ships (GSP images + GPU microcode/ucodes).
+    # Copying only gsp_*.bin omits ucodes_*.bin, which newer GPUs need to init —
+    # without it nvidia.ko fails probe (RmInitAdapter failed) and never exports
+    # its symbols. Scope to the driver's firmware/ dir to avoid installer cruft.
+    echo "Copy driver firmware"
     mkdir -p "$OUTDIR"/lib/firmware/nvidia/"$DRIVER_VERSION"/
-    find /tmp/nvidia -type f -name '*gsp*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
+    find "/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}/firmware" -type f -name '*.bin' -exec cp -a {} "$OUTDIR/lib/firmware/nvidia/$DRIVER_VERSION/" \;
 
     echo "Copy supported-gpus and license files"
     local NVIDIA_DIR="/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}"
@@ -127,6 +134,86 @@ compile_kernel_type() {
     tar czf "$OUTDIR-$DRIVER_VERSION-$KERNEL_TYPE-$KERNEL_NAME".tar.gz --directory $(dirname "$OUTDIR") $(basename "$OUTDIR") && rm -rf "$OUTDIR"
 
     set +x
+}
+
+
+# extract_nvidia_fs_source downloads the nvidia-fs redist tarball from NVIDIA's
+# redistribution index and extracts the kernel module source into /tmp/nvidia-fs/src.
+#
+# NVIDIA_FS_VERSION must be the full version (e.g. 2.30.2), matching the tarball at:
+# https://developer.download.nvidia.com/compute/nvidia-fs/redist/nvidia_fs/linux-x86_64/
+# The source tree inside is at src/nvidia-fs-<major.minor>/ (no patch component).
+extract_nvidia_fs_source() {
+    local TARBALL_URL="https://developer.download.nvidia.com/compute/nvidia-fs/redist/nvidia_fs/linux-x86_64/nvidia_fs-linux-x86_64-${NVIDIA_FS_VERSION}-archive.tar.xz"
+    local WORK_DIR="/tmp/nvidia/nvidia-fs"
+
+    echo "Extracting nvidia-fs ${NVIDIA_FS_VERSION} source"
+
+    mkdir -p "${WORK_DIR}"
+    wget -qO "${WORK_DIR}/nvidia-fs.tar.xz" "${TARBALL_URL}"
+
+    # Strip the top-level archive dir; source lands at src/nvidia-fs-<major.minor>/
+    tar xf "${WORK_DIR}/nvidia-fs.tar.xz" -C "${WORK_DIR}" --strip-components=1
+
+    local MAJOR_MINOR
+    MAJOR_MINOR=$(echo "${NVIDIA_FS_VERSION}" | cut -d. -f1-2)
+    # Export so callers know the exact source directory
+    NVIDIA_FS_SRC_DIR="${WORK_DIR}/src/nvidia-fs-${MAJOR_MINOR}"
+}
+
+# compile_nvidia_fs builds nvidia-fs.ko against the already-compiled nvidia.ko.
+#
+# Must run after compile_kernel_type (open) since it needs the driver source tree
+# and the Module.symvers produced by nvidia-installer.
+compile_nvidia_fs() {
+    extract_nvidia_fs_source
+
+    # nv-p2p.h is needed by nvidia-fs; it lives in the kernel source tree that
+    # the NVIDIA .run installer unpacked into /tmp/nvidia/.
+    local NVIDIA_SRC_DIR
+    NVIDIA_SRC_DIR=$(find "/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}" -name "nv-p2p.h" | head -1 | xargs dirname)
+    if [ -z "${NVIDIA_SRC_DIR}" ]; then
+        echo "[ERROR] nv-p2p.h not found — NVIDIA driver .run must be extracted first"
+        exit 1
+    fi
+
+    # The nvidia-installer writes Module.symvers alongside the compiled nvidia.ko,
+    # containing the real CRCs for nvidia_p2p_* (including relative/PIE CRCs that
+    # nm cannot extract). Pass it via KBUILD_EXTRA_SYMBOLS so nvidia-fs.ko gets
+    # matching symbol versions and insmod does not reject it with err -22.
+    local NVIDIA_SYMVERS
+    NVIDIA_SYMVERS=$(find "/tmp/nvidia/NVIDIA-Linux-${ARCH_TYPE}-${DRIVER_VERSION}" -name "Module.symvers" | head -1)
+    if [ -z "${NVIDIA_SYMVERS}" ]; then
+        echo "[ERROR] Module.symvers not found in driver source — nvidia-installer must run first"
+        exit 1
+    fi
+
+    # nvidia-fs's configure script probes the kernel headers and generates
+    # config-host.h, which is required by several source files.
+    echo "Configuring nvidia-fs ${NVIDIA_FS_VERSION} for kernel ${KERNEL_NAME}"
+    (cd "${NVIDIA_FS_SRC_DIR}" && ./configure "${KERNEL_NAME}")
+
+    echo "Compiling nvidia-fs ${NVIDIA_FS_VERSION} for kernel ${KERNEL_NAME}"
+    KCPPFLAGS="-DCONFIG_NVFS_STATS=y -DGDS_VERSION=$(cat "${NVIDIA_FS_SRC_DIR}/GDS_VERSION") -DNVFS_BATCH_SUPPORT=y" \
+    CONFIG_NVFS_BATCH_SUPPORT=y \
+    CONFIG_NVFS_STATS=y \
+    make -j"$(nproc)" \
+        -C "/lib/modules/${KERNEL_NAME}/build" \
+        M="${NVIDIA_FS_SRC_DIR}" \
+        KVER="${KERNEL_NAME}" \
+        NVIDIA_SRC_DIR="${NVIDIA_SRC_DIR}" \
+        KBUILD_EXTRA_SYMBOLS="${NVIDIA_SYMVERS}" \
+        modules
+
+    if [ ! -f "${NVIDIA_FS_SRC_DIR}/nvidia-fs.ko" ]; then
+        echo "[ERROR] nvidia-fs.ko was not produced by the build"
+        exit 1
+    fi
+    echo "nvidia-fs compiled successfully"
+
+    # Inject nvidia-fs.ko into open driver tarballs (open since GPU Direct storage is supported only with open kernel module).
+    cp "${NVIDIA_FS_SRC_DIR}/nvidia-fs.ko" "${OUTDIR}/lib/modules/${KERNEL_NAME}/"
+    echo "Injected nvidia-fs.ko into ${OUTDIR}/lib/modules/${KERNEL_NAME}/"
 }
 
 compile_kernel_type open

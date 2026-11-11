@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Chart.Name }}-nvidia-fs
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  hostPID: true
+  containers:
+    - name: nvidia-fs-test
+      image: "{{ .Values.test.image.repository }}:{{ .Values.test.image.tag }}"
+      imagePullPolicy: {{ .Values.test.image.pullPolicy }}
+      securityContext:
+        privileged: true
+      command:
+        - /bin/bash
+        - -c
+        - |
+          echo "Checking nvidia-fs {{ .Values.nvidiaFsVersion }} module is loaded..."
+          if ! grep -q '^nvidia_fs ' /host-proc/modules; then
+            echo "FAIL: nvidia-fs module is not loaded"
+            exit 1
+          fi
+          echo "PASS: nvidia-fs module loaded"
+          grep '^nvidia_fs ' /host-proc/modules
+
+          echo "Checking /proc/driver/nvidia-fs..."
+          if [ ! -d /host-proc/driver/nvidia-fs ]; then
+            echo "FAIL: /proc/driver/nvidia-fs does not exist"
+            exit 1
+          fi
+          echo "PASS: /proc/driver/nvidia-fs present"
+
+          if command -v gdscheck >/dev/null 2>&1; then
+            echo "Running gdscheck..."
+            gdscheck -p || true
+          fi
+      resources: {}
+      volumeMounts:
+        - name: host-proc
+          mountPath: /host-proc
+          readOnly: true
+  volumes:
+    - name: host-proc
+      hostPath:
+        path: /proc
+  restartPolicy: Never
+  nodeSelector: {{ .Values.nodeSelector }}
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule

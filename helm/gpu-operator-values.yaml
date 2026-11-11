@@ -6,7 +6,7 @@ toolkit:
 driver:
   imagePullPolicy: Always
   usePrecompiled: true
-  version: 610
+  version: 615
   repository: ghcr.io/gardenlinux/gardenlinux-nvidia-installer/1.25.0
 node-feature-discovery:
   worker:

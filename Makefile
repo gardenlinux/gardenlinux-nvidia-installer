@@ -43,6 +43,7 @@ build-driver: check-driver-version check-gl-version extract-kernel-name
 			   --env GL_VERSION=$(GL_VERSION) \
 			   --env DRIVER_VERSION=$(DRIVER_VERSION) \
 			   --env KERNEL_NAME=$(KERNEL_NAME) \
+			   --env NVIDIA_FS_VERSION=$(NVIDIA_FS_VERSION) \
 			   ghcr.io/gardenlinux/gardenlinux/kmodbuild:${TARGET_ARCH}-${GL_VERSION} \
 			   bash ./resources/compile.sh ;\
 	fi

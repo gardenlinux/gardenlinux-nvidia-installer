@@ -25,6 +25,8 @@ cpu_arch:
 nvidia_drivers:
 - 590.48.01
 - 570.211.01
+nvidia_fs_versions:
+- 2.30.2
 gvisor_driver_pins:
   590.48.01: 590.48.01
   570.211.01: 570.195.03
@@ -34,6 +36,7 @@ FIXTURE_OS_VERSIONS = ["2150.4.0", "1877.10"]
 FIXTURE_KERNEL_FLAVOURS = ["cloud", "metal"]
 FIXTURE_CPU_ARCHES = ["amd64"]
 FIXTURE_NVIDIA_DRIVERS = ["590.48.01", "570.211.01"]
+FIXTURE_NVIDIA_FS_VERSION = "2.30.2"
 FIXTURE_GVISOR_PINS = {
     "590.48.01": "590.48.01",
     "570.211.01": "570.195.03",
@@ -131,6 +134,7 @@ def test_mainstream_build_output_unchanged(versions_yaml):
             "driver_version": driver,
             "arch": arch,
             "kernel_flavour": flavour,
+            "nvidia_fs_version": FIXTURE_NVIDIA_FS_VERSION,
         }
         for os_version, arch, flavour, driver in itertools.product(
             FIXTURE_OS_VERSIONS,
@@ -155,6 +159,8 @@ cpu_arch:
 nvidia_drivers:
 - 590.48.01
 - 600.00.00
+nvidia_fs_versions:
+- 2.30.2
 gvisor_driver_pins:
   590.48.01: 590.48.01
 """
