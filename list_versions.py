@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 import yaml
 
-history_file = "history.yaml"
+versions_file = "versions.yaml"
 
 def load_yaml():
-    with open(history_file, "r") as f:
+    with open(versions_file, "r") as f:
         return yaml.safe_load(f)
 
-def display(history):
+def display(versions):
+    os_versions = versions.get("os_versions", [])
+    drivers = versions.get("nvidia_drivers", [])
+
     print("\nSupported OS ↔ Driver Versions")
     print("-" * 45)
-    for os_ver, drivers in sorted(history.items()):
-        if drivers:
-            print(f"OS {os_ver}: {', '.join(sorted(drivers, reverse=True))}")
-        else:
-            print(f"OS {os_ver}: (no drivers listed yet)")
+    for os_ver in os_versions:
+        print(f"OS {os_ver}: {', '.join(str(d) for d in drivers)}")
     print()
     print("\nLifecycle for Driver and supported GL version depends on Garden Linux Release and Driver Release")
     print("\nRefer below links for Garden Linux and driver releases")
@@ -23,8 +23,8 @@ def display(history):
 
 
 def main():
-    history = load_yaml()
-    display(history)
+    versions = load_yaml()
+    display(versions)
 
 if __name__ == "__main__":
     main()
