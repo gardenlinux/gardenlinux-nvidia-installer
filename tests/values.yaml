@@ -1,4 +1,4 @@
-nvidiaFsVersion: "2.30.2"
+nvidiaFsVersion: "2.31.5"
 
 # Test configuration
 test:
