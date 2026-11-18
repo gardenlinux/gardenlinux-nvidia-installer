@@ -5,3 +5,4 @@ out
 package.json
 .idea/
 **/__pycache__/**
+.claude/wiki-knowledge/sessions/

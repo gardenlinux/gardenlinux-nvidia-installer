@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: driver-cache-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "driver-cache.labels" . | nindent 4 }}
+data:
+  config.yml: |
+    version: 0.1
+    log:
+      level: info
+      formatter: json
+    storage:
+      filesystem:
+        rootdirectory: /var/lib/registry
+      delete:
+        enabled: true
+    http:
+      addr: :5000
+      tls:
+        certificate: /etc/registry/tls/server.crt
+        key: /etc/registry/tls/server.key
+        clientcas:
+          - /etc/registry/tls/ca.crt

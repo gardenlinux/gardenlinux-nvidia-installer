@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: driver-cache
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "driver-cache.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: registry
+      port: 5000
+      targetPort: registry
+      protocol: TCP
+  selector:
+    {{- include "driver-cache.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: driver-cache-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "driver-cache.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "driver-cache.selectorLabels" . | nindent 4 }}
