@@ -109,3 +109,34 @@ jobs:
       - name: Fail workflow if tests failed
         if: steps.helm-test.outcome == 'failure'
         run: exit 1
+
+  cache-hit-miss-test:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Authenticate to cluster
+        id: kube_auth
+        uses: gardener/cc-utils/.github/actions/kubernetes-auth@b7e4d874f30171964c5262a0bc20d644f4bcedba
+        with:
+          server: ${{ secrets.CLUSTER_SERVER }}
+          server-ca-discovery-url: ${{ secrets.CLUSTER_CA_DISCOVERY_URL }}
+          audience: gpu-ci-test
+          service-account-name: ci-gpu-test-sa
+          service-account-namespace: gpu-operator
+          service-account-token-expiration: 600
+
+      - name: Wait for cluster
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        run: |
+          kubectl wait --for=condition=Ready nodes --all --timeout=300s
+          kubectl get nodes
+
+      - name: Run cache hit/miss test
+        env:
+          KUBECONFIG: kubeconfig.yaml
+        run: bash .ci/cache_hit_miss_test.sh

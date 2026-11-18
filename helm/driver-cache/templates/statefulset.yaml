@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: driver-cache
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "driver-cache.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: driver-cache-headless
+  selector:
+    matchLabels:
+      {{- include "driver-cache.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "driver-cache.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: registry
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          args:
+            - serve
+            - /etc/distribution/config.yml
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: registry
+              containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - name: registry-data
+              mountPath: /var/lib/registry
+            - name: registry-config
+              mountPath: /etc/distribution
+              readOnly: true
+            - name: registry-tls
+              mountPath: /etc/registry/tls
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: registry-config
+          configMap:
+            name: driver-cache-config
+        - name: registry-tls
+          secret:
+            secretName: driver-cache-tls
+            items:
+              - key: ca.crt
+                path: ca.crt
+              - key: server.crt
+                path: server.crt
+              - key: server.key
+                path: server.key
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: registry-data
+        labels:
+          {{- include "driver-cache.labels" . | nindent 10 }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.storage.size }}
+        {{- if .Values.storage.volumeType }}
+        storageClassName: {{ include "driver-cache.name" . }}
+        {{- else if .Values.storage.storageClass }}
+        storageClassName: {{ .Values.storage.storageClass }}
+        {{- end }}

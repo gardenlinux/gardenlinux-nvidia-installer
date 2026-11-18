@@ -1,0 +1,11 @@
+apiVersion: v2
+name: driver-cache
+description: Standalone in-cluster OCI registry for NVIDIA driver artifact caching (Runtime Compilation Mode)
+type: application
+version: 0.1.0
+appVersion: "2"
+keywords:
+  - nvidia
+  - gpu
+  - driver-cache
+  - oci-registry
