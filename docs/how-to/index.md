@@ -43,7 +43,7 @@ helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
 
 gVisor driver images are published at:
 
-```
+```text
 ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<release>/gvisor/driver:<driver_major>-<kernel_version>-gardenlinux0
 ```
 
