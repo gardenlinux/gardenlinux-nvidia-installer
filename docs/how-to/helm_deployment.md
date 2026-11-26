@@ -2,6 +2,10 @@
 title: "Deploying NVIDIA GPU Operator with Helm"
 description: "Learn how to Deploy the NVIDIA GPU Operator using Helm"
 order: 2 
+related_topics:
+  - /how-to/nvidia_installer/index.md
+  - /how-to/nvidia_installer/helm_deployment.md
+  - /how-to/nvidia_installer/nvidia_driver_with_custom_kernel.md
 github_org: gardenlinux
 github_repo: gardenlinux-nvidia-installer
 github_source_path: docs/how-to/helm_deployment.md
@@ -17,7 +21,7 @@ helm upgrade --install -n gpu-operator gpu-operator nvidia/gpu-operator \
 
 Built images are published at:
 
-```
+```text
 ghcr.io/gardenlinux/gardenlinux-nvidia-installer/<release>/driver:<driver_major>-<kernel_version>-gardenlinux0
 ```
 
@@ -67,7 +71,7 @@ python3 list_versions.py
 Example output:
 
 <!-- list_versions_output_start -->
-```
+```text
 
 Supported OS ↔ Driver Versions
 ---------------------------------------------
@@ -98,3 +102,6 @@ Driver Release: https://www.nvidia.com/en-us/drivers/ --> Select Data Center/Tes
 ```
 <!-- list_versions_output_end -->
 
+## Related topics
+
+<RelatedTopics />
