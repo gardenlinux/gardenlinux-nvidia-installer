@@ -180,7 +180,7 @@ Driver download and container image creation are fully automated in this reposit
 versions.
 :::
 
-# Installing Drivers with the GPU Operator
+## Installing Drivers with the GPU Operator
 
 The previous section produced a container image that compiles and installs the NVIDIA driver. The next step is to pass
 this image to the gpu-operator so it can install the driver on each node.
@@ -273,7 +273,7 @@ ab:00.0 Infiniband controller: Mellanox Technologies MT2910 Family [ConnectX-7]
 
 When Fabric Manager is not installed correctly, the fabric status shows "In Progress":
 
-```
+```text
 /run/nvidia/driver/bin/nvidia-smi -q -i 0 | grep -i -A 2 Fabric
          Fabric
             State                   : In Progress
@@ -282,7 +282,7 @@ When Fabric Manager is not installed correctly, the fabric status shows "In Prog
 
 After a successful Fabric Manager installation, the status should show "Completed":
 
-```
+```text
 /run/nvidia/driver/bin/nvidia-smi -q -i 0 | grep -i -A 2 Fabric
     Fabric
         State                                          : Completed
@@ -335,7 +335,7 @@ lspci | grep -i -E 'nvidia|efa'
 ```
 
 Expected output:
-```
+```text
 10:1b.0 Ethernet controller: Amazon.com, Inc. Elastic Fabric Adapter (EFA)
 10:1c.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
 10:1d.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
@@ -399,7 +399,7 @@ CONFIG_RDMA_RXE=m
 CONFIG_INFINIBAND_IPOIB=m
 CONFIG_INFINIBAND_IPOIB_CM=y
 CONFIG_NET_UDP_TUNNEL=y
-```
+```text
 
 ### Mlx and Infiniband Driver Configurations
 
@@ -430,7 +430,7 @@ CONFIG_MLX5_INFINIBAND=m
 CONFIG_INFINIBAND_USER_ACCESS=m
 CONFIG_INFINIBAND_ON_DEMAND_PAGING=y
 CONFIG_INFINIBAND_ADDR_TRANS=y
-```
+```text
 
 ### EFA Configuration
 
@@ -440,7 +440,7 @@ CONFIG_INFINIBAND_ON_DEMAND_PAGING=y
 CONFIG_INFINIBAND_ADDR_TRANS=y
 CONFIG_INFINIBAND_EFA=m
 CONFIG_INFINIBAND_RDMAVT=m
-```
+```text
 
 ### DMABuf Configuration
 
@@ -452,7 +452,7 @@ CONFIG_DMABUF_MOVE_NOTIFY=y
 CONFIG_UDMABUF=y
 CONFIG_HMM_MIRROR=y
 CONFIG_DEVICE_PRIVATE=y
-```
+```text
 
 ## Network Configuration
 
@@ -481,7 +481,7 @@ systemctl restart containerd
 
 ::: details NCCL Container Image
 
-```
+```text
 FROM nvidia/cuda:12.9.1-devel-ubuntu22.04 AS base
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -580,7 +580,7 @@ RUN wget -q -O - https://github.com/NVIDIA/nccl-tests/archive/${NCCL_TESTS_COMMI
 ```
 EFA with DMABuf has issues in libfabric, hence patch below is applied in Containerfile. 
 
-```
+```text
 diff --git a/prov/efa/src/efa_mr.c b/prov/efa/src/efa_mr.c
 index fc62d21..f4804f0 100644
 --- a/prov/efa/src/efa_mr.c
@@ -890,7 +890,7 @@ kubectl exec -it rdma-test-node1 -n rdma-test -- ib_write_bw --use_cuda=0 --use_
 
 **Output**
 
-```
+```text
 ************************************
 * Waiting for client to connect... *
 ************************************
@@ -905,7 +905,7 @@ kubectl exec -it rdma-test-node2 -n rdma-test -- ib_write_bw --use_cuda=0 --use_
 
 **Output**
 
-```
+```text
 ---------------------------------------------------------------------------------------
                     RDMA_Write BW Test
  Dual-port       : OFF		Device         : mlx5_0
@@ -937,13 +937,13 @@ The test can be repeated for other RDMA interfaces.
 
 #### Start the MPI Operator
 
-```
+```text
 kubectl apply -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.3.0/deploy/v2beta1/mpi-operator.yaml
 ```
 
 mpi-operator must be allowed to create pods, hence we need to apply below ClusterRole
 
-```
+```text
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -1265,7 +1265,7 @@ kubectl apply -f nccl-test.yaml -n nccl-tests
 
 #### Observe Pods Running
 
-```
+```text
 kubectl get pods -n nccl-tests
 
 kubectl get pods -n nccl-tests
@@ -1277,13 +1277,13 @@ nccl-test-72-gb200-8n-roce-worker-1         1/1     Running   0          4m39s
 
 #### Run the mpirun Command Inside the Launcher
 
-```
+```text
 kubectl exec -it -n nccl-tests nccl-test-72-gb200-8n-roce-launcher-* -- bash
 ```
 
 **Intra-node test:**
 
-```
+```text
 mpirun -np 8 -N 8 --bind-to none --map-by slot \
   --mca oob_tcp_if_include <mngt_interface>  \
   --mca btl_tcp_if_include <mgmt_interface>   \
@@ -1307,7 +1307,7 @@ mpirun -np 8 -N 8 --bind-to none --map-by slot \
 
 **Inter-node test:**
 
-```
+```text
 mpirun -np 16 -N 8 --bind-to none --map-by slot \
   --mca oob_tcp_if_include <mngt_interface>  \
   --mca btl_tcp_if_include <mgmt_interface>   \
@@ -1330,7 +1330,7 @@ mpirun -np 16 -N 8 --bind-to none --map-by slot \
 
 
 #### EFA mpirun test command
-```
+```text
 /opt/amazon/openmpi/bin/mpirun \
   --mca plm_rsh_args "-p 2222 -o StrictHostKeyChecking=no" \
   --mca btl_tcp_if_include 10.250.0.0/19 \
@@ -1361,6 +1361,6 @@ RDMA : https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-o
 
 Soft RoCE : https://enterprise-support.nvidia.com/s/article/howto-configure-soft-roce
 
-# Related Topics
+## Related Topics
 
 <RelatedTopics />

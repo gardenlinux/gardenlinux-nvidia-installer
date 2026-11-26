@@ -3,6 +3,10 @@ title: "Building NVIDIA Kernel Modules"
 description: "Learn how to build NVIDIA kernel modules using the Garden Linux NVIDIA Installer."
 order: 1 
 github_target_path: docs/how-to/nvidia_installer/building_nvidia_modules.md
+related_topics:
+  - /how-to/nvidia_installer/index.md
+  - /how-to/nvidia_installer/helm_deployment.md
+  - /how-to/nvidia_installer/nvidia_driver_with_custom_kernel.md
 github_org: gardenlinux
 github_repo: gardenlinux-nvidia-installer
 github_source_path: docs/how-to/building_nvidia_modules.md
@@ -42,7 +46,7 @@ make build-driver
 
 The output tarballs are named `driver-<DRIVER_VERSION>-<KERNEL_TYPE>-<KERNEL_NAME>.tar.gz`, for example:
 
-```
+```text
 out/nvidia/driver-590.48.01-open-6.12.72-cloud-amd64.tar.gz
 out/nvidia/driver-590.48.01-proprietary-6.12.72-cloud-amd64.tar.gz
 ```
@@ -61,14 +65,14 @@ make build-image
 
 This produces two tags:
 
-```
+```text
 <IMAGE_PATH>:<driver_major>-<kernel_name>-gardenlinux0
 <IMAGE_PATH>:<driver_version>-<kernel_name>-gardenlinux0
 ```
 
 For example:
 
-```
+```text
 ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:590-6.12.72-cloud-amd64-gardenlinux0
 ghcr.io/gardenlinux/gardenlinux-nvidia-installer/driver:590.48.01-6.12.72-cloud-amd64-gardenlinux0
 ```
@@ -141,3 +145,7 @@ Each night the workflow in `.github/workflows/update-version.yaml` runs. It chec
 new Garden Linux versions. The `versions.yaml` and `history.yaml` files are updated and a pull request is then 
 created to merge those changes back to `main`. Once the PR is merged, the release process described above will be 
 triggered, which will create and push new images if needed.
+
+## Related topics
+
+<RelatedTopics />
