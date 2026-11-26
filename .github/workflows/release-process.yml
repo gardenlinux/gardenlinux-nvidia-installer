@@ -138,6 +138,4 @@ jobs:
 
   build-image:
     needs: [determine-version, update-files]
-    permissions:
-      packages: write
     uses: ./.github/workflows/build_image.yml
